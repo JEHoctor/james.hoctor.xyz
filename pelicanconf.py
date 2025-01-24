@@ -1,12 +1,12 @@
 AUTHOR = 'James Hoctor'
 SITENAME = 'hoctor.xyz'
-SITEURL = ""
+SITEURL = "https://hoctor.xyz"
 
 PATH = "content"
 
 TIMEZONE = 'America/New_York'
 
-DEFAULT_LANG = 'EN'
+DEFAULT_LANG = 'en'
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
@@ -32,4 +32,4 @@ SOCIAL = (
 DEFAULT_PAGINATION = 10
 
 # Uncomment following line if you want document-relative URLs when developing
-# RELATIVE_URLS = True
+RELATIVE_URLS = True
