@@ -21,6 +21,11 @@ CONFIG = {
     "settings_publish": "publishconf.py",
     # Output path. Can be absolute or relative to tasks.py. Default: 'output'
     "deploy_path": SETTINGS["OUTPUT_PATH"],
+    # Remote server configuration
+    "ssh_user": "root",
+    "ssh_host": "hoctor.xyz",
+    "ssh_port": "22",
+    "ssh_path": "/var/www/pelican",
     # Host and port for `serve`
     "host": "localhost",
     "port": 8000,
