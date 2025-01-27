@@ -1,5 +1,5 @@
 PY?=
-PELICAN?=uvx --from='pelican[markdown]' pelican
+PELICAN?=uvx --from='pelican[markdown]' --with='pelican-render-math' pelican
 PELICANOPTS=
 
 BASEDIR=$(CURDIR)
