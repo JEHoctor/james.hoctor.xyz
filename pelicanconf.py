@@ -1,6 +1,6 @@
 AUTHOR = 'James Hoctor'
-SITENAME = 'hoctor.xyz'
-SITEURL = "https://hoctor.xyz"
+SITENAME = 'james.hoctor.xyz'
+SITEURL = "https://james.hoctor.xyz"
 
 PATH = "content"
 
