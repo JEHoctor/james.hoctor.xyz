@@ -34,3 +34,13 @@ DEFAULT_PAGINATION = 10
 
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True
+
+# Development configuration for Pelican SEO plugin
+SEO_REPORT = True
+SEO_ENHANCER = True
+SEO_ENHANCER_OPEN_GRAPH = True
+SEO_ENHANCER_TWITTER_CARDS = True
+
+# Uncomment below to set limits on page analysis by the SEO plugin.
+# SEO_ARTICLES_LIMIT = 10
+# SEO_PAGES_LIMIT = 10
