@@ -20,3 +20,9 @@ DELETE_OUTPUT_DIRECTORY = True
 
 # DISQUS_SITENAME = ""
 # GOOGLE_ANALYTICS = ""
+
+# Publishing configuration for Pelican SEO plugin
+SEO_REPORT = False
+SEO_ENHANCER = True
+SEO_ENHANCER_OPEN_GRAPH = True
+SEO_ENHANCER_TWITTER_CARDS = True
