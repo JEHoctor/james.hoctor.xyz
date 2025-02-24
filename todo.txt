@@ -1,0 +1,7 @@
+Create favicon pack:
+ - https://github.com/getpelican/pelican/discussions/3196
+ - https://docs.getpelican.com/en/latest/tips.html#copy-static-files-to-the-root-of-your-site
+ - https://loqbooq.app/blog/add-favicon-modern-browser-guide
+ - https://realfavicongenerator.net/
+
+Fork the theme to make the headers less red on the home page.
