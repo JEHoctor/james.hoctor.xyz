@@ -20,10 +20,10 @@ LINKS = (
     ("GitHub", "https://github.com/JEHoctor/"),
     ("Resume", "https://drive.google.com/file/d/1dtkw-Jbo9DwJQrXAMmUa1jVqRovOlD3d/view?usp=share_link"),
     ("LinkedIn", "https://www.linkedin.com/in/james-hoctor/"),
-    ("Forgejo", "https://git.hoctor.xyz"),
+    # ("Forgejo", "https://git.hoctor.xyz"),
     ("Thingiverse", "https://www.thingiverse.com/jehoctor/designs/"),
     ("PyPI", "https://pypi.org/user/jehoctor/"),
-    ("github.io", "https://jehoctor.github.io/"),
+    # ("github.io", "https://jehoctor.github.io/"),
 )
 
 # Social widget
