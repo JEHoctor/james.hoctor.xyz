@@ -8,7 +8,7 @@ OUTPUTDIR=$(BASEDIR)/output
 CONFFILE=$(BASEDIR)/pelicanconf.py
 PUBLISHCONF=$(BASEDIR)/publishconf.py
 
-SSH_HOST=hoctor.xyz
+SSH_HOST=hoctor
 SSH_PORT=22
 SSH_USER=root
 SSH_TARGET_DIR=/var/www/pelican
