@@ -181,7 +181,7 @@ Finally, by the squeeze theorem,
 
 Everything I've shown here is also shown on Wikipedia and other references, though I like to think that my derivation of the Wallis product feels a little less like "magic" than the one on Wikipedia, specifically at the point where Wikipedia invokes the squeeze theorem.
 On the other hand, the Wikipedia page _Volume of an $n$-ball_ has a better derivation of the volume from the integral of a Gaussian function in arbitrary dimensions, because it introduces the gamma function as soon as possible, which greatly streamlines the process.
-Here are some Wikipedia permalinks at the time of publication of this post.
+Below are some permalinks that show Wikipedia at the time of publication of this post.
 
  1. [$n$-sphere](https://en.wikipedia.org/w/index.php?title=N-sphere&oldid=1279987621)
  2. [Gaussian integral](https://en.wikipedia.org/w/index.php?title=Gaussian_integral&oldid=1284755932)
