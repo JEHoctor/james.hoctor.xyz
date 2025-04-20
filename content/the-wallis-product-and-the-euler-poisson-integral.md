@@ -2,18 +2,16 @@ Title: The Wallis Product and the Euler-Poisson integral
 Date: 2025-04-14 13:29
 Category: Blog
 Tags: Math
+Status: draft
 
 Years ago I was experimenting with the Euler-Poisson integral in $n$ dimensions when I derived an infinite product for $\pi$ known as the Wallis product.
 
 $$\pi = 2\prod\limits_{i=1}^{\infty}\frac{(2i)^2}{(2i-1)(2i+1)}$$
 
-I was only expecting to calculate the area of $n$-spheres, so I was delighted to find this!
+I was only expecting to calculate the areas of $n$-spheres, so I was very pleased to find this!
 This formula was first published in 1656 by John Wallis.
-I'll show the standard Euler-Poisson integral, the way I used it to derive areas and volumes of spheres and balls in arbitrary dimensions, and finally how I derived the Wallis product.
+I'll show the standard Euler-Poisson integral, the way I modified it to derive areas of spheres in arbitrary dimensions, and finally how I derived the Wallis product.
 Unfortunately I lost my original derivation, so this is my best reconstruction of my process.
-
-I recently revisited my derivation and found it contained an interesting way to derive the areas of $n$-spheres.
-The rest of my derivation of the Wallis product was standard, but I'll show that too.
 
 First, some terminology.
 A closed ball is the set of points whose distance from a center point is less than or equal to a fixed radius.
@@ -37,13 +35,13 @@ Now convert to polar coordinates.
 
 $$\int\limits_{-\infty}^{\infty}\int\limits_{-\infty}^{\infty}e^{-x^2-y^2}dxdy = \int\limits_{0}^{2\pi}\int\limits_{0}^{\infty}e^{-r^2}r\,drd\theta = \int\limits_{0}^{2\pi}d\theta\int\limits_{0}^{\infty}re^{-r^2}dr = 2\pi\int\limits_{0}^{\infty}re^{-r^2}dr$$
 
-The integral can be solved by inspection.
+The integral that remains can be solved by inspection.
 
 \begin{align*}
 \frac{d}{dr}e^{-r^2} &=  e^{-r^2}(-2r) \\
-\left[e^{-r^2}\right]_{0}^{\infty} &= -2\int\limits_{0}^{\infty}re^{-r^2}dr \\
--(e^{-\infty^2} - e^{-0^2})\pi &= 2\pi\int\limits_{0}^{\infty}re^{-r^2}dr \\
-\pi &= 2\pi\int\limits_{0}^{\infty}re^{-r^2}dr
+\left.\left[e^{-r^2}\right]\right|_{0}^{\infty} &= -2\int\limits_{0}^{\infty}re^{-r^2}dr \\
+-(e^{-\infty^2} - e^{-0^2}) &= 2\int\limits_{0}^{\infty}re^{-r^2}dr \\
+\frac{1}{2} &= \int\limits_{0}^{\infty}re^{-r^2}dr
 \end{align*}
 
 Then we can take the square root of both sides, noting that the integral of a positive function is positive.
@@ -60,12 +58,12 @@ By raising the Euler-Poisson integral to the $n$th power, we get an integral und
 
 $$\pi^{n/2} = \left(\int\limits_{-\infty}^{\infty}e^{-x^2}dx\right)^n = \int_{\mathbb{R}^n}e^{-||\vec{x}||_2^2}|d\vec{x}| = \int\limits_{0}^{\infty}S_{n-1}r^{n-1}e^{-r^2}dr = S_{n-1}\int\limits_{0}^{\infty}r^{n-1}e^{-r^2}dr$$
 
-The remaining integral is $\int_{0}^{\infty}r^{n-1}e^{-r^2}dr$, and we _could_ use $u$-substitution to express it as a gamma function.
-Instead, we're going to call it $J_{n-1}$ and solve it with a recurrence relation.
+The remaining integral is $\int_{0}^{\infty}r^{n-1}e^{-r^2}dr$, and one good idea is to use $u$-substitution to express it in terms of the gamma function.
+Instead, we're going to follow my original process by calling it $J_{n-1}$ and solving it with a recurrence relation.
 
 \begin{align*}
 J_n &\equiv \int\limits_{0}^{\infty}r^n e^{-r^2}dr = \int\limits_0^{\infty}(r^{n-1})(-\frac{1}{2})(-2re^{-r^2})dr \\
-&= -\frac{1}{2}\left([(r^{n-1})(e^{-r^2})]|_0^{\infty} - \int\limits_0^{\infty}(n-1)r^{n-2}e^{-r^2}dr\right) & \text{(integration by parts)}\\
+&= -\frac{1}{2}\left(\left.\left[(r^{n-1})(e^{-r^2})\right]\right|_0^{\infty} - \int\limits_0^{\infty}(n-1)r^{n-2}e^{-r^2}dr\right) & \text{(integration by parts)}\\
 &= \frac{1}{2}(n-1)\int\limits_0^{\infty}r^{n-2}e^{-r^2}dr = \frac{1}{2}(n-1)J_{n-2} \\
 J_0 &= \int\limits_0^{\infty}e^{-r^2}dr = \frac{1}{2}\int\limits_{-\infty}^{\infty}e^{-r^2}dr = \frac{1}{2}\sqrt{\pi} \\
 J_1 &= \int\limits_0^{\infty}re^{-r^2}dr = \frac{1}{2}
@@ -78,7 +76,7 @@ J_{2n} &= \frac{1}{2}\sqrt{\pi}\prod\limits_{i=1}^n \frac{1}{2}(2i-1) \\
 J_{2n+1} &= \frac{1}{2}\prod\limits_{i=1}^{n}\frac{1}{2}(2i) = \frac{1}{2}n!
 \end{align*}
 
-Now we can solve for $S_{2n}$.
+Now we can solve for $S_{2n}$, the areas of even dimensional spheres.
 
 \begin{align*}
 \pi^{n/2} &= S_{n-1}J_{n-1} \\
@@ -86,7 +84,7 @@ Now we can solve for $S_{2n}$.
 S_{2n} &= \pi^{n+1/2}\frac{2}{\sqrt{\pi}}\prod\limits_{i=1}^{n}\frac{2}{2i-1} = 2\pi^n\prod\limits_{i=1}^{n}\frac{2}{2i-1}
 \end{align*}
 
-And similarly for $S_{2n+1}$.
+And similarly for $S_{2n+1}$, the areas of odd dimensional spheres.
 
 \begin{align*}
 \pi^{n/2} &= S_{n-1}J_{n-1} \\
@@ -108,7 +106,7 @@ There's an easier way to derive the surface areas of spheres and the volumes of 
 The first recurrence uses the fact that the area of a sphere is the derivative of the volume of a ball of the same radius with respect to that radius.
 
 \begin{align*}
-S_{n-1} &= \left. \frac{d}{dr} \left( V_n r^n \right) \right|_{r = 1} = V_n nr^{n-1}|_{r=1} = nV_n \\
+S_{n-1} &= \left. \frac{d}{dr} \left( V_n r^n \right) \right|_{r = 1} = \left.V_n nr^{n-1}\right|_{r=1} = nV_n \\
 V_n &= \frac{1}{n}S_{n-1}
 \end{align*}
 
@@ -134,14 +132,15 @@ S_n &= 2\pi V_{n-1}
 # The Wallis product
 
 So how does the Wallis product appear out of this?
-I don't have my original notes from the first time I derived this, but I think I must have been trying to solve the Wallis integrals
+Since I don't have my original notes, my best guess is that I was trying to solve the Wallis integrals to complete the direct recurrence for $V_n$.
+By applying a trigonometric identity and integration by parts, we can get a recurrence for the Wallis integrals.
 
 \begin{align*}
 I_n &= \int\limits_{0}^{\pi}\sin^{n-2}\theta\,(1-\cos^{2}\theta)d\theta \\
-&= \int\limits_{0}^{\pi} \sin^{n-2}\theta\,d\theta - \int\limits_{0}^{\pi}\sin^{n-2}\cos^{2}\theta\,d\theta \\
+&= \int\limits_{0}^{\pi} \sin^{n-2}\theta\,d\theta - \int\limits_{0}^{\pi}\sin^{n-2}\theta\cos^{2}\theta\,d\theta \\
 &= I_{n-2} - \int\limits_{0}^{\pi}\left(\sin^{n-2}\theta\cos\theta\right)\cos\theta\,d\theta \\
 &= I_{n-2} -\left.\left[\frac{1}{n-1}\sin^{n-1}\theta\cos\theta\right]\right|_{0}^{\pi} + \int\limits_{0}^{\pi}\frac{1}{n-1}\sin^{n-1}\theta(-\sin\theta)d\theta \\
-&= I_{n-2} - \frac{1}{n-1}\int\limits_{0}{\pi}\sin^{n}\theta\,d\theta \\
+&= I_{n-2} - \frac{1}{n-1}\int\limits_{0}^{\pi}\sin^{n}\theta\,d\theta \\
 &= I_{n-2} - \frac{1}{n-1}I_n \\
 I_n &= \frac{n-1}{n}I_{n-2}
 \end{align*}
@@ -153,7 +152,7 @@ I_0 &= \int\limits_{\theta=0}^{\pi}d\theta = \pi \\
 I_1 &= \int\limits_{0}^{\pi}\sin\theta\,d\theta = \left.\left[-\cos\theta\right]\right|_{0}^{\pi} = \cos 0-\cos\pi = 2
 \end{align*}
 
-Now the odd and even Wallis integrals can get separate formulas.
+And we get separate formulas for the odd and even Wallis integrals.
 
 \begin{align*}
 I_{2n} &= \pi\prod\limits_{i=1}^{n}\frac{2i-1}{2i} \\
@@ -161,16 +160,31 @@ I_{2n+1} &= 2\prod\limits_{i=1}^{n}\frac{2i}{2i+1}
 \end{align*}
 
 Now it's immediately tempting to combine these formulas and solve for $\pi$, by approximating $I_{2n}$ as $I_{2n+1}$.
-However, to do this we need show that the ratio of successive Wallis integrals approaches one, and luckily we already have his result for the ratio of Wallis integrals $I_n$ and $I_{n-2}$.
-Because $\sin^n\theta$ is less than $\sin^{n-1}\theta$ everywhere on the interval $[0,\pi]$, the sequence of Wallis integrals is decreasing, and we can use the ratio $I_n/I_{n-2}$ to bound the ratio $I_n/I_{n-1}$ as desired.
+However, to do this we need show that the ratio of successive Wallis integrals approaches one, and luckily we already have a similar result for the ratio of Wallis integrals $n$ and $n-2$.
+Because $\sin^n\theta$ is less than $\sin^{n-1}\theta$ everywhere on the interval $[0,\pi]$, the sequence of Wallis integrals is decreasing, and we can use the ratio $I_n/I_{n-2}$ to bound the ratio $I_n/I_{n-1}$ as we desired.
+We're also going to use the fact that $\sin^n\theta$ is positive on $[0,\pi]$ implies $I_n>0$.
+
+\begin{gather}
+I_{2n-1} \ge I_{2n} \ge I_{2n+1} > 0 \\
+\frac{2n+1}{2n} = \frac{I_{2n-1}}{I_{2n+1}} \ge \frac{I_{2n}}{I_{2n+1}} \ge 1 \\
+\frac{2n+1}{2n} \ge \frac{\pi}{2} \prod\limits_{i=1}^{n}\frac{(2i-1)(2i+1)}{(2i)^2} \ge 1 \\
+\frac{2n}{2n+1}\pi \le 2\prod\limits_{i=1}^{n} \frac{(2i)^2}{(2i-1)(2i+1)} \le \pi
+\end{gather}
+
+Finally, by the squeeze theorem,
 
 \begin{align*}
+\pi &= \lim_{n\to\infty}2\prod\limits_{i=1}^{n} \frac{(2i)^2}{(2i-1)(2i+1)} = \left(\frac{2}{1}\cdot\frac{2}{3}\right)\left(\frac{4}{3}\cdot\frac{4}{5}\right)\left(\frac{6}{5}\cdot\frac{6}{7}\right)\left(\frac{8}{7}\cdot\frac{8}{9}\right)\cdots
 \end{align*}
 
 # References
 
- 1. [https://en.wikipedia.org/wiki/N-sphere](https://en.wikipedia.org/wiki/N-sphere)
- 2. [https://en.wikipedia.org/wiki/Gaussian_integral](https://en.wikipedia.org/wiki/Gaussian_integral)
- 3. [https://en.wikipedia.org/wiki/Wallis_product](https://en.wikipedia.org/wiki/Wallis_product)
- 4. [https://en.wikipedia.org/wiki/Wallis%27_integrals](https://en.wikipedia.org/wiki/Wallis%27_integrals)
- 5. [https://en.wikipedia.org/wiki/Volume_of_an_n-ball](https://en.wikipedia.org/wiki/Volume_of_an_n-ball)
+Everything I've shown here is also shown on Wikipedia and other references, though I like to think that my derivation of the Wallis product feels a little less like "magic" than the one on Wikipedia, specifically at the point where Wikipedia invokes the squeeze theorem.
+On the other hand, the Wikipedia page _Volume of an $n$-ball_ has a better derivation of the volume from the integral of a Gaussian function in arbitrary dimensions, because it introduces the gamma function as soon as possible, which greatly streamlines the process.
+Here are some Wikipedia permalinks at the time of publication of this post.
+
+ 1. [$n$-sphere](https://en.wikipedia.org/w/index.php?title=N-sphere&oldid=1279987621)
+ 2. [Gaussian integral](https://en.wikipedia.org/w/index.php?title=Gaussian_integral&oldid=1284755932)
+ 3. [Wallis product](https://en.wikipedia.org/w/index.php?title=Wallis_product&oldid=1268216662)
+ 4. [Wallis' integrals](https://en.wikipedia.org/w/index.php?title=Wallis%27_integrals&oldid=1148694325)
+ 5. [Volume of an $n$-ball](https://en.wikipedia.org/w/index.php?title=Volume_of_an_n-ball&oldid=1253808989)
