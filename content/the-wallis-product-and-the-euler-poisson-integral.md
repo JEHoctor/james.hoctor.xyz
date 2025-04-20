@@ -40,7 +40,7 @@ The integral that remains can be solved by inspection.
 \begin{align*}
 \frac{d}{dr}e^{-r^2} &=  e^{-r^2}(-2r) \\
 \left.\left[e^{-r^2}\right]\right|_{0}^{\infty} &= -2\int\limits_{0}^{\infty}re^{-r^2}dr \\
--(e^{-\infty^2} - e^{-0^2}) &= 2\int\limits_{0}^{\infty}re^{-r^2}dr \\
+-\left(\lim_{r\to\infty}e^{-r^2} - e^{-0^2}\right) &= 2\int\limits_{0}^{\infty}re^{-r^2}dr \\
 \frac{1}{2} &= \int\limits_{0}^{\infty}re^{-r^2}dr
 \end{align*}
 
