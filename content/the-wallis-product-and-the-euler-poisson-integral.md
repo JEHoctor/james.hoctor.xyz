@@ -1,8 +1,7 @@
 Title: The Wallis Product and the Euler-Poisson integral
-Date: 2025-04-14 13:29
+Date: 2025-04-24 11:27
 Category: Blog
 Tags: Math
-Status: draft
 
 Years ago I was experimenting with the Euler-Poisson integral in $n$ dimensions when I derived an infinite product for $\pi$ known as the Wallis product.
 
