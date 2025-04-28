@@ -5,5 +5,10 @@ jobs:
     steps:
     - name: checkout
       uses: https://code.forgejo.org/actions/checkout@v4
+    - name: setup uv
+      uses: https://github.com/astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        prune-cache: false
     - name: run ShellCheck
-      run: find . -type f -name "*.sh" -exec shellcheck {} +
+      run: make check-scripts
