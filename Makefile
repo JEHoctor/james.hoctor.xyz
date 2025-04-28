@@ -45,9 +45,11 @@ help:
 	@echo '   make serve-global [SERVER=0.0.0.0]  serve (as root) to $(SERVER):80    '
 	@echo '   make devserver [PORT=8000]          serve and regenerate together      '
 	@echo '   make devserver-global               regenerate and serve on 0.0.0.0    '
-	@echo '   make ssh_upload                     upload the web site via SSH        '
-	@echo '   make sftp_upload                    upload the web site via SFTP       '
-	@echo '   make rsync_upload                   upload the web site via rsync+ssh  '
+	@echo '   make ssh-upload                     upload the web site via SSH        '
+	@echo '   make sftp-upload                    upload the web site via SFTP       '
+	@echo '   make rsync-upload                   upload the web site via rsync+ssh  '
+	@echo '   make new-post                       create an empty blog post          '
+	@echo '   make check-scripts                  run ShellCheck on all scripts      '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
@@ -65,6 +67,9 @@ clean:
 regenerate:
 	$(PELICAN) -r "$(INPUTDIR)" -o "$(OUTPUTDIR)" -s "$(CONFFILE)" $(PELICANOPTS)
 
+publish:
+	$(PELICAN) "$(INPUTDIR)" -o "$(OUTPUTDIR)" -s "$(PUBLISHCONF)" $(PELICANOPTS)
+
 serve:
 	$(PELICAN) -l "$(INPUTDIR)" -o "$(OUTPUTDIR)" -s "$(CONFFILE)" $(PELICANOPTS)
 
@@ -77,17 +82,20 @@ devserver:
 devserver-global:
 	$(PELICAN) -lr "$(INPUTDIR)" -o "$(OUTPUTDIR)" -s "$(CONFFILE)" $(PELICANOPTS) -b 0.0.0.0
 
-publish:
-	$(PELICAN) "$(INPUTDIR)" -o "$(OUTPUTDIR)" -s "$(PUBLISHCONF)" $(PELICANOPTS)
-
-ssh_upload: publish
+ssh-upload: publish
 	scp -P $(SSH_PORT) -r "$(OUTPUTDIR)"/* "$(SSH_USER)@$(SSH_HOST):$(SSH_TARGET_DIR)"
 
-sftp_upload: publish
+sftp-upload: publish
 	printf 'put -r $(OUTPUTDIR)/*' | sftp $(SSH_USER)@$(SSH_HOST):$(SSH_TARGET_DIR)
 
-rsync_upload: publish
+rsync-upload: publish
 	rsync -e "ssh -p $(SSH_PORT)" -P -rvzc --include tags --cvs-exclude --delete "$(OUTPUTDIR)"/ "$(SSH_USER)@$(SSH_HOST):$(SSH_TARGET_DIR)"
 
+new-post:
+	@./automation/new-post.sh
 
-.PHONY: html help clean regenerate serve serve-global devserver devserver-global publish ssh_upload sftp_upload rsync_upload
+check-scripts:
+	find . -type f -name "*.sh" -exec uvx --from='shellcheck-py' shellcheck {} +
+
+
+.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global ssh-upload sftp-upload rsync-upload new-post check-scripts
