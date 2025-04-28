@@ -1,0 +1,9 @@
+on: [push, pull_request]
+jobs:
+  shellcheck:
+    runs-on: docker
+    steps:
+    - name: checkout
+      uses: https://code.forgejo.org/actions/checkout@v4
+    - name: run ShellCheck
+      run: find . -type f -name "*.sh" -exec shellcheck {} +
