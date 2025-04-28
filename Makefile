@@ -48,6 +48,7 @@ help:
 	@echo '   make ssh-upload                     upload the web site via SSH        '
 	@echo '   make sftp-upload                    upload the web site via SFTP       '
 	@echo '   make rsync-upload                   upload the web site via rsync+ssh  '
+	@echo '   make new-post                       create an empty blog post          '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
@@ -89,5 +90,8 @@ sftp-upload: publish
 rsync-upload: publish
 	rsync -e "ssh -p $(SSH_PORT)" -P -rvzc --include tags --cvs-exclude --delete "$(OUTPUTDIR)"/ "$(SSH_USER)@$(SSH_HOST):$(SSH_TARGET_DIR)"
 
+new-post:
+	@./automation/new-post.sh
 
-.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global ssh-upload sftp-upload rsync-upload
+
+.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global ssh-upload sftp-upload rsync-upload new-post
