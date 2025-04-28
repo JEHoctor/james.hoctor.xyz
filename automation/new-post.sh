@@ -30,7 +30,7 @@ if [ -f "$filename" ]; then
 fi
 
 # Create a new post file using a heredoc as a template.
-cat <<- EOF > $filename
+cat <<- EOF > "$filename"
 	Title: $title
 	Date: $(date '+%Y-%m-%d %H:%M')
 	Category: Blog
