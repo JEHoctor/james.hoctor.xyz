@@ -34,4 +34,5 @@ cat <<- EOF > "$filename"
 	Title: $title
 	Date: $(date '+%Y-%m-%d %H:%M')
 	Category: Blog
+	Status: draft
 EOF
