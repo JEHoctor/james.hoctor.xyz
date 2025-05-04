@@ -49,6 +49,7 @@ help:
 	@echo '   make sftp-upload                    upload the web site via SFTP       '
 	@echo '   make rsync-upload                   upload the web site via rsync+ssh  '
 	@echo '   make new-post                       create an empty blog post          '
+	@echo '   make retitle-post                   rename a blog post                 '
 	@echo '   make check-scripts                  run ShellCheck on all scripts      '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
@@ -94,8 +95,11 @@ rsync-upload: publish
 new-post:
 	@./automation/new-post.sh
 
+retitle-post:
+	@./automation/retitle-post.sh
+
 check-scripts:
 	find . -type f -name "*.sh" -exec uvx --from='shellcheck-py' shellcheck {} +
 
 
-.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global ssh-upload sftp-upload rsync-upload new-post check-scripts
+.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global ssh-upload sftp-upload rsync-upload new-post retitle-post check-scripts
