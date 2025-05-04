@@ -49,3 +49,9 @@ fi
 
 # Replace the old title with the new title, and write to the new filename.
 sed "s/^Title: .*$/Title: $new_title/" "$old_filename".old > "$filename"
+
+# Print next steps for the user.
+echo "Next steps:"
+echo "  - diff $filename $old_filename.old"
+echo "  - git add $filename $old_filename"
+echo "  - rm $old_filename.old"
