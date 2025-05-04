@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Collect old file name from the user.
-read -erp "Old file name (including path): " old_filename
+read -i "content/" -erp "Old file name: " old_filename
 
 # Verify that the file exists.
 if [ ! -f "$old_filename" ]; then
