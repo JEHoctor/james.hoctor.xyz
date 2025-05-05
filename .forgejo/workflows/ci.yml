@@ -50,7 +50,7 @@ jobs:
           path: output
       - name: setup rsync
         id: rsync
-        runs: |
+        run: |
           apt-get -qq update
           apt-get -qq install rsync
           (umask 077 && mkdir .ssh)
