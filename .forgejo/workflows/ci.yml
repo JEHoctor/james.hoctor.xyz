@@ -48,11 +48,14 @@ jobs:
         with:
           name: web-content-${{ github.sha }}
           path: output
-      - id: rsync
-        uses: https://github.com/GuillaumeFalourd/setup-rsync@v1.2
-        with:
-          ssh_key: ${{ secrets.DEPLOY_KEY }}
+      - name: setup rsync
+        id: rsync
+        run: |
+          apt-get -qq update
+          apt-get -qq install rsync
+          (umask 077 && touch deploy_id)
+          echo "${{ secrets.DEPLOY_KEY }}" > deploy_id
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" >> /etc/ssh/ssh_known_hosts
       - name: deploy
         run: |
-          rsync -rvz --delete -e "ssh -i ${{ steps.rsync.outputs.ssh_key_path }}" output/ \
-          ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_TARGET_DIR }}
+          rsync -rvz --delete -e "ssh -i deploy_id" output/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:
