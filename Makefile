@@ -102,6 +102,7 @@ check-no-drafts:
 	ls -lash automation
 	ls -lash ./automation
 	ls -lash ./automation/check-no-drafts.sh
+	ls -lash /usr/bin/bash
 	./automation/check-no-drafts.sh
 
 
