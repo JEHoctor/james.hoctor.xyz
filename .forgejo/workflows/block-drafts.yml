@@ -8,4 +8,6 @@ jobs:
       - name: checkout
         uses: https://code.forgejo.org/actions/checkout@v4
       - name: block-drafts
-        run: ! make find-drafts
+        run: |
+          ! make find-drafts
+          echo "Success!"
