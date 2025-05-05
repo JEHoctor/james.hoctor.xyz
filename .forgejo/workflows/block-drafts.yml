@@ -9,8 +9,11 @@ jobs:
         uses: https://code.forgejo.org/actions/checkout@v4
       - name: block-drafts
         run: |
-          if make find-drafts ; then
-            echo "Failure: can't merge draft posts into main. See list of relevant files above."
+          drafts=$(make find-drafts)
+          n_drafts=$(echo "$drafts" | wc -l)
+          if [ $n_drafts -gt 0 ]; then
+            echo "Failure: can't merge draft posts into main. See the list below:"
+            echo "$drafts"
             exit 1
           fi
           echo "Success!"
