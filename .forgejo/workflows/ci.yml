@@ -58,5 +58,4 @@ jobs:
           echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" >> /etc/ssh/ssh_known_hosts
       - name: deploy
         run: |
-          rsync -rvz --delete -e "ssh -i deploy_id" output/ \
-          ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_TARGET_DIR }}
+          rsync -rvz --delete -e "ssh -i deploy_id" output/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:
