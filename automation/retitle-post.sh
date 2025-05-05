@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # This script should only be run via make to ensure correct paths!
 
