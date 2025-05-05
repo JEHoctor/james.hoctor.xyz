@@ -51,6 +51,8 @@ help:
 	@echo '   make new-post                       create an empty blog post          '
 	@echo '   make retitle-post                   rename a blog post                 '
 	@echo '   make check-scripts                  run ShellCheck on all scripts      '
+	@echo '   make init-precommit                 set up pre-commit hooks            '
+	@echo '   make check-precommit                run pre-commit checks              '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
@@ -101,5 +103,11 @@ retitle-post:
 check-scripts:
 	find . -type f -name "*.sh" -exec uvx --from='shellcheck-py' shellcheck {} +
 
+init-precommit:
+	uvx --from='pre-commit' pre-commit install
 
-.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global ssh-upload sftp-upload rsync-upload new-post retitle-post check-scripts
+check-precommit:
+	uvx --from='pre-commit' pre-commit run --all-files
+
+
+.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global ssh-upload sftp-upload rsync-upload new-post retitle-post check-scripts init-precommit check-precommit
