@@ -86,7 +86,7 @@ The Python code is the same in both versions, but the official version is carefu
 I don't think this matters at all, so I've chosen to rely on whatever version of Python 3 is installed.
 This is typically going to end up being the exact same interpreter, since the official instructions use system Python to create the Certbot venv.
 
-My final command uses `uvx` (a tool packaged with uv) to run "certbot renew -q" in a temporary venv. The "--with='certbot-nginx'" flag ensures that this venv includes the `certbot-nginx` package. The venv will include the `certbot` package because uv infers this dependency from the command "certbot renew -q". The "--refresh" command ensures that uv checks for a new version of Certbot on PyPI before creating the venv. 
+My final command uses `uvx` (a tool packaged with uv) to run "certbot renew -q" in a temporary venv. The "--with='certbot-nginx'" flag ensures that this venv includes the `certbot-nginx` package. The venv will include the `certbot` package because uv infers this dependency from the command "certbot renew -q". The "--refresh" command ensures that uv checks for a new version of Certbot on PyPI before creating the venv.
 
 ## Step 9: Confirm that Certbot worked
 
