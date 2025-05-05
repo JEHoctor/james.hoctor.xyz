@@ -1,0 +1,39 @@
+on: [push]
+jobs:
+  quality:
+    name: code-quality
+    runs-on: docker
+    steps:
+      - name: checkout
+        uses: https://code.forgejo.org/actions/checkout@v4
+      - name: setup uv
+        uses: https://github.com/astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
+      - name: run ShellCheck
+        run: make check-scripts
+      - name: run pre-commit checks
+        run: SKIP="shellcheck,no-commit-to-branch" make check-precommit
+  build:
+    name: build
+    needs: quality
+    runs-on: docker
+    steps:
+      - name: checkout
+        uses: https://code.forgejo.org/actions/checkout@v4
+      - name: setup uv
+        uses: https://github.com/astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
+      - name: build
+        run: make publish
+      - name: upload-artifacts
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        with:
+          name: web-content-${{ github.sha }}
+          path: |
+            output/
+            !**/.gitkeep
+          if-no-files-found: error
