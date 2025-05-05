@@ -98,7 +98,11 @@ find-drafts:
 	@find content/ -type f -name '*.md' -execdir grep -q '^Status: draft$$' '{}' \; -print
 
 check-no-drafts:
-	@./automation/check-no-drafts.sh
+	ls -lash .
+	ls -lash automation
+	ls -lash ./automation
+	ls -lash ./automation/check-no-drafts.sh
+	./automation/check-no-drafts.sh
 
 
 .PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init-precommit check-precommit find-drafts check-no-drafts
