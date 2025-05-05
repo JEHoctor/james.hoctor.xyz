@@ -7,16 +7,5 @@ jobs:
     steps:
       - name: checkout
         uses: https://code.forgejo.org/actions/checkout@v4
-      - name: investigate
-        run: |
-          pwd
-          echo ===
-          ls -lash
-          echo ===
-          git status
-          echo ===
-          ls -lash automation
-          echo ===
-          ls -lash ./automation/check-no-drafts.sh
       - name: block-drafts
         run: make check-no-drafts

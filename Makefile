@@ -98,11 +98,7 @@ find-drafts:
 	@find content/ -type f -name '*.md' -execdir grep -q '^Status: draft$$' '{}' \; -print
 
 check-no-drafts:
-	ls -lash .
-	ls -lash automation
-	ls -lash ./automation
-	ls -lash ./automation/check-no-drafts.sh
-	ls -lash /usr/bin/bash
+	which bash
 	./automation/check-no-drafts.sh
 
 
