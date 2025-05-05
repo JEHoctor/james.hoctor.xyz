@@ -16,6 +16,8 @@ But first, if you're already familiar with uv and Certbot, and you're just looki
 _Update 2025-01-30: After I set this up, I discovered [Caddy](https://caddyserver.com/), an HTTPS server and reverse proxy that automatically handles TLS certificate procurement and renewal.
 I'm still using nginx+uv as described here, but if it breaks I plan to switch to Caddy._
 
+_Update 2025-05-05: Read my [new post]({filename}/i-switched-to-caddy.md) about why I switched to Caddy._
+
 # Step by step instructions and comparison
 
 ## Step 1: SSH into the server
