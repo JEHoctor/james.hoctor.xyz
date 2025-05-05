@@ -32,7 +32,7 @@ jobs:
       - name: upload-artifacts
         uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
-          name: web-content-{{ GITHUB_SHA }}
+          name: web-content-${{ github.sha }}
           path: |
             output/
             !**/.gitkeep
