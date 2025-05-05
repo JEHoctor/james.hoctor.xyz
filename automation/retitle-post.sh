@@ -15,6 +15,7 @@ if [ ! -f "$old_filename" ]; then
 fi
 
 # Collect new blog post title from the user.
+echo "Old title: $(grep "^Title: " "$old_filename" | head -n 1 | sed 's/^Title: //')"
 read -erp "New title: " new_title
 
 # Rename the old file so it won't be searched by grep, and is available for the user to recover.
