@@ -16,5 +16,7 @@ jobs:
           git status
           echo ===
           ls -lash automation
+          echo ===
+          ls -lash ./automation/check-no-drafts.sh
       - name: block-drafts
         run: make check-no-drafts
