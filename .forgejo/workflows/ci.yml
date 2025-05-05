@@ -37,3 +37,23 @@ jobs:
             output/
             !**/.gitkeep
           if-no-files-found: error
+  deploy:
+    name: deploy
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: docker
+    steps:
+      - name: download-artifacts
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        with:
+          name: web-content-${{ github.sha }}
+          path: output
+      - name: investigate output
+        run: ls -lash output
+      - name: deploy
+        run: |
+          (umask 077 && mkdir .ssh)
+          (umask 177 && touch .ssh/id_ed25519)
+          echo "${{ secrets.DEPLOY_KEY }}" > .ssh/id_ed25519
+          rsync -rvz --delete -e "ssh -i .ssh/id_ed25519" output/ \
+          ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_HOST}}:${{secrets.DEPLOY_TARGET_DIR}}
