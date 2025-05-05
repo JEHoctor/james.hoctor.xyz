@@ -1,6 +1,7 @@
 on: [push]
 jobs:
-  shellcheck:
+  quality:
+    name: code-quality
     runs-on: docker
     steps:
       - name: checkout
@@ -13,4 +14,4 @@ jobs:
       - name: run ShellCheck
         run: make check-scripts
       - name: run pre-commit checks
-        run: SKIP="shellcheck" make check-precommit
+        run: SKIP="shellcheck,no-commit-to-branch" make check-precommit
