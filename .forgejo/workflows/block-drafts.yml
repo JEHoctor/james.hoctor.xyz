@@ -8,6 +8,13 @@ jobs:
       - name: checkout
         uses: https://code.forgejo.org/actions/checkout@v4
       - name: investigate
-        run: ls -lash
+        run: |
+          pwd
+          echo ===
+          ls -lash
+          echo ===
+          git status
+          echo ===
+          ls -lash automation
       - name: block-drafts
         run: make check-no-drafts
