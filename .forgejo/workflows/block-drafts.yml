@@ -9,5 +9,5 @@ jobs:
         uses: https://code.forgejo.org/actions/checkout@v4
       - name: block-drafts
         run: |
-          ! make find-drafts
+          if [ make find-drafts ]; then exit 1; fi
           echo "Success!"
