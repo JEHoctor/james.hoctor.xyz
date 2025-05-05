@@ -1,0 +1,24 @@
+on: [push]
+jobs:
+  build:
+    name: build
+    needs: quality
+    runs-on: docker
+    steps:
+      - name: checkout
+        uses: https://code.forgejo.org/actions/checkout@v4
+      - name: setup uv
+        uses: https://github.com/astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
+      - name: build
+        run: make publish
+      - name: upload-artifacts
+        uses: https://code.forgejo.org/forgejo/upload-artifact/src/tag/v4
+        with:
+          name: web-content-{{ GITHUB_SHA }}
+          path: |
+            output/
+            !**/.gitkeep
+          if-no-files-found: error
