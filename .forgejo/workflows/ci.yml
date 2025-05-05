@@ -53,10 +53,10 @@ jobs:
         run: |
           apt-get -qq update
           apt-get -qq install rsync
-          (umask 077 && mkdir .ssh)
-          (umask 077 && touch .ssh/id_25519)
-          echo "${{ secrets.DEPLOY_KEY }}" > .ssh/id_25519
+          (umask 077 && touch deploy_id)
+          echo "${{ secrets.DEPLOY_KEY }}" > deploy_id
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" >> /etc/ssh/ssh_known_hosts
       - name: deploy
         run: |
-          rsync -rvz --delete -e "ssh -i .ssh/id_25519" output/ \
+          rsync -rvz --delete -e "ssh -i deploy_id" output/ \
           ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_TARGET_DIR }}
