@@ -45,6 +45,8 @@ help:
 	@echo '   make check-scripts                  run ShellCheck on all scripts      '
 	@echo '   make init-precommit                 set up pre-commit hooks            '
 	@echo '   make check-precommit                run pre-commit checks              '
+	@echo '   make find-drafts                    find draft posts                   '
+	@echo '   make check-no-drafts                fail if there are draft posts      '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
@@ -92,5 +94,11 @@ init-precommit:
 check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
 
+find-drafts:
+	@find content/ -type f -name '*.md' -execdir grep -q '^Status: draft$$' '{}' \; -print
 
-.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init-precommit check-precommit
+check-no-drafts:
+	@./automation/check-no-drafts.sh
+
+
+.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init-precommit check-precommit find-drafts check-no-drafts

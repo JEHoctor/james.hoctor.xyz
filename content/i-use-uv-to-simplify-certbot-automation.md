@@ -13,8 +13,10 @@ But first, if you're already familiar with uv and Certbot, and you're just looki
 0 0,12	* * *	root	/root/.local/bin/uv self update && /usr/bin/python3 -c 'import random; import time; time.sleep(random.random() * 3600)' && /root/.local/bin/uvx --with='certbot-nginx' --refresh certbot renew -q
 ```
 
-_Update 2025-01-30: After I set this up, I discovered [Caddy](https://caddyserver.com/), an HTTPS server and reverse proxy that automativally handles TLS certificate procurement and renewal.
+_Update 2025-01-30: After I set this up, I discovered [Caddy](https://caddyserver.com/), an HTTPS server and reverse proxy that automatically handles TLS certificate procurement and renewal.
 I'm still using nginx+uv as described here, but if it breaks I plan to switch to Caddy._
+
+_Update 2025-05-05: Read my [new post]({filename}/i-switched-to-caddy.md) about why I switched to Caddy._
 
 # Step by step instructions and comparison
 
