@@ -173,7 +173,7 @@ I_{2n-1} \ge I_{2n} \ge I_{2n+1} > 0 \\
 Finally, by the squeeze theorem,
 
 \begin{align*}
-\pi &= \lim_{n\to\infty}2\prod\limits_{i=1}^{n} \frac{(2i)^2}{(2i-1)(2i+1)} = \left(\frac{2}{1}\cdot\frac{2}{3}\right)\left(\frac{4}{3}\cdot\frac{4}{5}\right)\left(\frac{6}{5}\cdot\frac{6}{7}\right)\left(\frac{8}{7}\cdot\frac{8}{9}\right)\cdots
+\pi &= \lim_{n\to\infty}2\prod\limits_{i=1}^{n} \frac{(2i)^2}{(2i-1)(2i+1)} = 2\cdot\left(\frac{2}{1}\cdot\frac{2}{3}\right)\left(\frac{4}{3}\cdot\frac{4}{5}\right)\left(\frac{6}{5}\cdot\frac{6}{7}\right)\left(\frac{8}{7}\cdot\frac{8}{9}\right)\cdots
 \end{align*}
 
 # References
