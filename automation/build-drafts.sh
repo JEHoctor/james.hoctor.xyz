@@ -53,8 +53,8 @@ make -C "$temp_dir/main" -f "$temp_dir/main/Makefile" publish
 mkdir -p "$temp_dir/main/output/drafts" output/drafts
 cp -rT "$temp_dir/main/output/drafts" output/drafts
 
-# Clean up the main worktree.
-git worktree remove "$temp_dir/main"
+# Clean up the main worktree. We have to use force because the worktree will contain uncommitted changes.
+git worktree remove --force "$temp_dir/main"
 
 # Remove the temp dir.
 rm -rf "$temp_dir"
