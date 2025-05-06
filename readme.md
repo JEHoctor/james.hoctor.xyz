@@ -7,3 +7,5 @@ You can look at the automation I use to deploy the blog via forgejo actions, but
 
 The site is built with [Pelican](https://getpelican.com/), a static site generator.
 It is assumed that you have [uv](https://docs.astral.sh/uv) from Astral installed.
+
+Before beginning development, install the pre-commit hooks with `make init-precommit`.
