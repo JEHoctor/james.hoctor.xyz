@@ -2,6 +2,7 @@
 
 # This script should only be run via make to ensure correct paths!
 
+# Not using -x because this script potentially reports a list of drafts and we don't want to clutter that output.
 set -euo pipefail
 
 drafts="$(find content/ -type f -name '*.md' -execdir grep -q '^Status: draft$' '{}' \; -print)"
