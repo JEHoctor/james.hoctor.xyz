@@ -1,5 +1,6 @@
 Title: The Wallis Product and the Euler-Poisson integral
 Date: 2025-04-24 11:27
+Modified: 2025-05-06 01:14
 Category: Blog
 Tags: Math
 
@@ -8,7 +9,7 @@ Years ago I was experimenting with the Euler-Poisson integral in $n$ dimensions 
 $$\pi = 2\prod\limits_{i=1}^{\infty}\frac{(2i)^2}{(2i-1)(2i+1)}$$
 
 I was only expecting to calculate the areas of $n$-spheres, so I was very pleased to find this!
-This formula was first published in 1656 by John Wallis.
+The formula was first published in 1656 by John Wallis.
 I'll show the standard Euler-Poisson integral, the way I modified it to derive areas of spheres in arbitrary dimensions, and finally how I derived the Wallis product.
 Unfortunately I lost my original derivation, so this is my best reconstruction of my process.
 
@@ -52,42 +53,44 @@ Then we can take the square root of both sides, noting that the integral of a po
 
 # The Euler-Poisson integral in higher dimensions
 
-The main idea of the derivation is already present in Poisson's computation above.
+The main idea of the derivation of areas of spheres in arbitrary dimensions is already present in Poisson's computation above.
 By raising the Euler-Poisson integral to the $n$th power, we get an integral under an $n$-dimensional Gaussian, and this can be converted to a radial coordinate system using spherical shells.
 
 $$\pi^{n/2} = \left(\int\limits_{-\infty}^{\infty}e^{-x^2}dx\right)^n = \int_{\mathbb{R}^n}e^{-||\vec{x}||_2^2}|d\vec{x}| = \int\limits_{0}^{\infty}S_{n-1}r^{n-1}e^{-r^2}dr = S_{n-1}\int\limits_{0}^{\infty}r^{n-1}e^{-r^2}dr$$
 
 The remaining integral is $\int_{0}^{\infty}r^{n-1}e^{-r^2}dr$, and one good idea is to use $u$-substitution to express it in terms of the gamma function.
-Instead, we're going to follow my original process by calling it $J_{n-1}$ and solving it with a recurrence relation.
+Instead, we're going to follow my original process by calling it $\gamma_{n-1}$ and solving it with a recurrence relation.
 
 \begin{align*}
-J_n &\equiv \int\limits_{0}^{\infty}r^n e^{-r^2}dr = \int\limits_0^{\infty}(r^{n-1})(-\frac{1}{2})(-2re^{-r^2})dr \\
+\gamma_n &\equiv \int\limits_{0}^{\infty}r^n e^{-r^2}dr = \int\limits_0^{\infty}(r^{n-1})(-\frac{1}{2})(-2re^{-r^2})dr \\
 &= -\frac{1}{2}\left(\left.\left[(r^{n-1})(e^{-r^2})\right]\right|_0^{\infty} - \int\limits_0^{\infty}(n-1)r^{n-2}e^{-r^2}dr\right) & \text{(integration by parts)}\\
-&= \frac{1}{2}(n-1)\int\limits_0^{\infty}r^{n-2}e^{-r^2}dr = \frac{1}{2}(n-1)J_{n-2} \\
-J_0 &= \int\limits_0^{\infty}e^{-r^2}dr = \frac{1}{2}\int\limits_{-\infty}^{\infty}e^{-r^2}dr = \frac{1}{2}\sqrt{\pi} \\
-J_1 &= \int\limits_0^{\infty}re^{-r^2}dr = \frac{1}{2}
+&= \frac{1}{2}(n-1)\int\limits_0^{\infty}r^{n-2}e^{-r^2}dr = \frac{1}{2}(n-1)\gamma_{n-2} \\
+\gamma_0 &= \int\limits_0^{\infty}e^{-r^2}dr = \frac{1}{2}\int\limits_{-\infty}^{\infty}e^{-r^2}dr = \frac{1}{2}\sqrt{\pi} \\
+\gamma_1 &= \int\limits_0^{\infty}re^{-r^2}dr = \frac{1}{2}
 \end{align*}
 
 With the recurrence and the base cases, we can calculate:
 
 \begin{align*}
-J_{2n} &= \frac{1}{2}\sqrt{\pi}\prod\limits_{i=1}^n \frac{1}{2}(2i-1) \\
-J_{2n+1} &= \frac{1}{2}\prod\limits_{i=1}^{n}\frac{1}{2}(2i) = \frac{1}{2}n!
+\gamma_{2n} &= \frac{1}{2}\sqrt{\pi}\prod\limits_{i=1}^n \frac{1}{2}(2i-1) \\
+\gamma_{2n+1} &= \frac{1}{2}\prod\limits_{i=1}^{n}\frac{1}{2}(2i) = \frac{1}{2}n!
 \end{align*}
 
-Now we can solve for $S_{2n}$, the areas of even dimensional spheres.
+It's clear from this that the sequence $\gamma_n$ is related to the gamma function, because in the odd case it is half a factorial, and in the even case it is half a product that can be seen to be the gamma function evaluated at a half integer.
+
+Turning back to surface areas, we can now solve for $S_{2n}$, the areas of even dimensional spheres.
 
 \begin{align*}
-\pi^{n/2} &= S_{n-1}J_{n-1} \\
-\pi^{n+1/2} &= S_{2n}J_{2n} \\
+\pi^{n/2} &= S_{n-1}\gamma_{n-1} \\
+\pi^{n+1/2} &= S_{2n}\gamma_{2n} \\
 S_{2n} &= \pi^{n+1/2}\frac{2}{\sqrt{\pi}}\prod\limits_{i=1}^{n}\frac{2}{2i-1} = 2\pi^n\prod\limits_{i=1}^{n}\frac{2}{2i-1}
 \end{align*}
 
 And similarly for $S_{2n+1}$, the areas of odd dimensional spheres.
 
 \begin{align*}
-\pi^{n/2} &= S_{n-1}J_{n-1} \\
-\pi^{n+1} &= S_{2n+1}J_{2n+1} \\
+\pi^{n/2} &= S_{n-1}\gamma_{n-1} \\
+\pi^{n+1} &= S_{2n+1}\gamma_{2n+1} \\
 S_{2n+1} &= \frac{2\pi^{n+1}}{n!}
 \end{align*}
 
@@ -173,7 +176,7 @@ I_{2n-1} \ge I_{2n} \ge I_{2n+1} > 0 \\
 Finally, by the squeeze theorem,
 
 \begin{align*}
-\pi &= \lim_{n\to\infty}2\prod\limits_{i=1}^{n} \frac{(2i)^2}{(2i-1)(2i+1)} = \left(\frac{2}{1}\cdot\frac{2}{3}\right)\left(\frac{4}{3}\cdot\frac{4}{5}\right)\left(\frac{6}{5}\cdot\frac{6}{7}\right)\left(\frac{8}{7}\cdot\frac{8}{9}\right)\cdots
+\pi &= \lim_{n\to\infty}2\prod\limits_{i=1}^{n} \frac{(2i)^2}{(2i-1)(2i+1)} = 2\cdot\left(\frac{2}{1}\cdot\frac{2}{3}\right)\left(\frac{4}{3}\cdot\frac{4}{5}\right)\left(\frac{6}{5}\cdot\frac{6}{7}\right)\left(\frac{8}{7}\cdot\frac{8}{9}\right)\cdots
 \end{align*}
 
 # References
