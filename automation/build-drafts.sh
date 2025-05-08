@@ -32,23 +32,6 @@ temp_dir=$(mktemp -d)
 # Create a git worktree for the remote's main branch in the temp dir.
 git worktree add -fd "$temp_dir/main" "deploy/main"
 
-# Bash function to copy a file but modify its name in the destination directory if it already exists.
-copy_safe() {
-    source_path="$1"
-    source_dir=$(dirname "$source_path")
-    source_name=$(basename "$source_path")
-    dest_dir="$2"
-    naive_dest_path="$dest_dir/$source_name"
-    if [ -f "$naive_dest_path" ]; then
-        # Source dir is a git worktree, so get the short hash of the commit.
-        short_hash=$(git -C "$source_dir" rev-parse --short HEAD)
-        cp "$source_path" "$dest_dir/$short_hash-$source_name"
-    else
-        cp "$source_path" "$naive_dest_path"
-    fi
-}
-export -f copy_safe
-
 for branch in $(git branch -r --no-merged deploy/main 'deploy/*' | grep -v '^deploy/HEAD'); do
     # Extract the branch name.
     branch_name=$(echo "$branch" | sed 's/deploy\///')
@@ -56,12 +39,21 @@ for branch in $(git branch -r --no-merged deploy/main 'deploy/*' | grep -v '^dep
     # Create a git worktree for this branch in the temp dir.
     git worktree add -fd "$temp_dir/$branch_name" "$branch"
 
-    # Find drafts in the worktree and copy them to the main worktree.
-	find "$temp_dir/$branch_name/content/" -type f -name '*.md' -execdir grep -q '^Status: draft$' '{}' \; -print0 | xargs -0 -I'{}' bash -c copy_safe '{}' "$temp_dir/main/content/"
+    # Get the short hash of the branch's HEAD commit.
+    branch_hash=$(git -C "$temp_dir/$branch_name" rev-parse --short HEAD)
+
+    # Make a dedicated directory for this branch in the main worktree.
+    mkdir -p "$temp_dir/main/content/$branch_hash"
+
+    # Find drafts in the worktree and copy them to the new directory in the main worktree .
+	find "$temp_dir/$branch_name/content/" -type f -name '*.md' -execdir grep -q '^Status: draft$' '{}' \; -execdir cp '{}' "$temp_dir/main/content/$branch_hash" \;
 
     # Clean up the worktree.
     git worktree remove "$temp_dir/$branch_name"
 done
+
+# Useful for debugging.
+ls -lash "$temp_dir/main/content/"
 
 # Run make publish in the worktree for branch "main".
 make -C "$temp_dir/main" -f "$temp_dir/main/Makefile" "${DRAFTS_BUILD_TARGET:-html}"
