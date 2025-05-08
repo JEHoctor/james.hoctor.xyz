@@ -6,14 +6,14 @@
 set -euxo pipefail
 
 # Check for an environment variable containing the git ssh url of the deployment remote.
-if [ -z "${remote_url:-}" ]; then
+if [ -z "${REMOTE_URL:-}" ]; then
     # Ask the user for the git ssh url of the deployment remote.
-    read -erp "Deployment remote (ssh clone url as displayed on Forgejo): " remote_url
+    read -erp "Deployment remote (ssh clone url as displayed on Forgejo): " REMOTE_URL
 fi
 
 # Ensure that this url is associated with a git remote called "deploy".
-if ! git remote add deploy "$remote_url"; then
-    if [ "$(git remote get-url deploy)" != "$remote_url" ]; then
+if ! git remote add deploy "$REMOTE_URL"; then
+    if [ "$(git remote get-url deploy)" != "$REMOTE_URL" ]; then
         echo 'Failed to add remote "deploy": remote already exists with a different url.'
         exit 1
     fi
