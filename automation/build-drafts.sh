@@ -47,7 +47,7 @@ for branch in $(git branch -r --no-merged deploy/main 'deploy/*' | grep -v '^dep
 done
 
 # Run make publish in the worktree for branch "main".
-make -C "$temp_dir/main" -f "$temp_dir/main/Makefile" publish
+make -C "$temp_dir/main" -f "$temp_dir/main/Makefile" "${DRAFTS_BUILD_TARGET:-html}"
 
 # Copy drafts in the temp dir to the output dir.
 mkdir -p "$temp_dir/main/output/drafts" output/drafts
