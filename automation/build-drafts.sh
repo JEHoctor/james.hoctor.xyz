@@ -43,10 +43,10 @@ for branch in $(git branch -r --no-merged deploy/main 'deploy/*' | grep -v '^dep
     branch_hash=$(git -C "$temp_dir/$branch_name" rev-parse --short HEAD)
 
     # Make a dedicated directory for this branch in the main worktree.
-    mkdir -p "$temp_dir/main/content/$branch_hash"
+    mkdir -p "$temp_dir/main/content/from/$branch_hash"
 
     # Find drafts in the worktree and copy them to the new directory in the main worktree .
-	find "$temp_dir/$branch_name/content/" -type f -name '*.md' -execdir grep -q '^Status: draft$' '{}' \; -execdir cp '{}' "$temp_dir/main/content/$branch_hash" \;
+	find "$temp_dir/$branch_name/content/" -type f -name '*.md' -execdir grep -q '^Status: draft$' '{}' \; -execdir cp '{}' "$temp_dir/main/content/from/$branch_hash" \;
 
     # Clean up the worktree.
     git worktree remove "$temp_dir/$branch_name"
@@ -54,6 +54,20 @@ done
 
 # Useful for debugging.
 ls -lash "$temp_dir/main/content/"
+
+# Try to move draft files out of from/ and into content/, but handle file name conflicts by prepending the branch hash.
+while read -r filename; do
+    if [ "$(find "$temp_dir/main/content/from/" -type f -name "$filename" | wc -l)" -gt 1 ]; then
+        while read -r file; do
+            mv "$file" "$temp_dir/main/content/$(basename "$(dirname "$file")")-$filename"
+        done < <(find "$temp_dir/main/content/from/" -type f -name "$filename")
+    else
+        mv "$temp_dir/main/content/from/"*"/$filename" "$temp_dir/main/content/$filename"
+    fi
+done < <(find "$temp_dir/main/content/from/" -type f -execdir basename '{}' \; | sort | uniq)
+
+# Clean up from/.
+rm -rf "$temp_dir/main/content/from/"
 
 # Run make publish in the worktree for branch "main".
 make -C "$temp_dir/main" -f "$temp_dir/main/Makefile" "${DRAFTS_BUILD_TARGET:-html}"
