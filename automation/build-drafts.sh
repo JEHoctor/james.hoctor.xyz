@@ -81,5 +81,7 @@ cp -rT "$temp_dir/main/output/drafts" output/drafts
 # Clean up the main worktree. We have to use force because the worktree will contain uncommitted changes.
 git worktree remove --force "$temp_dir/main"
 
+# Note that we don't obsess over removing every worktree on every error path. You can clean these up with git worktree prune, or git will clean them up eventually.
+
 # Remove the temp dir.
 rm -rf "$temp_dir"
