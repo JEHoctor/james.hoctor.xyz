@@ -1,0 +1,54 @@
+on:
+  push:
+    paths:
+      - 'content/*.md'
+      - 'content/**/*.md'
+  workflow_dispatch:
+jobs:
+  build-drafts:
+    name: build-drafts
+    runs-on: docker
+    steps:
+      - name: checkout
+        uses: https://code.forgejo.org/actions/checkout@v4
+      - name: investigate-git
+        run: git remote -v
+#      - name: setup uv
+#        uses: https://github.com/astral-sh/setup-uv@v6
+#        with:
+#          enable-cache: true
+#          prune-cache: false
+#      - name: build-drafts
+#        run: make build-drafts
+#        env:
+#          DRAFTS_BUILD_TARGET: publish
+#          REMOTE_URL: ${{ secrets.DEPLOY_REMOTE_URL }}
+#      - name: upload-artifacts
+#        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+#        with:
+#          name: web-drafts-${{ github.sha }}
+#          path: |
+#            output/drafts/
+#            !**/.gitkeep
+#  deploy-drafts:
+#    name: deploy-drafts
+#    needs: build-drafts
+#    runs-on: docker
+#    steps:
+#      - name: download-artifacts
+#        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+#        with:
+#          name: web-drafts-${{ github.sha }}
+#          path: output/drafts
+#      - name: setup rsync
+#        id: rsync
+#        run: |
+#          apt-get -qq update
+#          apt-get -qq install rsync
+#          (umask 077 && touch deploy_id)
+#          echo "${{ secrets.DEPLOY_KEY }}" > deploy_id
+#          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" >> /etc/ssh/ssh_known_hosts
+#      - name: deploy
+#        run: |
+#          rsync -rvz --delete -e "ssh -i deploy_id" output/drafts/ \
+#          ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:drafts
