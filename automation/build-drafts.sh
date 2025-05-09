@@ -59,7 +59,9 @@ ls -lash "$temp_dir/main/content/"
 while read -r filename; do
     if [ "$(find "$temp_dir/main/content/from/" -type f -name "$filename" | wc -l)" -gt 1 ]; then
         while read -r file; do
-            mv "$file" "$temp_dir/main/content/$(basename "$(dirname "$file")")-$filename"
+            branch_hash=$(basename "$(dirname "$file")")
+            sed -i "s/^Title:/Title: ($branch_hash)/" "$file"
+            mv "$file" "$temp_dir/main/content/$branch_hash-$filename"
         done < <(find "$temp_dir/main/content/from/" -type f -name "$filename")
     else
         mv "$temp_dir/main/content/from/"*"/$filename" "$temp_dir/main/content/$filename"
