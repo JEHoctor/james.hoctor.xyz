@@ -76,4 +76,4 @@ jobs:
       - name: mirror-redacted
         run: make mirror-redacted
         env:
-          SECRET_MIRROR_ACCESS_URL: ${{ secrets.MIRROR_ACCESS_URL }}
+          MIRROR_ACCESS_URL: ${{ secrets.MIRROR_ACCESS_URL }}
