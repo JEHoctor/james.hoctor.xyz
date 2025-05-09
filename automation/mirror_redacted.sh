@@ -12,7 +12,7 @@ fi
 
 # Create a clone of the target repository in a temporary directory.
 tmpdir=$(mktemp -d)
-git clone "$SECRET_MIRROR_ACCESS_URL" "$tmpdir"
+git clone "$MIRROR_ACCESS_URL" "$tmpdir"
 
 # Run git-filter-repo to redact draft posts.
 uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" --paths-from-file <<- EOF
