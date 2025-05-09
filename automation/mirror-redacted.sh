@@ -15,13 +15,14 @@ tmpdir=$(mktemp -d)
 git clone "$MIRROR_ACCESS_URL" "$tmpdir"
 
 # Run git-filter-repo to redact draft posts.
-uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" --paths-from-file <<- EOF
+uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" --paths-from-file <(cat <<- EOF
 	regex:^(?!content/).*$
 
 	$(while read -r file; do
 		echo "literal:$file"
 	done < <(find content/ -type f -not -execdir grep -q '^Status: draft$' '{}' \; -print))
 EOF
+)
 
 # Push the changes to the target repository.
 git -C "$tmpdir" push
