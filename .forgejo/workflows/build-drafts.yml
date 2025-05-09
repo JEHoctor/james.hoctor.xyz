@@ -1,9 +1,9 @@
 on:
   push:
-    paths:
-      - 'content/*.md'
-      - 'content/**/*.md'
-  workflow_dispatch:
+#    paths:
+#      - 'content/*.md'
+#      - 'content/**/*.md'
+#  workflow_dispatch:
 jobs:
   build-drafts:
     name: build-drafts
@@ -12,7 +12,11 @@ jobs:
       - name: checkout
         uses: https://code.forgejo.org/actions/checkout@v4
       - name: investigate-git
-        run: git remote -v
+        run: |
+          git remote -v
+          git branch -r
+          git fetch --no-tags
+          git branch -r
 #      - name: setup uv
 #        uses: https://github.com/astral-sh/setup-uv@v6
 #        with:
