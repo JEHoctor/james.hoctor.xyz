@@ -47,6 +47,7 @@ help:
 	@echo '   make check-precommit                run pre-commit checks              '
 	@echo '   make find-drafts                    find draft posts                   '
 	@echo '   make check-no-drafts                fail if there are draft posts      '
+	@echo '   make mirror-redacted                mirror repo without drafts         '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
@@ -100,5 +101,8 @@ find-drafts:
 check-no-drafts:
 	@./automation/check-no-drafts.sh
 
+mirror-redacted:
+	@./automation/mirror-redacted.sh
 
-.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init-precommit check-precommit find-drafts check-no-drafts
+
+.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init-precommit check-precommit find-drafts check-no-drafts mirror-redacted
