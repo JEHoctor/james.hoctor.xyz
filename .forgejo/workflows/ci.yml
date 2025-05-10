@@ -59,3 +59,21 @@ jobs:
       - name: deploy
         run: |
           rsync -rvz --delete -e "ssh -i deploy_id" output/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:
+  mirror:
+    name: mirror
+    runs-on: docker
+    steps:
+      - name: checkout
+        uses: https://code.forgejo.org/actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: setup uv
+        uses: https://github.com/astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
+      - name: mirror-redacted
+        run: make mirror-redacted
+        env:
+          MIRROR_ACCESS_URL: ${{ secrets.MIRROR_ACCESS_URL }}
