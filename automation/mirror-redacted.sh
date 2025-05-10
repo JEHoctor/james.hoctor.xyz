@@ -15,7 +15,9 @@ tmpdir=$(mktemp -d)
 git clone "$MIRROR_ACCESS_URL" "$tmpdir"
 
 # Run git-filter-repo to redact draft posts.
-uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" --paths-from-file <(cat <<- EOF
+uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" \
+	--mailmap <(echo "James Hoctor <JEHoctor@protonmail.com>") \
+	--paths-from-file <(cat <<- EOF
 	regex:^(?!content/).*$
 
 	$(while read -r file; do
