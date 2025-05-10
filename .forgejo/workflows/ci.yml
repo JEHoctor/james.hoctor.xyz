@@ -14,7 +14,7 @@ jobs:
       - name: run ShellCheck
         run: make check-scripts
       - name: run pre-commit checks
-        run: SKIP="shellcheck,no-commit-to-branch" make check-precommit
+        run: SKIP="shellcheck" make check-precommit
   build:
     name: build
     needs: quality
