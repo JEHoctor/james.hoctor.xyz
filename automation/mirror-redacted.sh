@@ -26,14 +26,23 @@ EOF
 
 # Remove branches that are merged into main in the target repository, but not in the local repository.
 while read -r branch; do
+	local_branch="$(echo "$branch" | sed 's/origin\///')"
 	if git -C "$tmpdir" merge-base --is-ancestor "$branch" origin/main; then
 		echo "Removing merged branch: $branch"
 		git -C "$tmpdir" branch -rD "$branch"
+		git -C "$tmpdir" branch -D "$local_branch" || true
 	fi
 done < <(git branch -r --no-merged origin/main 'origin/*')
 
+# We have to check out each of the branches that wasn't removed in the previous step.
+while read -r branch; do
+	local_branch="$(echo "$branch" | sed 's/origin\///')"
+	echo "Checking out branch: $branch"
+	git -C "$tmpdir" checkout "$local_branch"
+done < <(git -C "$tmpdir" branch -r --list 'origin/*' | grep -v 'HEAD')
+
 # Push the changes to the target repository.
-git -C "$tmpdir" push
+git -C "$tmpdir" push --force --mirror --prune origin
 
 # Remove the temporary directory.
 rm -rf "$tmpdir"
