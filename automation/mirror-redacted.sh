@@ -16,7 +16,7 @@ git clone "$MIRROR_ACCESS_URL" "$tmpdir"
 
 # Run git-filter-repo to redact draft posts.
 uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" \
-	--mailmap <(echo "James Hoctor <JEHoctor@protonmail.com>") \
+	--mailmap <(echo "$SECRET_MAILMAP") \
 	--paths-from-file <(cat <<- EOF
 	regex:^(?!content/).*$
 

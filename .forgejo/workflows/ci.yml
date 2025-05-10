@@ -77,3 +77,4 @@ jobs:
         run: make mirror-redacted
         env:
           MIRROR_ACCESS_URL: ${{ secrets.MIRROR_ACCESS_URL }}
+          SECRET_MAILMAP: ${{ secrets.SECRET_MAILMAP }}
