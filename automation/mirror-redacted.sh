@@ -26,7 +26,7 @@ uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" \
 EOF
 )
 
-# Remove branches that are merged into main in the target repository, but not in the local repository.
+# Remove branches that are merged into main in the target repository, but not in the source repository.
 while read -r branch; do
 	local_branch="$(echo "$branch" | sed 's/origin\///')"
 	if git -C "$tmpdir" merge-base --is-ancestor "$branch" origin/main; then
