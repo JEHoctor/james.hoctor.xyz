@@ -28,10 +28,10 @@ EOF
 
 # Remove branches that are merged into main in the target repository, but not in the source repository.
 while read -r branch; do
-	local_branch="$(echo "$branch" | sed 's/origin\///')"
 	if git -C "$tmpdir" merge-base --is-ancestor "$branch" origin/main; then
 		echo "Removing merged branch: $branch"
 		git -C "$tmpdir" branch -rD "$branch"
+		local_branch=$(echo "$branch" | sed 's/origin\///')
 		git -C "$tmpdir" branch -D "$local_branch" || true
 	fi
 done < <(git branch -r --no-merged origin/main 'origin/*')
