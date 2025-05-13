@@ -1,0 +1,8 @@
+# Controls shfmt. See the section on EditorConfig in:
+# https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd
+[*.sh]
+indent_style = space
+indent_size = 2
+binary_next_line   = true
+switch_case_indent = true
+space_redirects    = true
