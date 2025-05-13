@@ -10,8 +10,8 @@ read -erp "Title: " title
 
 # Check for collision with titles of existing posts and pages, which can prevent Pelican from building the site.
 if grep -q "^Title: $title$" content/{*,**/*}.md; then
-  echo "Duplicate post title identified by grep:"
-  grep "^Title: $title$" content/{*,**/*}.md
+  echo "Duplicate post title identified by grep:" >&2
+  grep "^Title: $title$" content/{*,**/*}.md >&2
   exit 1
 fi
 
@@ -24,8 +24,8 @@ fi
 filename=content/$(echo "$title" | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]').md
 
 # Verify that the file doesn't already exist.
-if [ -f "$filename" ]; then
-  echo "File already exists: $filename"
+if [[ -f $filename ]]; then
+  echo "File already exists: $filename" >&2
   exit 1
 fi
 
