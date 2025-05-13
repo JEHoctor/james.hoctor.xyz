@@ -11,10 +11,10 @@ jobs:
         with:
           enable-cache: true
           prune-cache: false
-      - name: run ShellCheck
+      - name: run ShellCheck and shfmt
         run: make check-scripts
       - name: run pre-commit checks
-        run: SKIP="shellcheck" make check-precommit
+        run: SKIP="shellcheck,shfmt" make check-precommit
   build:
     name: build
     needs: quality
