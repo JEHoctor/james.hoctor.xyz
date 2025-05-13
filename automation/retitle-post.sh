@@ -9,8 +9,8 @@ set -euo pipefail
 read -i "content/" -erp "Old file name: " old_filename
 
 # Verify that the file exists.
-if [ ! -f "$old_filename" ]; then
-  echo "File does not exist: $old_filename"
+if [[ ! -f $old_filename ]]; then
+  echo "File does not exist: $old_filename" >&2
   exit 1
 fi
 
@@ -24,8 +24,8 @@ mv "$old_filename" "$old_filename".old
 # Check for collision with titles of existing posts and pages, which can prevent Pelican from building the site.
 if grep -q "^Title: $new_title$" content/{*,**/*}.md; then
   set +e # Don't exit if grep (or echo) fails
-  echo "Duplicate post title identified by grep:"
-  grep "^Title: $new_title$" content/{*,**/*}.md
+  echo "Duplicate post title identified by grep:" >&2
+  grep "^Title: $new_title$" content/{*,**/*}.md >&2
   set -e
   mv "$old_filename".old "$old_filename"
   exit 1
@@ -40,9 +40,9 @@ fi
 filename=content/$(echo "$new_title" | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]').md
 
 # Verify that the file doesn't already exist.
-if [ -f "$filename" ]; then
+if [[ -f $filename ]]; then
   set +e # Don't exit if echo fails
-  echo "File already exists: $filename"
+  echo "File already exists: $filename" >&2
   set -e
   mv "$old_filename".old "$old_filename"
   exit 1
