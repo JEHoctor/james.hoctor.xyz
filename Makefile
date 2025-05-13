@@ -42,7 +42,7 @@ help:
 	@echo '   make devserver-global               regenerate and serve on 0.0.0.0    '
 	@echo '   make new-post                       create an empty blog post          '
 	@echo '   make retitle-post                   rename a blog post                 '
-	@echo '   make check-scripts                  run ShellCheck on all scripts      '
+	@echo '   make check-scripts                  run ShellCheck+shfmt on all scripts'
 	@echo '   make init-precommit                 set up pre-commit hooks            '
 	@echo '   make check-precommit                run pre-commit checks              '
 	@echo '   make mirror-redacted                mirror repo without drafts         '
@@ -85,7 +85,8 @@ retitle-post:
 	@./automation/retitle-post.sh
 
 check-scripts:
-	find . -type f -name "*.sh" -exec uvx --from='shellcheck-py' shellcheck {} +
+	uvx --from='shfmt-py' shfmt -d **/*.sh
+	uvx --from='shellcheck-py' shellcheck **/*.sh
 
 init-precommit:
 	uvx --from='pre-commit' pre-commit install
