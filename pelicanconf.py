@@ -1,12 +1,12 @@
-AUTHOR = 'James Hoctor'
-SITENAME = 'james.hoctor.xyz'
+AUTHOR = "James Hoctor"
+SITENAME = "james.hoctor.xyz"
 SITEURL = "https://james.hoctor.xyz"
 
 PATH = "content"
 
-TIMEZONE = 'America/New_York'
+TIMEZONE = "America/New_York"
 
-DEFAULT_LANG = 'en'
+DEFAULT_LANG = "en"
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
@@ -20,15 +20,12 @@ LINKS = (
     ("GitHub", "https://github.com/JEHoctor/"),
     ("Resume", "https://drive.google.com/file/d/1dtkw-Jbo9DwJQrXAMmUa1jVqRovOlD3d/view?usp=share_link"),
     ("LinkedIn", "https://www.linkedin.com/in/james-hoctor/"),
-    # ("Forgejo", "https://git.hoctor.xyz"),
     ("Thingiverse", "https://www.thingiverse.com/jehoctor/designs/"),
     ("PyPI", "https://pypi.org/user/jehoctor/"),
-    # ("github.io", "https://jehoctor.github.io/"),
 )
 
 # Social widget
-SOCIAL = (
-)
+SOCIAL = ()
 
 DEFAULT_PAGINATION = 10
 
