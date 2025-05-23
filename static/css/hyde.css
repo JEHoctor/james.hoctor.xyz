@@ -56,7 +56,7 @@ html {
 .sidebar {
   text-align: center;
   padding: 2rem 1rem;
-  color: rgba(255,255,255,.5);
+  color: rgba(255,255,255,.775);
   background-color: #202020;
 }
 @media (min-width: 48em) {
@@ -92,7 +92,7 @@ html {
   margin: 0 auto;
   border-radius: 50%;
   border: 2px solid #0001;
-  max-width: 5rem;
+  max-width: 6rem;
 }
 
 /* Sidebar nav */
@@ -108,12 +108,12 @@ html {
 }
 .sidebar-social-item {
   display: block;
-  padding: .25rem 0.8rem;
+  padding: .1rem 0.55rem;
   background: #fff2;
   margin: 0 .2rem;
   border-radius: .25rem;
   text-transform: uppercase;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: bold;
 }
 a.sidebar-social-item:hover,
