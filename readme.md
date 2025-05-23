@@ -1,15 +1,18 @@
 # James Hoctor's blog
 
-This repo is what I use to manage the content on my blog, [james.hoctor.xyz](https://james.hoctor.xyz/).
-I also use this repo to deploy the blog.
-If you are viewing this on GitHub, then you are looking at a copy, which is downstream of the working copy on my private git forge.
-You can look at the automation I use to deploy the blog via forgejo actions, but those actions don't run on GitHub, and likely wouldn't work on GitHub.
+I use this repo to manage the content on my blog: [james.hoctor.xyz](https://james.hoctor.xyz/).
+I also deploy the blog using a [Forgejo Actions workflow](.forgejo/workflows/ci.yml) running on my private git forge.
+The workflow doesn't run on GitHub, and likely wouldn't work with GitHub Actions.
+
+If you are viewing this on GitHub, then you are looking at a copy, which is downstream of the working copy on my forge.
+The copy on GitHub is redacted using this [script](automation/mirror-redacted.sh), whose purpose is to remove draft posts from the git history until they are published.
+The redacted copy will regularly receive force pushes that rewrite its history, so it is not suitable for forking.
 
 The site is built with [Pelican](https://getpelican.com/), a static site generator.
-It is assumed that you have [uv](https://docs.astral.sh/uv) from Astral installed.
+The Python environment and tools are managed with [uv](https://docs.astral.sh/uv).
 
-Before beginning development, install the pre-commit hooks with `make init-precommit`.
+Before beginning development, install the pre-commit hooks and the submodule with `make init`.
 
 ## Credit for content used
 
-I got the 3D printing icon from [icon-icons.com](https://icon-icons.com/icon/printer-3d-nozzle/135279).
+I downloaded the 3D printing icon from [icon-icons.com](https://icon-icons.com/icon/printer-3d-nozzle/135279).
