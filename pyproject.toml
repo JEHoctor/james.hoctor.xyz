@@ -1,0 +1,15 @@
+[project]
+name = "james-hoctor-xyz"
+version = "0.1.0"
+description = "Static site generation for james.hoctor.xyz powered by Pelican"
+readme = "readme.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pelican-render-math>=1.0.4",
+    "pelican-seo>=1.4.0",
+    "pelican[markdown]>=4.11.0",
+]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4

@@ -1,0 +1,3 @@
+[submodule "hyde-personalized"]
+	path = hyde-personalized
+	url = https://github.com/JEHoctor/pelican-hyde.git

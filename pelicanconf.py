@@ -8,6 +8,8 @@ TIMEZONE = "America/New_York"
 
 DEFAULT_LANG = "en"
 
+THEME = "hyde-personalized"
+
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
@@ -16,16 +18,16 @@ AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
 # Blogroll
-LINKS = (
+LINKS = ()
+
+# Social widget
+SOCIAL = (
     ("GitHub", "https://github.com/JEHoctor/"),
     ("Resume", "https://drive.google.com/file/d/1dtkw-Jbo9DwJQrXAMmUa1jVqRovOlD3d/view?usp=share_link"),
     ("LinkedIn", "https://www.linkedin.com/in/james-hoctor/"),
     ("Thingiverse", "https://www.thingiverse.com/jehoctor/designs/"),
     ("PyPI", "https://pypi.org/user/jehoctor/"),
 )
-
-# Social widget
-SOCIAL = ()
 
 DEFAULT_PAGINATION = 10
 
