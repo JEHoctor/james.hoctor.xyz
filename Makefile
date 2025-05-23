@@ -87,7 +87,7 @@ check-scripts:
 
 init:
 	uvx --from='pre-commit' pre-commit install
-	git submodule update
+	git submodule update --init
 
 check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
