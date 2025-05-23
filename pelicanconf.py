@@ -12,11 +12,10 @@ THEME = "hyde-personalized"
 
 # Settings specific to the theme
 BIO = """
-I am a machine learning engineer and a data scientist.
-My interests include natural language processing, computer vision, and interpretable machine learning.
-I hold an MS in Computer Science from Duke University, and a BS in Mathematics from Rensselaer Polytechnic Institute.
+Machine learning engineer and data scientist. BS Mathematics, MS Computer Science.
 """
 PROFILE_IMAGE = "github-profile.jpg"
+COLOR_THEME = "08"
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
@@ -24,6 +23,9 @@ CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
+
+# Link to "about me" page
+DISPLAY_PAGES_ON_MENU = (("about", "about.md"),)
 
 # Blogroll
 LINKS = ()
