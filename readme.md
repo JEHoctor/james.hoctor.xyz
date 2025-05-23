@@ -9,3 +9,7 @@ The site is built with [Pelican](https://getpelican.com/), a static site generat
 It is assumed that you have [uv](https://docs.astral.sh/uv) from Astral installed.
 
 Before beginning development, install the pre-commit hooks with `make init-precommit`.
+
+## Credit for content used
+
+I got the 3D printing icon from [icon-icons.com](https://icon-icons.com/icon/printer-3d-nozzle/135279).
