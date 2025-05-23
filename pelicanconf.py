@@ -30,11 +30,11 @@ LINKS = ()
 
 # Social widget
 SOCIAL = (
-    ("GitHub", "https://github.com/JEHoctor/"),
-    ("Resume", "https://drive.google.com/file/d/1dtkw-Jbo9DwJQrXAMmUa1jVqRovOlD3d/view?usp=share_link"),
-    ("LinkedIn", "https://www.linkedin.com/in/james-hoctor/"),
-    ("Thingiverse", "https://www.thingiverse.com/jehoctor/designs/"),
-    ("PyPI", "https://pypi.org/user/jehoctor/"),
+    ("github", "https://github.com/JEHoctor/"),
+    ("file-pdf-o", "https://drive.google.com/file/d/1dtkw-Jbo9DwJQrXAMmUa1jVqRovOlD3d/view?usp=share_link"),  # Resume
+    ("linkedin", "https://www.linkedin.com/in/james-hoctor/"),
+    ("cubes", "https://www.thingiverse.com/jehoctor/designs/"),  # Thingiverse
+    ("python", "https://pypi.org/user/jehoctor/"),  # PyPI
 )
 
 DEFAULT_PAGINATION = 10
