@@ -42,7 +42,7 @@ help:
 	@echo '   make new-post                       create an empty blog post          '
 	@echo '   make retitle-post                   rename a blog post                 '
 	@echo '   make check-scripts                  run ShellCheck+shfmt on all scripts'
-	@echo '   make init-precommit                 set up pre-commit hooks            '
+	@echo '   make init                           initialize pre-commit and submodule'
 	@echo '   make check-precommit                run pre-commit checks              '
 	@echo '   make mirror-redacted                mirror repo without drafts         '
 	@echo '                                                                          '
@@ -85,8 +85,9 @@ check-scripts:
 	uvx --from='shfmt-py' shfmt -d **/*.sh
 	uvx --from='shellcheck-py' shellcheck **/*.sh
 
-init-precommit:
+init:
 	uvx --from='pre-commit' pre-commit install
+	git submodule update
 
 check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
@@ -95,4 +96,4 @@ mirror-redacted:
 	@./automation/mirror-redacted.sh
 
 
-.PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init-precommit check-precommit mirror-redacted
+.PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init check-precommit mirror-redacted
