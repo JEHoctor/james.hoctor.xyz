@@ -96,6 +96,7 @@ check-precommit:
 
 validate-html-css:
 	npx htmlhint output/
+	npx csslint output/
 
 mirror-redacted:
 	@./automation/mirror-redacted.sh
