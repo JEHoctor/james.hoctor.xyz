@@ -87,8 +87,8 @@ check-scripts:
 	uvx --from='shellcheck-py' shellcheck **/*.sh
 
 init:
-	uvx --from='pre-commit' pre-commit install
 	git submodule update --init
+	uvx --from='pre-commit' pre-commit install
 
 check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
