@@ -98,6 +98,7 @@ validate:
 	@if [ ! -d output ]; then echo "No output/ directory - run 'make html' or another similar target first" >&2; exit 1; fi
 	npx htmlhint output/
 	npx csslint output/
+	diff .csslintrc hyde-personalized/.csslintrc
 
 mirror-redacted:
 	@./automation/mirror-redacted.sh
