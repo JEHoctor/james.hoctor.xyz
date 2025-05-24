@@ -35,7 +35,7 @@ SOCIAL = (
     ("github", "https://github.com/JEHoctor/"),
     ("file-pdf-o", "https://drive.google.com/file/d/1dtkw-Jbo9DwJQrXAMmUa1jVqRovOlD3d/view?usp=share_link"),  # Resume
     ("linkedin", "https://www.linkedin.com/in/james-hoctor/"),
-    ("cubes", "https://www.thingiverse.com/jehoctor/designs/"),  # Thingiverse
+    ("thingiverse", "https://www.thingiverse.com/jehoctor/designs/"),
     ("python", "https://pypi.org/user/jehoctor/"),  # PyPI
 )
 
