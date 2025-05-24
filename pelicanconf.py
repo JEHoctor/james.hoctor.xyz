@@ -11,7 +11,7 @@ DEFAULT_LANG = "en"
 THEME = "hyde-personalized"
 
 # Settings specific to the theme
-BIO = "Machine learning engineer and data scientist. <nobr>BS Mathematics</nobr>, <nobr>MS Computer</nobr> Science."
+BIO = "Machine learning engineer and data scientist. <nobr>BS Mathematics</nobr>, <nobr>MS Computer Science.</nobr>"
 PROFILE_IMAGE = "github-profile.jpg"
 COLOR_THEME = "08"
 
