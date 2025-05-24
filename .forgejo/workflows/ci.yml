@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: checkout
         uses: https://code.forgejo.org/actions/checkout@v4
+        with:
+          submodules: true
       - name: setup uv
         uses: https://github.com/astral-sh/setup-uv@v6
         with:
