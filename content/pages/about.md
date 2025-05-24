@@ -2,11 +2,11 @@ Title: About me
 
 Hi, I'm James.
 
- - [GitHub](https://github.com/JEHoctor)
- - [Resume](https://drive.google.com/file/d/1dtkw-Jbo9DwJQrXAMmUa1jVqRovOlD3d/view?usp=share_link)
- - [LinkedIn](https://www.linkedin.com/in/james-hoctor/)
- - [Thingiverse](https://www.thingiverse.com/jehoctor/designs)
- - [PyPI](https://pypi.org/user/jehoctor/)
+ - [GitHub](https://github.com/JEHoctor){:target="_blank"}
+ - [Resume](https://drive.google.com/file/d/1dtkw-Jbo9DwJQrXAMmUa1jVqRovOlD3d/view?usp=share_link){:target="_blank"}
+ - [LinkedIn](https://www.linkedin.com/in/james-hoctor/){:target="_blank"}
+ - [Thingiverse](https://www.thingiverse.com/jehoctor/designs){:target="_blank"}
+ - [PyPI](https://pypi.org/user/jehoctor/){:target="_blank"}
 
 I'm a machine learning engineer and a data scientist.
 My interests include natural language processing, computer vision, and interpretable machine learning.
