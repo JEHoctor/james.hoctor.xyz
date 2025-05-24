@@ -1,5 +1,5 @@
 PY?=
-PELICAN?=uvx --from='pelican[markdown]' --with='pelican-render-math,pelican-seo' pelican -v
+PELICAN?=uv run pelican -v
 PELICANOPTS=
 
 BASEDIR=$(CURDIR)
@@ -31,7 +31,6 @@ help:
 	@echo 'Makefile for a pelican Web site                                           '
 	@echo '                                                                          '
 	@echo 'Usage:                                                                    '
-	@echo '   $$(make pelican-command) [args]      Run pelican with provided arguments'
 	@echo '   make html                           (re)generate the web site          '
 	@echo '   make clean                          remove the generated files         '
 	@echo '   make regenerate                     regenerate files upon modification '
@@ -43,7 +42,7 @@ help:
 	@echo '   make new-post                       create an empty blog post          '
 	@echo '   make retitle-post                   rename a blog post                 '
 	@echo '   make check-scripts                  run ShellCheck+shfmt on all scripts'
-	@echo '   make init-precommit                 set up pre-commit hooks            '
+	@echo '   make init                           initialize pre-commit and submodule'
 	@echo '   make check-precommit                run pre-commit checks              '
 	@echo '   make mirror-redacted                mirror repo without drafts         '
 	@echo '                                                                          '
@@ -51,14 +50,12 @@ help:
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
 	@echo '                                                                          '
 
-pelican-command:
-	@echo $(PELICAN)
-
 html:
 	$(PELICAN) "$(INPUTDIR)" -o "$(OUTPUTDIR)" -s "$(CONFFILE)" $(PELICANOPTS)
 
 clean:
 	[ ! -d "$(OUTPUTDIR)" ] || rm -rf "$(OUTPUTDIR)"
+	rm -rf .venv
 
 regenerate:
 	$(PELICAN) -r "$(INPUTDIR)" -o "$(OUTPUTDIR)" -s "$(CONFFILE)" $(PELICANOPTS)
@@ -88,8 +85,9 @@ check-scripts:
 	uvx --from='shfmt-py' shfmt -d **/*.sh
 	uvx --from='shellcheck-py' shellcheck **/*.sh
 
-init-precommit:
+init:
 	uvx --from='pre-commit' pre-commit install
+	git submodule update --init
 
 check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
@@ -98,4 +96,4 @@ mirror-redacted:
 	@./automation/mirror-redacted.sh
 
 
-.PHONY: help pelican-command html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init-precommit check-precommit mirror-redacted
+.PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init check-precommit mirror-redacted

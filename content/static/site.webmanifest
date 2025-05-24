@@ -1,0 +1,21 @@
+{
+  "name": "James Hoctor",
+  "short_name": "James H",
+  "icons": [
+    {
+      "src": "/static/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#ac4142",
+  "background_color": "#d6a9a9",
+  "display": "standalone"
+}
