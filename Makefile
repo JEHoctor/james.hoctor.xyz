@@ -89,6 +89,7 @@ check-scripts:
 init:
 	git submodule update --init
 	uvx --from='pre-commit' pre-commit install
+	(cd hyde-personalized/ && uvx --from='pre-commit' pre-commit install)
 
 check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
