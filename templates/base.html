@@ -38,6 +38,18 @@
 			<link rel="stylesheet" href="https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css">
 		{% endif %}
 
+		<!-- Favicon -->
+		{% if FAVICON_DIR %}
+			<link rel="icon" type="image/png" href="{{ SITEURL }}/{{ FAVICON_DIR }}/favicon-96x96.png" sizes="96x96" />
+			<link rel="icon" type="image/svg+xml" href="{{ SITEURL }}/{{ FAVICON_DIR }}/favicon.svg" />
+			<link rel="shortcut icon" href="{{ SITEURL }}/{{ FAVICON_DIR }}/favicon.ico" />
+			<link rel="apple-touch-icon" sizes="180x180" href="{{ SITEURL }}/{{ FAVICON_DIR }}/apple-touch-icon.png" />
+			{% if APPLE_MOBILE_WEB_APP_TITLE %}
+				<meta name="apple-mobile-web-app-title" content="{{ APPLE_MOBILE_WEB_APP_TITLE }}" />
+			{% endif %}
+			<link rel="manifest" href="{{ SITEURL }}/{{ FAVICON_DIR }}/site.webmanifest" />
+		{% endif %}
+
 		<!-- Feeds -->
 		{% include 'fragments/feeds.html' %}
 

@@ -37,6 +37,10 @@ Additional settings:
 - `FONT_AWESOME_JS` - URL to get Font Awesome as Javascript
 - `FONT_ACADEMICONS` - set to `True` to fetch the [Academicons font](https://jpswalsh.github.io/academicons/)
 
+Settings added by this fork:
+- `FAVICON_DIR` - directory where favicon files are served
+- `APPLE_MOBILE_WEB_APP_TITLE` - used to set apple-mobile-web-app-title meta tag (only if FAVICON_DIR is set)
+
 By default, the theme uses **Fork Awesome**, which is fetched from
 `cdn.jsdelivr.net`. Fork Awesome is a drop-in replacement for Font Awesome v4,
 but is not compatible with Font Awesome v5 and later, so if you want to use
@@ -57,3 +61,4 @@ Released under the [MIT license](LICENSE)
 ## Credit for content used
 
 1. I downloaded the 3D printing icon from [icon-icons.com](https://icon-icons.com/icon/printer-3d-nozzle/135279).
+2. I used sample HTML from https://realfavicongenerator.net/ to create the favicon integration.
