@@ -95,6 +95,7 @@ check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
 
 validate-html-css:
+	@if [ ! -d output ]; then echo "No output/ directory - run 'make html' or another similar target first" >&2; exit 1; fi
 	npx htmlhint output/
 	npx csslint output/
 
