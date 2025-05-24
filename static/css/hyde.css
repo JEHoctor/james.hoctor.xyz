@@ -106,14 +106,12 @@ html {
   justify-content: center;
   align-items: center;
 }
-.sidebar-social > * {
+.sidebar-social-item {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.sidebar-social-item {
   padding: .25rem 0.55rem;
   background: #fff2;
   margin: 0 .2rem;
