@@ -53,3 +53,7 @@ to modify the templates.
 ## License
 
 Released under the [MIT license](LICENSE)
+
+## Credit for content used
+
+1. I downloaded the 3D printing icon from [icon-icons.com](https://icon-icons.com/icon/printer-3d-nozzle/135279).

@@ -43,6 +43,10 @@
 					<a class="sidebar-social-item" href="{{ link }}" target="_blank">
 						<i class="ai ai-{{ name }}"></i>
 					</a>
+				{% elif name == 'thingiverse' %}
+					<a class="sidebar-social-item" href="{{ link }}" target="_blank">
+						<img class="sidebar-social-item-img" src="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/images/printer_d_nozzle_icon_135279.svg" alt="3D printer icon">
+					</a>
 				{% else %}
 					<a class="sidebar-social-item" href="{{ link }}" target="_blank">
 						<i class="fa fa-{{ name }}"></i>
