@@ -3,6 +3,9 @@
         "csslint",
         "htmlhint",
         "oneline",
-        "shellcheck"
+        "shellcheck",
+        "SITENAME",
+        "SITESUBTITLE",
+        "SITEURL"
     ]
 }
