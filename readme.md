@@ -10,6 +10,7 @@ The redacted copy will regularly receive force pushes that rewrite its history, 
 
 The site is built with [Pelican](https://getpelican.com/), a static site generator.
 The Python environment and tools are managed with [uv](https://docs.astral.sh/uv).
+The Node.js environment is managed with [fnm](https://github.com/Schniz/fnm).
 
 Before beginning development, install the pre-commit hooks and the submodule with `make init`.
 

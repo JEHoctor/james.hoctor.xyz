@@ -44,6 +44,7 @@ help:
 	@echo '   make check-scripts                  run ShellCheck+shfmt on all scripts'
 	@echo '   make init                           initialize pre-commit and submodule'
 	@echo '   make check-precommit                run pre-commit checks              '
+	@echo '   make validate-html-css              validate generated HTML and CSS    '
 	@echo '   make mirror-redacted                mirror repo without drafts         '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
@@ -92,8 +93,11 @@ init:
 check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
 
+validate-html-css:
+	npx htmlhint output/
+
 mirror-redacted:
 	@./automation/mirror-redacted.sh
 
 
-.PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init check-precommit mirror-redacted
+.PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init check-precommit validate-html-css mirror-redacted
