@@ -12,3 +12,7 @@ The site is built with [Pelican](https://getpelican.com/), a static site generat
 The Python environment and tools are managed with [uv](https://docs.astral.sh/uv).
 
 Before beginning development, install the pre-commit hooks and the submodule with `make init`.
+
+## Credit
+
+I generated the favicon package with https://realfavicongenerator.net/.
