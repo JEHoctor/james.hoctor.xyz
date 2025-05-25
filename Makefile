@@ -42,7 +42,7 @@ help:
 	@echo '   make new-post                       create an empty blog post          '
 	@echo '   make retitle-post                   rename a blog post                 '
 	@echo '   make check-scripts                  run ShellCheck+shfmt on all scripts'
-	@echo '   make init                           initialize pre-commit and submodule'
+	@echo '   make init                           initialize the repo for development'
 	@echo '   make check-precommit                run pre-commit checks              '
 	@echo '   make validate                       validate generated HTML and CSS    '
 	@echo '   make mirror-redacted                mirror repo without drafts         '
@@ -90,6 +90,7 @@ init:
 	git submodule update --init
 	uvx --from='pre-commit' pre-commit install
 	(cd hyde-personalized/ && uvx --from='pre-commit' pre-commit install)
+	npm install
 
 check-precommit:
 	uvx --from='pre-commit' pre-commit run --all-files
