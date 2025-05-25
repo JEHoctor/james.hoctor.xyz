@@ -45,6 +45,11 @@ html {
   }
 }
 
+@media (min-width: 170em) {
+  html {
+    font-size: 32px;
+  }
+}
 
 /*
  * Sidebar
