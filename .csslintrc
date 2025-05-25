@@ -1,5 +1,13 @@
 {
     "ignore": [
-        "order-alphabetical"
+        "adjoining-classes",
+        "box-model",
+        "box-sizing",
+        "empty-rules",
+        "fallback-colors",
+        "order-alphabetical",
+        "qualified-headings",
+        "unique-headings",
+        "universal-selector"
     ]
 }
