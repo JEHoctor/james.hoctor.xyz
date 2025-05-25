@@ -98,7 +98,7 @@ validate:
 	@if [ ! -d output ]; then echo "No output/ directory - run 'make html' or another similar target first" >&2; exit 1; fi
 	npx htmlhint output/
 	npx csslint output/
-	npx stylelint output/
+	npx stylelint $$(find output -name '*.css')
 	diff .csslintrc hyde-personalized/.csslintrc
 
 mirror-redacted:
