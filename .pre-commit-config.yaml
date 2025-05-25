@@ -23,3 +23,7 @@ repos:
     rev: 'ad9b0d72db73272bae05948632f13b5cada6f3ef'  # Use the sha / tag you want to point at
     hooks:
       - id: csslint
+  - repo: https://github.com/thibaudcolas/pre-commit-stylelint
+    rev: v14.4.0
+    hooks:
+      - id: stylelint
