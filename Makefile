@@ -100,6 +100,7 @@ validate:
 	npx csslint output/
 	npx stylelint $$(find output -name '*.css')
 	diff .csslintrc hyde-personalized/.csslintrc
+	diff .stylelintrc.json hyde-personalized/.stylelintrc.json
 
 mirror-redacted:
 	@./automation/mirror-redacted.sh
