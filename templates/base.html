@@ -6,9 +6,9 @@
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
 		<!-- Metadata -->
-		{% block metadata %}
-			<meta name="description" content="{{ BIO }}" />
-			<meta property="og:description" content="{{ BIO }}" />
+		{% set BIO_FOR_DESCRIPTION = BIO|striptags() %}{% block metadata %}
+			<meta name="description" content="{{ BIO_FOR_DESCRIPTION }}" />
+			<meta property="og:description" content="{{ BIO_FOR_DESCRIPTION }}" />
 			<meta property="og:title" content="{{ SITENAME }}{% if SITESUBTITLE %} - {{ SITESUBTITLE }}{% endif %}" />
 			<meta property="og:type" content="website" />
 			<meta property="og:url" content="{{ SITEURL }}" />
