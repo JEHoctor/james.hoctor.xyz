@@ -1,4 +1,4 @@
-Title: The Wallis Product and the Euler-Poisson integral
+Title: The Wallis product and the Euler-Poisson integral
 Date: 2025-04-24 11:27
 Modified: 2025-05-06 01:14
 Category: Blog
