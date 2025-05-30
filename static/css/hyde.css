@@ -134,7 +134,7 @@ html {
   border-radius: 0;
 }
 a.sidebar-social-item:hover,
-a.sidebar-social-item:focus {
+a.sidebar-social-item:focus-visible {
   background: #0001;
   text-decoration: none;
 }
@@ -143,8 +143,11 @@ a.sidebar-social-item:focus {
   background: #fff;
 }
 a.sidebar-social-item.active:hover,
-a.sidebar-social-item.active:focus {
+a.sidebar-social-item.active:focus-visible {
   color: #fff;
+}
+a.sidebar-social-item:focus:not(:focus-visible) {
+  text-decoration: none;
 }
 .sidebar-footer {
   font-size: .7rem;
