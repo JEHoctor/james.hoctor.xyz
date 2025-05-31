@@ -1,6 +1,7 @@
 Title: Announcing my new Thingiverse
 Date: 2023-02-05 23:55
 Category: Blog
+Status: published
 
 Big announcement.
 

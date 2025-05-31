@@ -1,6 +1,7 @@
 Title: I switched to Caddy
 Date: 2025-05-05 15:19
 Category: Blog
+Status: published
 
 In a [previous blog post]({filename}/i-use-uv-to-simplify-certbot-automation.md), I described how I use nginx to serve my blog, and how uv makes it easier to setup Certbot to manage TLS certificates.
 I've since switched to [Caddy](https://caddyserver.com/), which manages certificates for me.

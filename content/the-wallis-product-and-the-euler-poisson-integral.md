@@ -3,6 +3,7 @@ Date: 2025-04-24 11:27
 Modified: 2025-05-06 01:14
 Category: Blog
 Tags: Math
+Status: published
 
 Years ago I was experimenting with the Euler-Poisson integral in $n$ dimensions when I derived an infinite product for $\pi$ known as the Wallis product.
 
