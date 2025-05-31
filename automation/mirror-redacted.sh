@@ -17,9 +17,10 @@ git clone "$MIRROR_ACCESS_URL" "$tmpdir"
 # Run git-filter-repo to redact draft posts.
 uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" \
   --mailmap <(echo "$SECRET_MAILMAP") \
+  --replace-text mirror-redacted-config/replace-text.txt \
   --paths-from-file <(
     cat <<- EOF
-	regex:^(?!content/).*$
+	regex:^(?!content/|mirror-redacted-config/).*$
 
 	$(while read -r file; do
       echo "literal:$file"
