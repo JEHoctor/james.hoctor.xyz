@@ -25,7 +25,7 @@ mv "$old_filename" "$old_filename".old
 if grep -q "^Title: $new_title$" content/{*,**/*}.md; then
   set +e # Don't exit if grep (or echo) fails
   echo "Duplicate post title identified by grep:" >&2
-  grep "^Title: $new_title$" content/{*,**/*}.md >&2
+  grep --line-number --with-filename "^Title: $new_title$" content/{*,**/*}.md >&2
   set -e
   mv "$old_filename".old "$old_filename"
   exit 1

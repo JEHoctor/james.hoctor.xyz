@@ -11,7 +11,7 @@ read -erp "Title: " title
 # Check for collision with titles of existing posts and pages, which can prevent Pelican from building the site.
 if grep -q "^Title: $title$" content/{*,**/*}.md; then
   echo "Duplicate post title identified by grep:" >&2
-  grep "^Title: $title$" content/{*,**/*}.md >&2
+  grep --line-number --with-filename "^Title: $title$" content/{*,**/*}.md >&2
   exit 1
 fi
 
