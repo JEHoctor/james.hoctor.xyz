@@ -1,6 +1,7 @@
 AUTHOR = "James Hoctor"
 SITENAME = "James Hoctor"
 SITEURL = "https://james.hoctor.xyz"
+SITESUBTITLE = "machine learning engineer"
 
 PATH = "content"
 
