@@ -41,6 +41,8 @@ help:
 	@echo '   make devserver-global               regenerate and serve on 0.0.0.0    '
 	@echo '   make new-post                       create an empty blog post          '
 	@echo '   make retitle-post                   rename a blog post                 '
+	@echo '   make publish-post                   remove draft status and set date   '
+	@echo '   make modify-post                    set modified date                  '
 	@echo '   make check-scripts                  run ShellCheck+shfmt on all scripts'
 	@echo '   make init                           initialize the repo for development'
 	@echo '   make check-precommit                run pre-commit checks              '
@@ -81,6 +83,12 @@ new-post:
 retitle-post:
 	@./automation/retitle-post.sh
 
+publish-post:
+	@./automation/publish-post.sh
+
+modify-post:
+	@./automation/modify-post.sh
+
 check-scripts:
 	uvx --from='shfmt-py' shfmt -d **/*.sh
 	uvx --from='shellcheck-py' shellcheck **/*.sh
@@ -106,4 +114,4 @@ mirror-redacted:
 	@./automation/mirror-redacted.sh
 
 
-.PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post check-scripts init check-precommit validate mirror-redacted
+.PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post publish-post modify-post check-scripts init check-precommit validate mirror-redacted
