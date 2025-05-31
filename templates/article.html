@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 
 {% block metadata %}
-	<meta name="description" content="{% if article.description %}{{ article.description }}{% else %}{{ BIO_FOR_DESCRIPTION }}{% endif %}" />
-	<meta property="og:description" content="{% if article.description %}{{ article.description }}{% else %}{{ BIO_FOR_DESCRIPTION }}{% endif %}" />
-	<meta property="og:title" content="{{ article.title }}" />
+	<meta name="description" content="{% if article.description %}{{ article.description }}{% elif article.summary %}{{ article.summary|striptags|truncate(160) }}{% else %}{{ SITENAME }}: {{ BIO_FOR_DESCRIPTION }}{% endif %}" />
+	<meta property="og:description" content="{% if article.description %}{{ article.description }}{% elif article.summary %}{{ article.summary|striptags|truncate(300) }}{% else %}{{ SITENAME }}: {{ BIO_FOR_DESCRIPTION }}{% endif %}" />
+	<meta property="og:title" content="{{ article.title }} | {{ SITENAME }}" />
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content="{{ SITEURL }}/{{ article.url }}" />
     {% if article.image %}
         <meta property="og:image" content="{{ article.image }}" />
     {% endif %}
 {% endblock %}
+
+{% block title %}{{ article.title }} | {{ SITENAME }}{% endblock %}
 
 {% block content %}
 <div class="post">

@@ -7,8 +7,8 @@
 
 		<!-- Metadata -->
 		{% set BIO_FOR_DESCRIPTION = BIO|striptags() %}{% block metadata %}
-			<meta name="description" content="{{ BIO_FOR_DESCRIPTION }}" />
-			<meta property="og:description" content="{{ BIO_FOR_DESCRIPTION }}" />
+			<meta name="description" content="{{ SITENAME }}: {{ BIO_FOR_DESCRIPTION }}" />
+			<meta property="og:description" content="{{ SITENAME }}: {{ BIO_FOR_DESCRIPTION }}" />
 			<meta property="og:title" content="{{ SITENAME }}{% if SITESUBTITLE %} - {{ SITESUBTITLE }}{% endif %}" />
 			<meta property="og:type" content="website" />
 			<meta property="og:url" content="{{ SITEURL }}" />
