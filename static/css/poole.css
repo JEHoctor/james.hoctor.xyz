@@ -36,9 +36,7 @@
  */
 
 * {
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
@@ -52,7 +50,8 @@ html {
   font-size: 16px;
   line-height: 1.5;
 }
-@media (min-width: 38em) {
+
+@media (width >= 38em) {
   html {
     font-size: 20px;
   }
@@ -61,8 +60,7 @@ html {
 body {
   color: #515151;
   background-color: #fff;
-  -webkit-text-size-adjust: 100%;
-      -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* No `:visited` state is required by default (browsers will use `a`) */
@@ -70,9 +68,11 @@ a {
   color: #268bd2;
   text-decoration: none;
 }
+
 a strong {
   color: inherit;
 }
+
 /* `:focus` is linked to `:hover` for basic accessibility */
 a:hover,
 a:focus {
@@ -85,19 +85,23 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
   line-height: 1.25;
   color: #313131;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizelegibility;
 }
+
 h1 {
   font-size: 1.6rem;
 }
+
 h2 {
   margin-top: .8rem;
   font-size: 1.2rem;
 }
+
 h3 {
   margin-top: 1.2rem;
   font-size: 1rem;
 }
+
 h4, h5, h6 {
   margin-top: .8rem;
   font-size: .8rem;
@@ -123,6 +127,7 @@ ul, ol, dl {
 dt {
   font-weight: bold;
 }
+
 dd {
   margin-bottom: .5rem;
 }
@@ -142,6 +147,7 @@ abbr {
   color: #555;
   text-transform: uppercase;
 }
+
 abbr[title] {
   cursor: help;
   border-bottom: 1px dotted #e5e5e5;
@@ -152,6 +158,7 @@ code,
 pre {
   font-family: Menlo, Monaco, "Courier New", monospace;
 }
+
 code {
   padding: .25em .5em;
   font-size: 85%;
@@ -159,6 +166,7 @@ code {
   background-color: #f9f9f9;
   border-radius: 3px;
 }
+
 pre {
   display: block;
   margin-top: 0;
@@ -172,6 +180,7 @@ pre {
   word-wrap: break-word;
   background-color: #f9f9f9;
 }
+
 pre code {
   padding: 0;
   font-size: 100%;
@@ -184,6 +193,7 @@ pre code {
   margin-bottom: 1rem;
   border-radius: 4px;
 }
+
 .highlight pre {
   margin-bottom: 0;
 }
@@ -192,17 +202,21 @@ pre code {
 .gist .gist-file {
   font-family: Menlo, Monaco, "Courier New", monospace !important;
 }
+
 .gist .markdown-body {
   padding: 15px;
 }
+
 .gist pre {
   padding: 0;
   background-color: transparent;
 }
+
 .gist .gist-file .gist-data {
   font-size: .8rem !important;
   line-height: 1.4;
 }
+
 .gist code {
   padding: 0;
   color: inherit;
@@ -217,10 +231,12 @@ blockquote {
   color: #7a7a7a;
   border-left: .25rem solid #e5e5e5;
 }
+
 blockquote p:last-child {
   margin-bottom: 0;
 }
-@media (min-width: 30em) {
+
+@media (width >= 30em) {
   blockquote {
     padding-right: 5rem;
     padding-left: 1.25rem;
@@ -241,11 +257,13 @@ table {
   border: 1px solid #e5e5e5;
   border-collapse: collapse;
 }
+
 td,
 th {
   padding: .25rem .5rem;
   border: 1px solid #e5e5e5;
 }
+
 tbody tr:nth-child(odd) td,
 tbody tr:nth-child(odd) th {
   background-color: #f9f9f9;
@@ -305,14 +323,17 @@ tbody tr:nth-child(odd) th {
   padding-bottom: 1rem;
   margin-bottom: 3rem;
 }
+
 .masthead-title {
   margin-top: 0;
   margin-bottom: 0;
   color: #505050;
 }
+
 .masthead-title a {
   color: #505050;
 }
+
 .masthead-title small {
   font-size: 75%;
   font-weight: 400;
@@ -340,6 +361,7 @@ tbody tr:nth-child(odd) th {
 .post-title a {
   color: #303030;
 }
+
 .page-title,
 .post-title {
   margin-top: 0;
@@ -358,17 +380,21 @@ tbody tr:nth-child(odd) th {
   margin-bottom: 1rem;
   color: #9a9a9a;
 }
+
 .post-tags ul {
   margin: 0;
   padding: 0;
   display: inline;
 }
+
 .post-tags li {
   display: inline;
 }
+
 .post-tags li:after {
   content: ", ";
 }
+
 .post-tags li:last-child:after {
   content: "";
 }
@@ -379,21 +405,26 @@ tbody tr:nth-child(odd) th {
   padding-bottom: 2rem;
   border-top: 1px solid #eee;
 }
+
 .related-posts {
   padding-left: 0;
   list-style: none;
 }
+
 .related-posts h3 {
   margin-top: 0;
 }
+
 .related-posts li small {
   font-size: 75%;
   color: #999;
 }
+
 .related-posts li a:hover {
   color: #268bd2;
   text-decoration: none;
 }
+
 .related-posts li a:hover small {
   color: inherit;
 }
@@ -428,6 +459,7 @@ tbody tr:nth-child(odd) th {
   padding: 1rem;
   border: 1px solid #eee;
 }
+
 .pagination-item:first-child {
   margin-bottom: -1px;
 }
@@ -437,19 +469,22 @@ a.pagination-item:hover {
   background-color: #f5f5f5;
 }
 
-@media (min-width: 30em) {
+@media (width >= 30em) {
   .pagination {
     margin: 3rem 0;
   }
+
   .pagination-item {
     float: left;
     width: 50%;
   }
+
   .pagination-item:first-child {
     margin-bottom: 0;
     border-top-left-radius:    4px;
     border-bottom-left-radius: 4px;
   }
+
   .pagination-item:last-child {
     margin-left: -1px;
     border-top-right-radius:    4px;
