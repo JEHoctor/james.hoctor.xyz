@@ -110,7 +110,7 @@ h4, h5, h6 {
 /* Body text */
 p {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: .9rem;
 }
 
 strong {
@@ -170,7 +170,7 @@ code {
 pre {
   display: block;
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: .9rem;
   font-size: .8rem;
   line-height: 1.4;
   white-space: pre;
@@ -181,7 +181,6 @@ pre {
 
 pre code {
   padding: 0;
-  font-size: 100%;
   color: inherit;
 }
 
