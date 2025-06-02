@@ -39,22 +39,22 @@ We're going to restrict the file transfer user to connect with rsync in only one
 Let's create that directory.
 
 ```bash
-(umask 027 && sudo mkdir /home/transfer/files)
+sudo -u transfer sh -c "umask 027 && mkdir /home/transfer/files"
 ```
 
 The new user also needs an .ssh directory and an authorized_keys file.
 
 ```bash
-(umask 077 && sudo mkdir /home/transfer/.ssh)
-(umask 177 && sudo touch /home/transfer/.ssh/authorized_keys)
+sudo -u transfer sh -c "umask 077 && mkdir /home/transfer/.ssh"
+sudo -u transfer sh -c "umask 177 && touch /home/transfer/.ssh/authorized_keys"
 ```
 
-Everything that we've created in the new user's home folder is owned by root at this point.
+<!-- Everything that we've created in the new user's home folder is owned by root at this point.
 Let's transfer ownership to the new user.
 
 ```bash
 sudo chown -R transfer:transfer /home/transfer/{files,.ssh}
-```
+``` -->
 
 ## Step 3: Create a protected directory
 
@@ -69,7 +69,8 @@ Here I'm using the name of the new user as the directory name.
 
 ## Step 4: Create an ssh key
 
-Note that this creates a passwordless key with the `-N` flag.
+If you plan to use multiple keys with this user, for instance to have more fine-grained control over transfer permissions, then set a good comment on the new key.
+Note that this command creates a passwordless key with the `-N` flag.
 
 ```bash
 ssh-keygen -t ed25519 -f ~/transfer/transfer_id_ed25519 -C "automated file transfer key" -N ""
@@ -79,9 +80,11 @@ ssh-keygen -t ed25519 -f ~/transfer/transfer_id_ed25519 -C "automated file trans
 
 If you need to use this key to read files, then remove or change the `-wo` flag.
 You might want to look at the [man page for rrsync](https://download.samba.org/pub/rsync/rrsync.1).
+Note that this is where we restrict rsync access to the `/home/transfer/files` directory.
+If you want something else, then change it here.
 
 ```bash
-echo 'command="rrsync -wo -munge /home/transfer/files",no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-X11-forwarding ssh-ed25519 '"$(cat ~/transfer/transfer_id_ed25519.pub)" | sudo tee -a /home/transfer/.ssh/authorized_keys > /dev/null
+echo 'command="rrsync -wo -munge /home/transfer/files",no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-X11-forwarding '"$(cat ~/transfer/transfer_id_ed25519.pub)" | sudo tee -a /home/transfer/.ssh/authorized_keys > /dev/null
 ```
 
 The public key is not needed anymore.
@@ -133,7 +136,8 @@ For example, I want the user `caddy` to be in the `transfer` group, so that the 
 sudo usermod -aG transfer caddy
 ```
 
-Then you need to set the group read and execute bits on the new user's home directory, so that other users can read the files directory within.
+Then you might need to set the group read and execute bits on the new user's home directory, so that other users can read the files directory within.
+This seems to be dependent on the OS defaults for new users.
 
 ```bash
 chmod 750 /home/transfer
