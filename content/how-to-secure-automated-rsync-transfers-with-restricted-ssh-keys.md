@@ -49,13 +49,6 @@ sudo -u transfer sh -c "umask 077 && mkdir /home/transfer/.ssh"
 sudo -u transfer sh -c "umask 177 && touch /home/transfer/.ssh/authorized_keys"
 ```
 
-<!-- Everything that we've created in the new user's home folder is owned by root at this point.
-Let's transfer ownership to the new user.
-
-```bash
-sudo chown -R transfer:transfer /home/transfer/{files,.ssh}
-``` -->
-
 ## Step 3: Create a protected directory
 
 This is where we will temporarily store the files needed by the client.
