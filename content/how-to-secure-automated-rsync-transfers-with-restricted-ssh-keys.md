@@ -21,7 +21,7 @@ If you're creating a new one, pick an appropriate user name.
 I'll use `transfer` as the user name throughout these instructions.
 It's also good to add a descriptive comment for the new user.
 
-If the server runs Debian or Ubuntu, then and run the following:
+If the server runs Debian or Ubuntu, then run the following:
 
 ```bash
 sudo adduser --disabled-password --shell /usr/bin/dash --comment "for automated file transfers" transfer
