@@ -115,7 +115,7 @@ Of course, you'll want to tailor the rsync flags and parameters to your needs.
 
 # Other steps
 
-If the server runs Fedora, you will need to install rrsync.
+If the server runs Fedora, you will need to install rrsync, even if you already have rsync installed.
 
 ```bash
 sudo dnf install rsync-rrsync
