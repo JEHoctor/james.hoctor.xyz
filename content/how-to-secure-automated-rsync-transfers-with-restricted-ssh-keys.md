@@ -7,12 +7,11 @@ If you use rsync to send files between machines in any sort of automated process
 Using rsync over ssh guarantees the confidentiality and integrity of the transfer, but the ssh credentials also create a security risk: if your automation is compromised, then the ssh credentials could be used to gain access to another machine.
 You can follow these steps to limit the risk by blocking shell access over ssh, restricting what rsync can read and write, and connecting as an unprivileged user.
 
-I'll call the system that initiates the file transfer via rsync the client, and call the other system the server.
-It doesn't matter if the transfer is used to send files, receive files, or both.
-Most of the setup is performed on the server, where you will need an account with elevated privileges.
+The system that initiates the file transfer is called the client, and the other system is called the server, regardless of how the transfer is used to send or receive files.
+All of these setup steps are performed on the server, where you will need an account with elevated privileges.
 
-After completing these instructions, the new ssh key will be in a protected directory in the home of your privileged user.
-You will also need the `known_hosts` file that will be placed in the same directory, and, like any other rsync connection, the username, hostname, and file path for the transfer.
+After completing these instructions, the new ssh key will be in a protected subdirectory of the home of your privileged user on the server.
+You will also need the `known_hosts` file that will be placed in the same subdirectory, and, like any other rsync connection, the username, hostname, and file path for the transfer.
 
 ## Step 1: Create an unprivileged user
 
