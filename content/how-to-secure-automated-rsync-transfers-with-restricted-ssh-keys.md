@@ -90,7 +90,7 @@ rm ~/transfer/transfer_id_ed25519.pub
 Replace `example.com` with the hostname the client will use to reach the server.
 
 ```bash
-echo "example.com $(cat /etc/ssh/ssh_host_ed25519_key.pub)" > ~/transfer/known_hosts
+echo "example.com $(cut -d ' ' -f -2 -- /etc/ssh/ssh_host_ed25519_key.pub)" > ~/transfer/known_hosts
 ssh-keygen -Hf ~/transfer/known_hosts
 rm ~/transfer/known_hosts.old
 ```
