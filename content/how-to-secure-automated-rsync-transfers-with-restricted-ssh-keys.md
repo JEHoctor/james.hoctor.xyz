@@ -11,8 +11,8 @@ I'll call the system that initiates the file transfer via rsync the client, and 
 It doesn't matter if the transfer is used to send files, receive files, or both.
 Most of the setup is performed on the server, where you will need an account with elevated privileges.
 
-Initiating the transfer will require a private key, a `known_hosts` file, the name of the unprivileged user, the name of the server, and possibly a file path.
-It's ultimately up to you to provide this information to the client, but at the end of this setup process, all of the necessary pieces will be in a protected directory in the home directory of your privileged user on the server.
+After following these instructions, the new ssh key will be in a protected directory in the home of your privileged user.
+You will also need the `known_hosts` file that will be placed in the same directory, and, like any other rsync connection, the username, hostname, and file path for the transfer.
 
 ## Step 1: Create an unprivileged user
 
