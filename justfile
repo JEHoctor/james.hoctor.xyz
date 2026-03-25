@@ -101,3 +101,7 @@ validate:
 # mirror repo without drafts
 mirror-redacted:
     @./automation/mirror-redacted.sh
+
+# launch Jupyter Lab
+notebook:
+    uv run --group=notebook jupyter lab

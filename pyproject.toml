@@ -10,6 +10,45 @@ dependencies = [
     "pelican[markdown]>=4.11.0",
 ]
 
+[dependency-groups]
+dev = [
+    "ipython>=9.11.0",
+    "nbconvert>=7.17.0",
+    "nbdime>=4.0.4",
+    "nbqa>=1.9.1",
+    "ruff>=0.15.6",
+    "ty>=0.0.23",
+]
+notebook = [
+    "ipywidgets>=8.1.8",
+    "jupyter-ruff>=0.3.1",
+    "jupyterlab>=4.5.6",
+    "jupyterlab-lsp>=5.2.0",
+    "jupyterlab-vim>=4.1.4",
+    "pandas>=3.0.1",
+    "pandas-stubs>=3.0.0.260204",
+    "pylsp-mypy>=0.7.1",
+    "python-lsp-ruff>=2.3.0",
+    "ruff>=0.15.6",
+]
+
 [tool.ruff]
 line-length = 120
 indent-width = 4
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "E501",      # Handled by ruff format (line-too-long)
+    "D100",      # undocumented-public-module
+    "D104",      # undocumented-public-package
+    "D203",      # Conflicts with Google style D211/D212
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+strict = true
+show_error_codes = true
+warn_unused_ignores = true
