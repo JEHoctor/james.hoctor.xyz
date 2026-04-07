@@ -20,7 +20,7 @@ uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" \
   --replace-text mirror-redacted-config/replace-text.txt \
   --paths-from-file <(
     cat <<- EOF
-	regex:^(?!content/|mirror-redacted-config/).*$
+	regex:^(?!content/|mirror-redacted-config/|notebooks/).*$
 
 	$(while read -r file; do
       echo "literal:$file"
