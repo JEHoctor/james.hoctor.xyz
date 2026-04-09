@@ -100,7 +100,7 @@ validate:
 
 # mirror repo without drafts
 mirror-redacted:
-    @./automation/mirror-redacted.sh
+    uv run --group=automation automation/mirror-redacted.py
 
 # launch Jupyter Lab
 notebook:

@@ -11,6 +11,10 @@ dependencies = [
 ]
 
 [dependency-groups]
+automation = [
+    "rich>=14.3.3",
+    "typer>=0.24.1",
+]
 dev = [
     "ipython>=9.11.0",
     "nbconvert>=7.17.0",
@@ -43,6 +47,11 @@ ignore = [
     "D100",      # undocumented-public-module
     "D104",      # undocumented-public-package
     "D203",      # Conflicts with Google style D211/D212
+]
+
+[tool.ruff.lint.per-file-ignores]
+"automation/*" = [
+    "INP001",    # No need to create __init__.py files in the automation/ directory.
 ]
 
 [tool.ruff.lint.pydocstyle]
