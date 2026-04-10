@@ -75,19 +75,19 @@ modify-post:
 
 # run ShellCheck+shfmt on all scripts
 check-scripts:
-    uvx --from='shfmt-py' shfmt -d **/*.sh
-    uvx --from='shellcheck-py' shellcheck **/*.sh
+    uv run --group=dev shfmt -d **/*.sh
+    uv run --group=dev shellcheck **/*.sh
 
 # initialize the repo for development
 init:
     git submodule update --init
-    uvx --from='pre-commit' pre-commit install
-    (cd hyde-personalized/ && uvx --from='pre-commit' pre-commit install)
+    uv run --group=dev pre-commit install
+    (cd hyde-personalized/ && uv run --group=dev pre-commit install)
     npm install
 
 # run pre-commit checks
 check-precommit:
-    uvx --from='pre-commit' pre-commit run --all-files
+    uv run --group=dev pre-commit run --all-files
 
 # validate generated HTML and CSS
 validate:

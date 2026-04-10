@@ -90,17 +90,17 @@ modify-post:
 	@./automation/modify-post.sh
 
 check-scripts:
-	uvx --from='shfmt-py' shfmt -d **/*.sh
-	uvx --from='shellcheck-py' shellcheck **/*.sh
+	uv run --group=dev shfmt -d **/*.sh
+	uv run --group=dev shellcheck **/*.sh
 
 init:
 	git submodule update --init
-	uvx --from='pre-commit' pre-commit install
-	(cd hyde-personalized/ && uvx --from='pre-commit' pre-commit install)
+	uv run --group=dev pre-commit install
+	(cd hyde-personalized/ && uv run --group=dev pre-commit install)
 	npm install
 
 check-precommit:
-	uvx --from='pre-commit' pre-commit run --all-files
+	uv run --group=dev pre-commit run --all-files
 
 validate:
 	@if [ ! -d output ]; then echo "No output/ directory - run 'make html' or another similar target first" >&2; exit 1; fi

@@ -15,7 +15,7 @@ tmpdir=$(mktemp -d)
 git clone "$MIRROR_ACCESS_URL" "$tmpdir"
 
 # Run git-filter-repo to redact draft posts.
-uvx --with='git-filter-repo' git-filter-repo --source . --target "$tmpdir" \
+uv run --group=automation git-filter-repo --source . --target "$tmpdir" \
   --mailmap <(echo "$SECRET_MAILMAP") \
   --replace-text mirror-redacted-config/replace-text.txt \
   --paths-from-file <(

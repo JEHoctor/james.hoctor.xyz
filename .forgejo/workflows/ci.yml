@@ -13,10 +13,10 @@ jobs:
           prune-cache: false
       - name: run ShellCheck and shfmt
         run: |
-          uvx --from='shfmt-py' shfmt -d **/*.sh
-          uvx --from='shellcheck-py' shellcheck **/*.sh
+          uv run --group=dev shfmt -d **/*.sh
+          uv run --group=dev shellcheck **/*.sh
       - name: run pre-commit checks
-        run: SKIP="shellcheck,shfmt" uvx --from='pre-commit' pre-commit run --all-files
+        run: SKIP="shellcheck,shfmt" uv run --group=dev pre-commit run --all-files
   build:
     name: build
     needs: quality
@@ -32,7 +32,7 @@ jobs:
           enable-cache: true
           prune-cache: false
       - name: build
-        run: uv --from='rust-just' just publish
+        run: uv run --group=dev just publish
       - name: upload-artifacts
         uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
