@@ -58,6 +58,9 @@ ignore = [
 "automation/*" = [
     "INP001",    # No need to create __init__.py files in the automation/ directory.
 ]
+"{pelican,publish}conf.py" = [
+    "ERA001",    # These are conf files and sometimes config settings are commented out.
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
