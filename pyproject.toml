@@ -13,3 +13,10 @@ dependencies = [
 [tool.ruff]
 line-length = 120
 indent-width = 4
+
+[dependency-groups]
+automation = [
+    "git-filter-repo>=2.47.0",
+    "rich>=14.0.0",
+    "typer>=0.24.1",
+]
