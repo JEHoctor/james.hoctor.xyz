@@ -264,8 +264,9 @@ def mirror(
     # Run git-filter-repo to redact draft posts.
     subprocess.run(
         args=[
-            "uvx",
-            "--with=git-filter-repo",
+            "uv",
+            "run",
+            "--group=automation",
             "git-filter-repo",
             "--source",
             ".",

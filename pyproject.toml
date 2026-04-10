@@ -12,6 +12,7 @@ dependencies = [
 
 [dependency-groups]
 automation = [
+    "git-filter-repo>=2.47.0",
     "rich>=14.3.3",
     "typer>=0.24.1",
 ]
@@ -20,7 +21,11 @@ dev = [
     "nbconvert>=7.17.0",
     "nbdime>=4.0.4",
     "nbqa>=1.9.1",
+    "pre-commit>=4.5.1",
     "ruff>=0.15.6",
+    "rust-just>=1.49.0",
+    "shellcheck-py>=0.11.0.1",
+    "shfmt-py>=3.12.0.2",
     "ty>=0.0.23",
 ]
 notebook = [
