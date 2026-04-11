@@ -13,49 +13,49 @@ SERVER       := "0.0.0.0"
 PORT         := "0"
 
 # List available recipes
-default:
-    @just --list
+_default:
+    @just --list --unsorted --list-heading=$'Justfile for a Pelican web site\n\nAvailable recipes:\n'
 
 # Internal helper to build options string
-pelican_opts:
+_pelican_opts debug relative port:
     #!/usr/bin/env bash
     opts=""
-    [ "{{DEBUG}}" == "1" ] && opts="$opts -D"
-    [ "{{RELATIVE}}" == "1" ] && opts="$opts --relative-urls"
-    [ "{{PORT}}" != "0" ] && opts="$opts -p {{PORT}}"
+    [ "{{debug}}" == "1" ] && opts="$opts -D"
+    [ "{{relative}}" == "1" ] && opts="$opts --relative-urls"
+    [ "{{port}}" != "0" ] && opts="$opts -p {{port}}"
     echo -n "$opts"
 
 # (re)generate the web site
-html:
-    {{PELICAN}} "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just pelican_opts)
+html debug=DEBUG relative=RELATIVE:
+    {{PELICAN}} "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just _pelican_opts {{debug}} {{relative}} {{PORT}})
 
 # remove the generated files
 clean:
     [ ! -d "{{OUTPUTDIR}}" ] || rm -rf "{{OUTPUTDIR}}"
 
 # regenerate files upon modification
-regenerate:
-    {{PELICAN}} -r "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just pelican_opts)
+regenerate debug=DEBUG relative=RELATIVE:
+    {{PELICAN}} -r "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just _pelican_opts {{debug}} {{relative}} {{PORT}})
 
 # generate using production settings
-publish:
-    {{PELICAN}} "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{PUBLISHCONF}}" $(just pelican_opts)
+publish debug=DEBUG:
+    {{PELICAN}} "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{PUBLISHCONF}}" $(just _pelican_opts {{debug}} {{RELATIVE}} {{PORT}})
 
-# serve site locally
-serve port="8000":
-    {{PELICAN}} -l "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just pelican_opts) -p {{port}}
+# serve site at http://localhost:8000
+serve debug=DEBUG relative=RELATIVE port=PORT:
+    {{PELICAN}} -l "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just _pelican_opts {{debug}} {{relative}} {{port}})
 
-# serve (as root) to a specific server
-serve-global server=SERVER:
-    {{PELICAN}} -l "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just pelican_opts) -b {{server}}
+# serve (as root) to a 0.0.0.0:80
+serve-global debug=DEBUG relative=RELATIVE port=PORT server=SERVER:
+    {{PELICAN}} -l "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just _pelican_opts {{debug}} {{relative}} {{port}}) -b {{server}}
 
 # serve and regenerate together
-devserver port="8000":
-    {{PELICAN}} -lr "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just pelican_opts) -p {{port}}
+devserver debug=DEBUG relative=RELATIVE port=PORT:
+    {{PELICAN}} -lr "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just _pelican_opts {{debug}} {{relative}} {{port}})
 
 # regenerate and serve on 0.0.0.0
-devserver-global:
-    {{PELICAN}} -lr "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just pelican_opts) -b 0.0.0.0
+devserver-global debug=DEBUG relative=RELATIVE port=PORT:
+    {{PELICAN}} -lr "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just _pelican_opts {{debug}} {{relative}} {{port}}) -b 0.0.0.0
 
 # create an empty blog post
 new-post:
@@ -91,7 +91,7 @@ check-precommit:
 
 # validate generated HTML and CSS
 validate:
-    @if [ ! -d output ]; then echo "No output/ directory - run 'just html' first" >&2; exit 1; fi
+    @if [ ! -d output ]; then echo "No output/ directory - run 'just html' or another similar recipe first" >&2; exit 1; fi
     npx htmlhint output/
     npx csslint output/
     npx stylelint $(find output -name '*.css')
