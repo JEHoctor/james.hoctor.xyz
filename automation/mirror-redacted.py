@@ -80,6 +80,34 @@ def non_draft_content_files() -> list[Path]:
     return result
 
 
+def associated_notebooks(content_path: Path) -> list[Path]:
+    """Return all Jupyter notebooks listed in the metadata of a Pelican Markdown file."""
+    with content_path.open() as f:
+        for line in f:
+            stripped = line.strip()
+            if not stripped:
+                break  # End of Pelican metadata block
+            if stripped.lower().startswith("notebooks:"):
+                notebooks = stripped.split(":", maxsplit=1)[1].strip()
+                return [Path(notebooks) / f"{n.strip()}.ipynb" for n in notebooks.split(",")]
+    return []
+
+
+def notebooks_to_include(included_content: list[Path]) -> list[Path]:
+    """Return all Jupyter notebooks that should be mirrored."""
+    result = []
+    for content_path in included_content:
+        result.extend(associated_notebooks(content_path))
+    return list(set(result))
+
+
+def extra_paths_to_include() -> list[Path]:
+    """Return paths under content/ or notebooks/ that should be mirrored."""
+    non_draft_content = non_draft_content_files()
+    notebooks = notebooks_to_include(non_draft_content)
+    return non_draft_content + notebooks
+
+
 def find_unmerged_draft_branches(source_dir: str, target_dir: str) -> list[str]:
     """Find branches that are merged into main in the target repository, but not in the source repository.
 
@@ -256,8 +284,8 @@ def mirror(
     mailmap_path = Path(config_dir) / "mailmap.txt"
     mailmap_path.write_text(secret_mailmap)
 
-    paths_lines = ["regex:^(?!content/|mirror-redacted-config/).*$", ""]
-    paths_lines.extend(f"literal:{f}" for f in non_draft_content_files())
+    paths_lines = ["regex:^(?!content/|mirror-redacted-config/|notebooks/).*$", ""]
+    paths_lines.extend(f"literal:{f}" for f in extra_paths_to_include())
     paths_path = Path(config_dir) / "paths.txt"
     paths_path.write_text("\n".join(paths_lines))
 
