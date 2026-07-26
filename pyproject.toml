@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "pelican-render-math>=1.0.4",
     "pelican-seo>=1.4.0",
+    "pelican-sitemap>=1.2.2",
     "pelican[markdown]>=4.11.0",
 ]
 

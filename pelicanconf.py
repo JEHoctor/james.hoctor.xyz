@@ -21,7 +21,10 @@ FAVICON_DIR = "static"
 APPLE_MOBILE_WEB_APP_TITLE = "James H"
 
 # Tell Pelican that content/static/ should be copied to the output. The default is just content/images/.
-STATIC_PATHS = ["images", "static"]
+# extra/robots.txt is placed at the output root (below) to override the one pelican-seo generates, since
+# pelican-seo can only add per-document rules and we need a blanket "Disallow: /drafts/".
+STATIC_PATHS = ["images", "static", "extra/robots.txt"]
+EXTRA_PATH_METADATA = {"extra/robots.txt": {"path": "robots.txt"}}
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
@@ -59,3 +62,10 @@ SEO_ENHANCER_TWITTER_CARDS = True
 # Uncomment below to set limits on page analysis by the SEO plugin.
 # SEO_ARTICLES_LIMIT = 10
 # SEO_PAGES_LIMIT = 10
+
+# Sitemap plugin configuration. Drafts are excluded automatically (they aren't "published"),
+# but /drafts/ is excluded explicitly too, to match the Disallow rule in content/extra/robots.txt.
+SITEMAP = {
+    "format": "xml",
+    "exclude": ["^/drafts/"],
+}
