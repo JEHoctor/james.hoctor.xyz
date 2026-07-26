@@ -114,6 +114,7 @@ dependencies = [
     { name = "pelican", extra = ["markdown"] },
     { name = "pelican-render-math" },
     { name = "pelican-seo" },
+    { name = "pelican-sitemap" },
 ]
 
 [package.dev-dependencies]
@@ -128,6 +129,7 @@ requires-dist = [
     { name = "pelican", extras = ["markdown"], specifier = ">=4.11.0" },
     { name = "pelican-render-math", specifier = ">=1.0.4" },
     { name = "pelican-seo", specifier = ">=1.4.0" },
+    { name = "pelican-sitemap", specifier = ">=1.2.2" },
 ]
 
 [package.metadata.requires-dev]
@@ -266,6 +268,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/12/d5/a06835ee4b4069c7ca985599cd4ee813f6bfa44651f13bab3fe6fcd50b88/pelican_seo-1.4.0.tar.gz", hash = "sha256:a4d8b12fd9a333e6a32d93afd17ff80b90f3ef32e65e49425aab01e8bc7fce74", size = 27747, upload-time = "2025-04-25T11:21:39.152Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e7/9c/73ad808165ecd8935206f358ca8c20e94b73d2dd3045abfb7f2db04412a3/pelican_seo-1.4.0-py3-none-any.whl", hash = "sha256:c0c69e83f5e4eacbe9d2128d0884f79432bd537e0928066f5e08d312d358d319", size = 36353, upload-time = "2025-04-25T11:21:37.784Z" },
+]
+
+[[package]]
+name = "pelican-sitemap"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pelican" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5c/c1/d9e1d539decfba947d711bcb37427ad15914557a728418bd928d56e58a32/pelican_sitemap-1.2.2.tar.gz", hash = "sha256:93f72d035dd0ec2f5cee38b2766bbd7f6a54bf186635ae1261a6deac422dcfb7", size = 8013, upload-time = "2025-10-12T15:24:36.727Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/68/c2/d2f98364b49a40bac9f315f29d8c22322b47bc4ebdec6a8e3a4f657ebc24/pelican_sitemap-1.2.2-py3-none-any.whl", hash = "sha256:09ba150dd1b54ef855f18e7ec920160d7118e932e0dac1c6e8bf3a41e938e682", size = 8046, upload-time = "2025-10-12T15:24:35.678Z" },
 ]
 
 [[package]]
