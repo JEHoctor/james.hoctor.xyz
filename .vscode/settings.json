@@ -6,6 +6,7 @@
         "csslint",
         "DISQUS",
         "htmlhint",
+        "ipynb",
         "oneline",
         "pelicanconf",
         "rrsync",

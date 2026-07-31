@@ -111,7 +111,7 @@ validate:
 	diff .stylelintrc.json hyde-personalized/.stylelintrc.json
 
 mirror-redacted:
-	@./automation/mirror-redacted.sh
+	@uv run --group=automation automation/mirror-redacted.py
 
 
 .PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post publish-post modify-post check-scripts init check-precommit validate mirror-redacted
