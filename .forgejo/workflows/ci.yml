@@ -3,6 +3,11 @@ jobs:
   quality:
     name: code-quality
     runs-on: docker
+    # The runner defaults to a Debian bullseye image, whose git is 2.30. pre-commit shells out to
+    # "git ls-files --deduplicate", an option added in git 2.31, so --all-files cannot work there.
+    # Bookworm ships git 2.39. Pulled from the registry the runner already uses by default.
+    container:
+      image: data.forgejo.org/oci/node:20-bookworm
     steps:
       - name: checkout
         uses: https://code.forgejo.org/actions/checkout@v4
