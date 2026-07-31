@@ -242,6 +242,10 @@ def remove_branches(target_dir: str, branches: list[str]) -> None:
     The branches must be provided as remote branch names (e.g. 'origin/my-branch'), but both the remote
     and the local branch will be removed for each.
 
+    A local branch exists only once it has been checked out, which at this point most have not been.
+    Deleting one unconditionally therefore writes "error: branch not found" to the log for nearly
+    every branch removed, so its existence is checked first and a real failure is not ignored.
+
     Args:
         target_dir (str): Path to the cloned target repository.
         branches (list[str]): Remote branch names (e.g. 'origin/my-branch') to remove.
@@ -250,7 +254,12 @@ def remove_branches(target_dir: str, branches: list[str]) -> None:
         console.print(f"Removing draft branch: {branch}")
         subprocess.run(args=["git", "-C", target_dir, "branch", "-rD", branch], check=True)
         local_branch = branch.removeprefix("origin/")
-        subprocess.run(args=["git", "-C", target_dir, "branch", "-D", local_branch], check=False)
+        local_exists = subprocess.run(
+            args=["git", "-C", target_dir, "show-ref", "--verify", "--quiet", f"refs/heads/{local_branch}"],
+            check=False,
+        )
+        if local_exists.returncode == 0:
+            subprocess.run(args=["git", "-C", target_dir, "branch", "-D", local_branch], check=True)
 
 
 def ref_map(target_dir: str, namespace: str) -> dict[str, str]:
