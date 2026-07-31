@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import subprocess
 import tempfile
@@ -24,6 +25,11 @@ err_console = Console(stderr=True, style="bold red")
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = REPO_ROOT / "content"
 NOTEBOOKS_DIR = REPO_ROOT / "notebooks"
+REPLACE_TEXT_PATH = REPO_ROOT / "mirror-redacted-config" / "replace-text.txt"
+
+# Everything under these directories is withheld from the mirror unless it is named explicitly, so
+# that a new draft is private by default. Both the filter and the verification below work from this.
+FILTERED_PREFIXES = ("content/", "mirror-redacted-config/", "notebooks/")
 
 
 def flatten_arg_groups(arg_groups: Sequence[Sequence[str]]) -> list[str]:
@@ -247,6 +253,216 @@ def remove_branches(target_dir: str, branches: list[str]) -> None:
         subprocess.run(args=["git", "-C", target_dir, "branch", "-D", local_branch], check=False)
 
 
+def ref_map(target_dir: str, namespace: str) -> dict[str, str]:
+    """Return a mapping of branch name to commit hash for every ref under a namespace.
+
+    Args:
+        target_dir (str): Path to the cloned target repository.
+        namespace (str): Ref namespace to list, e.g. 'refs/heads' or 'refs/remotes/origin'.
+
+    Returns:
+        dict[str, str]: Branch name (without the namespace prefix) to commit hash.
+    """
+    output = subprocess.run(
+        args=["git", "-C", target_dir, "for-each-ref", "--format=%(refname) %(objectname)", namespace],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.splitlines()
+    result = {}
+    for line in output:
+        refname, _, commit = line.strip().partition(" ")
+        name = refname.removeprefix(f"{namespace}/")
+        # Skip the symbolic HEAD entry, which records the default branch rather than being one. Its
+        # abbreviated form is "origin" rather than "origin/HEAD", so match on the full ref name.
+        if not name or name == "HEAD":
+            continue
+        result[name] = commit
+    return result
+
+
+def redaction_search_terms() -> list[str]:
+    """Return the literal strings that git-filter-repo is configured to replace.
+
+    Lines using a regex: prefix are skipped, because they cannot be searched for literally.
+
+    Returns:
+        list[str]: Literal strings that must not survive filtering.
+    """
+    terms = []
+    for raw_line in REPLACE_TEXT_PATH.read_text().splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        search = line.split("==>", maxsplit=1)[0]
+        if search.startswith("regex:"):
+            console.print(f"Not verifying regex replacement rule: {search}")
+            continue
+        terms.append(search.removeprefix("literal:"))
+    return terms
+
+
+def mailmap_replaced_emails(secret_mailmap: str) -> list[str]:
+    """Return the commit email addresses that the mailmap rewrites away.
+
+    A mailmap line carries the replacement address first and the address being replaced last, so
+    only lines with more than one address contribute an address that must disappear.
+
+    Args:
+        secret_mailmap (str): Contents of the mailmap.
+
+    Returns:
+        list[str]: Email addresses that must not survive filtering.
+    """
+    result = []
+    for raw_line in secret_mailmap.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        addresses = re.findall(r"<([^>]*)>", line)
+        if len(addresses) > 1:
+            result.append(addresses[-1])
+    return result
+
+
+def plan_published_paths() -> set[str]:
+    """Decide which withheld files may be published, reporting the decision as it is made.
+
+    This is the choice that determines what becomes public, so it is reported in full rather than
+    only counted.
+
+    Returns:
+        set[str]: Repository-relative paths under a filtered prefix that may be published.
+    """
+    extra_paths = extra_paths_to_include()
+    included_markdown = {f for f in extra_paths if f.suffix == ".md"}
+    included_notebooks = sorted(f for f in extra_paths if f.suffix == ".ipynb")
+    excluded_drafts = sorted(f for f in CONTENT_DIR.rglob("*.md") if f.is_file() and f not in included_markdown)
+
+    console.print(f"Including {len(included_markdown)} published post(s).")
+    for notebook in included_notebooks:
+        console.print(f"Including notebook: {notebook.relative_to(REPO_ROOT)}")
+    console.print(f"Excluding {len(excluded_drafts)} draft post(s):")
+    for draft in excluded_drafts:
+        console.print(f"  {draft.relative_to(REPO_ROOT)}")
+
+    return {str(f.relative_to(REPO_ROOT)) for f in extra_paths}
+
+
+def checkout_all_branches(target_dir: str) -> None:
+    """Check out every remaining branch so that a mirror push publishes all of them.
+
+    Args:
+        target_dir (str): Path to the cloned target repository.
+    """
+    remaining = subprocess.run(
+        args=["git", "-C", target_dir, "branch", "-r", "--list", "origin/*"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.splitlines()
+    remaining = [b.strip() for b in remaining if b.strip()]
+    remaining = [b for b in remaining if not b.startswith("origin/HEAD")]  # Remove line: "origin/HEAD -> origin/main"
+    for branch in remaining:
+        local_branch = branch.removeprefix("origin/")
+        console.print(f"Checking out branch: {branch}")
+        subprocess.run(args=["git", "-C", target_dir, "checkout", local_branch], check=True)
+
+
+def verify_redaction(target_dir: str, secret_mailmap: str, allowed_paths: set[str]) -> None:
+    """Check the filtered clone and abort if anything that should have been redacted survived.
+
+    This inspects the actual result of filtering rather than trusting its inputs, because the
+    consequence of a mistake is publishing unpublished writing or personal addresses.
+
+    Every ref is checked, not just main, because a branch tip can carry a file that main does not.
+    Note that a published post legitimately brings its own history with it, including the revisions
+    in which it was still a draft, so the check is on paths rather than on post metadata.
+
+    Args:
+        target_dir (str): Path to the cloned target repository.
+        secret_mailmap (str): Contents of the mailmap, used to know which addresses to look for.
+        allowed_paths (set[str]): Repository-relative paths that may appear under a filtered prefix.
+
+    Raises:
+        typer.Exit: If withheld files, redacted strings, or pre-mailmap addresses survived.
+    """
+    console.print("Verifying the filtered result before pushing.")
+    refs = sorted(ref_map(target_dir, "refs/heads"))
+    problems = []
+
+    for ref in refs:
+        tracked = subprocess.run(
+            args=["git", "-C", target_dir, "ls-tree", "-r", "--name-only", ref],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.splitlines()
+        problems.extend(
+            f"withheld file {path} survived on branch {ref}"
+            for path in tracked
+            if path.startswith(FILTERED_PREFIXES) and path not in allowed_paths
+        )
+
+    for term in redaction_search_terms():
+        for ref in refs:
+            hits = subprocess.run(
+                args=["git", "-C", target_dir, "grep", "-l", "-I", "-F", "-e", term, ref],
+                capture_output=True,
+                text=True,
+                check=False,
+            ).stdout.splitlines()
+            problems.extend(f"redacted text survived in {h}" for h in hits)
+
+    surviving_addresses = set(
+        subprocess.run(
+            args=["git", "-C", target_dir, "log", "--all", "--format=%ae%n%ce"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.split(),
+    )
+    problems.extend(
+        f"pre-mailmap address {address} survived in the commit history"
+        for address in mailmap_replaced_emails(secret_mailmap)
+        if address in surviving_addresses
+    )
+
+    if problems:
+        err_console.print("Refusing to push. The filtered repository still contains:")
+        for problem in problems:
+            err_console.print(f"  {problem}")
+        raise typer.Exit(1)
+    console.print(f"Verified {len(refs)} branch(es): no withheld files, redacted text, or old addresses.")
+
+
+def report_changes(before: dict[str, str], after: dict[str, str]) -> None:
+    """Print a high level summary of how the mirror will differ from its current state.
+
+    git-filter-repo rewrites deterministically, so a branch whose commit hash is unchanged really
+    did not change, and the summary is a description of this run's effect rather than of its inputs.
+
+    Args:
+        before (dict[str, str]): Branch to commit hash as currently published on the mirror.
+        after (dict[str, str]): Branch to commit hash about to be pushed.
+    """
+    added = sorted(set(after) - set(before))
+    removed = sorted(set(before) - set(after))
+    updated = sorted(b for b in set(before) & set(after) if before[b] != after[b])
+    unchanged = len(set(before) & set(after)) - len(updated)
+
+    console.print("\nSummary of changes to the mirror:")
+    for branch in added:
+        console.print(f"  added    {branch}")
+    for branch in removed:
+        console.print(f"  removed  {branch}")
+    for branch in updated:
+        console.print(f"  updated  {branch}  {before[branch][:8]} -> {after[branch][:8]}")
+    console.print(f"  {unchanged} branch(es) unchanged, {len(after)} branch(es) will be published in total.")
+    if not (added or removed or updated):
+        console.print("  The mirror is already up to date; the push is a no-op.")
+
+
 def mirror(
     *,
     dry_run: Annotated[bool, typer.Option(help="Print the final push command instead of running it")] = False,
@@ -291,15 +507,19 @@ def mirror(
     console.print(f"Clone directory: {target_dir}")
     console.print(f"Config directory: {config_dir}")
 
-    # Clone the target repository.
+    # Clone the target repository. The URL carries an access token, so it is never printed.
+    console.print("Cloning the current state of the mirror.")
     subprocess.run(args=["git", "clone", mirror_access_url, target_dir], check=True)
+    published_before = ref_map(target_dir, "refs/remotes/origin")
+    console.print(f"The mirror currently publishes {len(published_before)} branch(es).")
 
     # Write filter-repo config files to the config temp dir.
     mailmap_path = Path(config_dir) / "mailmap.txt"
     mailmap_path.write_text(secret_mailmap)
 
-    paths_lines = ["regex:^(?!content/|mirror-redacted-config/|notebooks/).*$", ""]
-    paths_lines.extend(f"literal:{f.relative_to(REPO_ROOT)}" for f in extra_paths_to_include())
+    allowed_paths = plan_published_paths()
+    paths_lines = [f"regex:^(?!{'|'.join(FILTERED_PREFIXES)}).*$", ""]
+    paths_lines.extend(f"literal:{path}" for path in sorted(allowed_paths))
     paths_path = Path(config_dir) / "paths.txt"
     paths_path.write_text("\n".join(paths_lines))
 
@@ -333,19 +553,11 @@ def mirror(
     remove_branches(target_dir, find_unmerged_draft_branches(source_dir, target_dir))
     remove_branches(target_dir, find_merged_draft_branches(source_dir, target_dir))
 
-    # Checkout all remaining branches.
-    remaining = subprocess.run(
-        args=["git", "-C", target_dir, "branch", "-r", "--list", "origin/*"],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout.splitlines()
-    remaining = [b.strip() for b in remaining if b.strip()]
-    remaining = [b for b in remaining if not b.startswith("origin/HEAD")]  # Remove line: "origin/HEAD -> origin/main"
-    for branch in remaining:
-        local_branch = branch.removeprefix("origin/")
-        console.print(f"Checking out branch: {branch}")
-        subprocess.run(args=["git", "-C", target_dir, "checkout", local_branch], check=True)
+    checkout_all_branches(target_dir)
+
+    # Refuse to publish anything that should have been redacted. This runs before the push so that
+    # a bad filter result fails the job instead of reaching the mirror.
+    verify_redaction(target_dir, secret_mailmap, allowed_paths)
 
     # Push the changes to the target repository.
     push_arg_groups: list[list[str]] = [["git", "-C", target_dir, "push", "--force", "--mirror", "--prune", "origin"]]
@@ -353,6 +565,8 @@ def mirror(
         print_for_dry_run(arg_groups=push_arg_groups)
     else:
         subprocess.run(args=flatten_arg_groups(push_arg_groups), check=True)
+
+    report_changes(published_before, ref_map(target_dir, "refs/heads"))
 
 
 def main() -> None:
