@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script should only be run via make to ensure correct paths!
+# This script should only be run via just to ensure correct paths!
 
 # Not using -x because this script interacts with the user.
 set -euo pipefail
