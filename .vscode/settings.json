@@ -1,4 +1,8 @@
 {
+    // Don't copy the host ~/.gitconfig (and any configured credential
+    // helper) into the dev container — keeps host git credentials out
+    // of the isolated environment used for AI agent yolo mode.
+    "dev.containers.copyGitConfig": false,
     "cSpell.words": [
         "ACADEMICONS",
         "Blogroll",
