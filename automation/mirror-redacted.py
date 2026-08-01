@@ -32,7 +32,10 @@ REPLACE_TEXT_PATH = REPO_ROOT / "mirror-redacted-config" / "replace-text.txt"
 
 # Everything under these directories is withheld from the mirror unless it is named explicitly, so
 # that a new draft is private by default. Both the filter and the verification below work from this.
-FILTERED_PREFIXES = ("content/", "mirror-redacted-config/", "notebooks/")
+# Nothing under private/ is ever named explicitly, so that directory is withheld in full: it holds
+# notes that discuss unpublished writing, which must not reach the mirror even though the notes
+# themselves are not posts.
+FILTERED_PREFIXES = ("content/", "mirror-redacted-config/", "notebooks/", "private/")
 
 # Most of this job's output comes from git and git-filter-repo. Prefixing our own lines makes it
 # obvious which are which, and makes the whole narration greppable. Colour is not used, because the
