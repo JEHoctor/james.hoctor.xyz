@@ -12,7 +12,7 @@ The site is built with [Pelican](https://getpelican.com/), a static site generat
 The Python environment and tools are managed with [uv](https://docs.astral.sh/uv).
 The Node.js environment is managed with [fnm](https://github.com/Schniz/fnm).
 
-Before beginning development, install the pre-commit hooks and the submodule with `make init`.
+Before beginning development, install the pre-commit hooks and the submodule with `just init`.
 
 ## Credit
 
