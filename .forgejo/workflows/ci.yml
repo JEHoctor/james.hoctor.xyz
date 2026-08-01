@@ -3,6 +3,11 @@ jobs:
   quality:
     name: code-quality
     runs-on: docker
+    # The runner defaults to a Debian bullseye image, whose git is 2.30. pre-commit shells out to
+    # "git ls-files --deduplicate", an option added in git 2.31, so --all-files cannot work there.
+    # Bookworm ships git 2.39. Pulled from the registry the runner already uses by default.
+    container:
+      image: data.forgejo.org/oci/node:20-bookworm
     steps:
       - name: checkout
         uses: https://code.forgejo.org/actions/checkout@v4
@@ -12,9 +17,11 @@ jobs:
           enable-cache: true
           prune-cache: false
       - name: run ShellCheck and shfmt
-        run: make check-scripts
+        run: |
+          uv run --group=dev shfmt -d **/*.sh
+          uv run --group=dev shellcheck **/*.sh
       - name: run pre-commit checks
-        run: SKIP="shellcheck,shfmt" make check-precommit
+        run: SKIP="shellcheck,shfmt" uv run --group=dev pre-commit run --all-files
   build:
     name: build
     needs: quality
@@ -30,7 +37,7 @@ jobs:
           enable-cache: true
           prune-cache: false
       - name: build
-        run: make publish
+        run: uv run --group=dev just publish
       - name: upload-artifacts
         uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
@@ -76,7 +83,9 @@ jobs:
           enable-cache: true
           prune-cache: false
       - name: mirror-redacted
-        run: make mirror-redacted
+        # Invoked directly rather than through just, because this job checks out main and main will
+        # not have a justfile until this branch is merged.
+        run: uv run --group=automation ./automation/mirror-redacted.py
         env:
           MIRROR_ACCESS_URL: ${{ secrets.MIRROR_ACCESS_URL }}
           SECRET_MAILMAP: ${{ secrets.SECRET_MAILMAP }}
