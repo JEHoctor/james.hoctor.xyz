@@ -110,11 +110,8 @@ validate:
 	diff .csslintrc hyde-personalized/.csslintrc
 	diff .stylelintrc.json hyde-personalized/.stylelintrc.json
 
-# TEMPORARY: --dry-run does everything except the push, so that the first run of the Python
-# implementation can be read from the job log before it is allowed to publish. Remove the flag once
-# that log has been reviewed.
 mirror-redacted:
-	@uv run --group=automation automation/mirror-redacted.py --dry-run
+	@uv run --group=automation automation/mirror-redacted.py
 
 
 .PHONY: help html clean regenerate publish serve serve-global devserver devserver-global new-post retitle-post publish-post modify-post check-scripts init check-precommit validate mirror-redacted
