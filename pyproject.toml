@@ -49,10 +49,15 @@ notebook = [
 line-length = 120
 indent-width = 4
 
+# A git worktree lives here. It is a separate checkout rather than part of this source tree, so
+# linting it reports problems that belong to whatever is being worked on there.
+extend-exclude = [".claude"]
+
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
     "E501",      # Handled by ruff format (line-too-long)
+    "CPY001",    # This is a personal blog; it does not want copyright headers.
     "D100",      # undocumented-public-module
     "D104",      # undocumented-public-package
     "D203",      # Conflicts with Google style D211/D212
