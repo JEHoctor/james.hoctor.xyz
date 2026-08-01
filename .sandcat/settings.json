@@ -1,0 +1,12 @@
+{
+  "env": {
+    "UV_SYSTEM_CERTS": "1"
+  },
+  "network": [
+    {
+      "action": "allow",
+      "host": "*",
+      "method": "GET"
+    }
+  ]
+}

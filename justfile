@@ -12,6 +12,27 @@ RELATIVE     := "0"
 SERVER       := "0.0.0.0"
 PORT         := "0"
 
+# AI agent sandbox (sandcat: https://github.com/VirtusLab/sandcat) -- a
+# network-isolated, credential-scrubbed container for running coding agents in
+# autonomous mode.
+#
+# Host requirements:
+#   * the sandcat CLI on PATH. It has no tagged releases (rolling main); these
+#     recipes were tested against commit 53089985b506f5cb82886eb4e08b6ce6fc2fb8c8.
+#   * Mike Farah's Go yq (https://github.com/mikefarah/yq), which sandcat uses
+#     to edit compose files. The unrelated Python yq (kislyuk/yq) will not work,
+#     and is what `apt install yq` gives you on Debian/Ubuntu.
+#
+# Assumes a conventional rootful Docker daemon. Rootless Docker is not
+# supported: it remaps container UIDs, which leaves the bind-mounted workspace
+# read-only inside the sandbox, and sandcat has no handling for it.
+#
+# Commands go through sudo so this works whether or not the invoking user is in
+# the docker group. PATH and HOME are passed through because sudo's secure_path
+# hides sandcat and yq, and a reset HOME points sandcat at the wrong settings.
+SANDBOX_NAME := "james-hoctor-xyz"
+SANDCAT      := 'sudo env "PATH=$PATH" "HOME=$HOME" "DOCKER_HOST=unix:///var/run/docker.sock"'
+
 # List available recipes
 _default:
     @just --list --unsorted --list-heading=$'Justfile for a Pelican web site\n\nAvailable recipes:\n'
@@ -105,3 +126,45 @@ mirror-redacted:
 # launch Jupyter Lab
 notebook:
     uv run --group=notebook jupyter lab
+
+# open a shell in the network-isolated AI agent sandbox
+sandbox:
+    {{SANDCAT}} sandcat run
+
+# rebuild the sandbox image, then open a shell in it
+sandbox-build:
+    {{SANDCAT}} sandcat run --build
+
+# open an extra shell in an already-running sandbox
+sandbox-attach:
+    {{SANDCAT}} sandcat attach
+
+# stop the sandbox
+sandbox-down:
+    {{SANDCAT}} sandcat compose down
+
+# show the mitmproxy UI for inspecting sandbox traffic
+sandbox-proxy:
+    {{SANDCAT}} sandcat proxy
+
+# (re)generate the sandbox config, re-applying our hardening patch
+sandbox-init:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    sandcat init --agent claude --ide vscode --stacks "python" --name {{SANDBOX_NAME}} --features no-shared-cache
+    # sandcat regenerates .devcontainer/ on every init and only devbox.tools.json
+    # is tracked, so the hardening has to be re-applied each time. See the
+    # SANDCAT comment block above for why this matters.
+    if grep -q 'sandcat hardening' .devcontainer/Dockerfile.app; then
+        echo "hardening already present"
+    else
+        printf '\n%s\n%s\n%s\n%s\n%s\n' \
+            '# --- sandcat hardening (re-applied by `just sandbox-init`) ---' \
+            '# The devcontainers base image grants vscode passwordless sudo, and' \
+            '# under a rootful daemon container root IS host root. Drop both the' \
+            '# sudoers grant and the setuid bit so the agent cannot escalate.' \
+            'USER root' \
+            'RUN rm -f /etc/sudoers.d/vscode && chmod u-s /usr/bin/sudo' \
+            >> .devcontainer/Dockerfile.app
+        echo "hardening appended to .devcontainer/Dockerfile.app"
+    fi
