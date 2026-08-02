@@ -93,9 +93,7 @@ check-precommit:
 validate:
     @if [ ! -d output ]; then echo "No output/ directory - run 'just html' or another similar recipe first" >&2; exit 1; fi
     npx htmlhint output/
-    npx csslint output/
     npx stylelint $(find output -name '*.css')
-    diff .csslintrc hyde-personalized/.csslintrc
     diff .stylelintrc.json hyde-personalized/.stylelintrc.json
 
 # mirror repo without drafts
