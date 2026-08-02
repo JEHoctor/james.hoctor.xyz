@@ -154,10 +154,15 @@ reports every branch as updated, something is wrong.
 
 ## Conventions
 
-- Commit messages: a short subject, then prose explaining *why*. Wrap around 88 characters. No
+- Agent PRs should identify themselves as such at the top, unless the PR is created with a
+  designated agent user who can be identified as an agent by their username. We don't have that
+  yet, so be explicit.
+- Commit messages: a short subject, then prose explaining *why*. Wrap around 88 characters. Avoid
   bullet-point summaries of the diff.
 - End commits made by an agent with a `Co-Authored-By:` trailer.
-- Direct commits to `main` are allowed and normal for small content changes. Anything touching
-  automation or CI should go through a pull request.
+- Direct commits to `main` are normal for blog/post/content/notebook changes, but mostly that
+  content is updated by a human. Anything touching automation or CI should go through a pull
+  request. If you are unsure or need to mix types of changes, use a PR. In some circumstances, a
+  direct automation commit to main can make sense, but get human approval.
 - Drafts carry `Status: draft` in their Pelican metadata. That is what keeps them off both the
   public site and the mirror.
