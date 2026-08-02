@@ -1,1 +1,18 @@
-{ "extends": ["stylelint-config-standard"] }
+{
+  "extends": ["stylelint-config-standard"],
+  "overrides": [
+    {
+      "files": ["**/hyde.css"],
+      "rules": {
+        "no-descending-specificity": null
+      }
+    },
+    {
+      "files": ["**/syntax.css"],
+      "rules": {
+        "declaration-block-single-line-max-declarations": null,
+        "block-no-empty": null
+      }
+    }
+  ]
+}
