@@ -157,3 +157,20 @@ divergence was unintentional.
 - Mirror runs leave their temporary config directory behind in `/tmp`. The secret mailmap inside
   it is deleted as soon as git-filter-repo has consumed it, so nothing sensitive persists, but the
   directories accumulate.
+
+---
+
+## 8. Improve `mirror-redacted.py`
+
+- Improve the parsing of metadata at the head of content markdown files. How does Pelican do it?
+- Require the presence of a status in the metadata and validate its value.
+- Hide posts with statuses other than "published" defensively.
+- In mirror(), source_dir is set to ".", but at the top of the script we explicitly anchor to REPO_ROOT. This looks like it could cause a mismatch.
+- With `git push`, `--mirror` may imply `--prune`.
+- Streamline plan_published_paths and the functions called in that call tree. The
+  plan_published_paths function has a nice design where it collects information, logs some
+  information, and then returns what its caller needs. But, it also repeats the rglob of CONTENT_DIR
+  to find excluded drafts. The whole call tree under extra_paths_to_include exists to serve
+  plan_published_paths, so it can be reworked a bit to avoid this. plan_published_paths needs
+  categorized file lists/sets to log, and then it can select which to pass to its caller (caller
+  does not get excluded_drafts).
