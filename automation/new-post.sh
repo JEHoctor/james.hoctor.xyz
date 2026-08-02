@@ -5,12 +5,24 @@
 # Not using -x because this script interacts with the user.
 set -euo pipefail
 
+# These scripts are read at a terminal rather than in a job log, so the prefix is here to separate
+# the script's own words from the output of anything it calls, not to be grepped for.
+readonly LOG_PREFIX="[new-post]"
+
+log() {
+  printf '%s %s\n' "$LOG_PREFIX" "$*"
+}
+
+err() {
+  printf '%s %s\n' "$LOG_PREFIX" "$*" >&2
+}
+
 # Collect blog post title from the user.
 read -erp "Title: " title
 
 # Check for collision with titles of existing posts and pages, which can prevent Pelican from building the site.
 if grep -q "^Title: $title$" content/{*,**/*}.md; then
-  echo "Duplicate post title identified by grep:" >&2
+  err "A post or page already uses that title:"
   grep --line-number --with-filename "^Title: $title$" content/{*,**/*}.md >&2
   exit 1
 fi
@@ -25,7 +37,7 @@ filename=content/$(echo "$title" | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]').m
 
 # Verify that the file doesn't already exist.
 if [[ -f $filename ]]; then
-  echo "File already exists: $filename" >&2
+  err "File already exists: $filename"
   exit 1
 fi
 
@@ -36,3 +48,6 @@ cat <<- EOF > "$filename"
 	Category: Blog
 	Status: draft
 EOF
+
+log "Created $filename"
+log "It is a draft, so it will not be published or mirrored until you change Status."
