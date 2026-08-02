@@ -46,6 +46,26 @@ jobs:
             output/
             !**/.gitkeep
           if-no-files-found: error
+  validate:
+    name: validate
+    # Depends on build for the artifact, but nothing depends on this job. A failure here shows as a
+    # red mark and never holds up a deployment: deploy waits on build, not on validate.
+    needs: build
+    runs-on: docker
+    steps:
+      - name: checkout
+        uses: https://code.forgejo.org/actions/checkout@v4
+        with:
+          submodules: true
+      - name: download-artifacts
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        with:
+          name: web-content-${{ github.sha }}
+          path: output
+      - name: install node dependencies
+        run: npm install
+      - name: validate
+        run: npx htmlhint output/ && npx stylelint $(find output -name '*.css')
   deploy:
     name: deploy
     needs: build
