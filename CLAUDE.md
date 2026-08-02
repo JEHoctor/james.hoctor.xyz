@@ -13,16 +13,14 @@ running on a self-hosted forge. A **redacted** copy of the repository is publish
 `gh` does not work here and will tell you no remote matches a known GitHub host. Use `tea`, which
 is already authenticated, or `fj`.
 
-`tea` does not automatically match this repository to its login, so **always pass `--repo`**:
-
-```bash
-tea pr ls --repo james/james.hoctor.xyz
-```
+`tea`'s login is configured to match this remote, so commands work from inside the checkout with
+no `--repo` flag. If you ever see it print a `NOTE: no login matched this repository` line, the
+configuration has regressed; the flag is the workaround, not the norm.
 
 `tea api` takes any REST path and expands `{owner}` and `{repo}` placeholders:
 
 ```bash
-tea api --repo james/james.hoctor.xyz "repos/{owner}/{repo}/actions/runs?limit=5"
+tea api "repos/{owner}/{repo}/actions/runs?limit=5"
 ```
 
 Useful commands beyond the obvious:
@@ -30,17 +28,43 @@ Useful commands beyond the obvious:
 ```bash
 # Edit a pull request. Removing a "WIP: " title prefix is what un-drafts it;
 # a draft PR reports mergeable=false and cannot be merged.
-tea api --repo james/james.hoctor.xyz -X PATCH -f title="New title" "repos/{owner}/{repo}/pulls/31"
+tea api -X PATCH -f title="New title" "repos/{owner}/{repo}/pulls/31"
 
 # Comment on a PR or issue.
-tea api --repo james/james.hoctor.xyz -X POST -f body='text' "repos/{owner}/{repo}/issues/27/comments"
+tea api -X POST -f body='text' "repos/{owner}/{repo}/issues/27/comments"
 
-tea pr merge 30 --repo james/james.hoctor.xyz --style merge
-tea pr close 27 --repo james/james.hoctor.xyz
+tea pr merge 30 --style merge
+tea pr close 27
 ```
 
 `fj` has `actions tasks|variables|secrets|dispatch` but no log subcommand, so `tea api` is the
 better tool for CI work.
+
+### Do not scrape tea's human-facing output
+
+`tea pr ls` draws a Unicode box (`│`, `─`, `┌`) and `tea pr <n>` embeds OSC-8 hyperlink escapes,
+so its output is for eyes only. Grep patterns against it fail in confusing ways — a literal `│`
+in a pattern is rejected outright as an invalid escape by some greps, and the escape sequences
+smear across the fields you were trying to read.
+
+Ask for structured output instead. Either JSON from `tea` itself:
+
+```bash
+tea pr ls --output json | jq -r '.[] | "\(.index) \(.title)"'
+```
+
+or go through the API, which is the better choice whenever you want a field the table does not
+show, such as `draft` or `mergeable`:
+
+```bash
+tea api "repos/{owner}/{repo}/pulls?state=open&limit=20" \
+  | jq -r '.[] | "#\(.number) draft=\(.draft) \(.head.ref) \(.title)"'
+```
+
+While on the subject of pipelines: resist `2>/dev/null` on commands whose success you have not
+otherwise confirmed. It hides real failures. A `git add` whose pathspec matched nothing once
+looked like a clean run here, and the commit that followed was missing four of its five files.
+Redirect stderr somewhere you still read it, rather than discarding it.
 
 ## Reading CI logs
 
@@ -51,19 +75,17 @@ endpoint is missing rather than that you have the path wrong.
 Three steps, because the log is per job and jobs are per run:
 
 ```bash
-R=james/james.hoctor.xyz
-
 # 1. Find the run. Note both numbers: the web UI URL uses index_in_repo,
 #    but every API call below wants id.
-tea api --repo $R "repos/{owner}/{repo}/actions/runs?limit=5" \
+tea api "repos/{owner}/{repo}/actions/runs?limit=5" \
   | jq -r '.workflow_runs[] | "id=\(.id) index=\(.index_in_repo) \(.status) \(.title)"'
 
 # 2. Jobs for that run. Returns a bare array, not an object.
-tea api --repo $R "repos/{owner}/{repo}/actions/runs/433/jobs" \
+tea api "repos/{owner}/{repo}/actions/runs/433/jobs" \
   | jq -r '.[] | "job_id=\(.id) \(.name) \(.status)"'
 
 # 3. The log, as plain text. Download it whole before filtering.
-tea api --repo $R "repos/{owner}/{repo}/actions/jobs/1833/logs" > job.log
+tea api "repos/{owner}/{repo}/actions/jobs/1833/logs" > job.log
 ```
 
 The run-level `status` can still say `running` after every job has finished, so check the jobs
