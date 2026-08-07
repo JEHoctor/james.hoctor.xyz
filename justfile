@@ -151,7 +151,13 @@ sandbox-proxy:
 sandbox-init:
     #!/usr/bin/env bash
     set -euo pipefail
-    sandcat init --agent claude --ide vscode --stacks "python" --name {{SANDBOX_NAME}} --features no-shared-cache
+    sandcat init \
+        --agent claude \
+        --ide vscode \
+        --stacks "python" \
+        --name {{SANDBOX_NAME}} \
+        --features "" \
+        --secret-provider "none"
     # sandcat regenerates .devcontainer/ on every init and only devbox.tools.json
     # is tracked, so the hardening has to be re-applied each time. See the
     # SANDCAT comment block above for why this matters.
