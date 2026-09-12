@@ -17,6 +17,7 @@
         "ipywidgets",
         "jupyterlab",
         "justfile",
+        "Kriging",
         "nbconvert",
         "nbdime",
         "nbqa",
