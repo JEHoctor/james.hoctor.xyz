@@ -6,3 +6,7 @@ indent_size = 2
 binary_next_line   = true
 switch_case_indent = true
 space_redirects    = true
+
+# Include Posix trailing newlines.
+[*]
+insert_final_newline = true
