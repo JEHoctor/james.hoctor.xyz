@@ -1,7 +1,7 @@
 Title: Publishing my banner image generator
-Date: 2026-09-12 11:34
+Date: 2026-09-12 15:18
 Category: Blog
-Status: draft
+Status: published
 
 Back in 2021, I wrote a script to create the colorful banner images I use on LinkedIn, GitHub, and Thingiverse.
 Today this tool is available as `geometric-banner` on [PyPI](https://pypi.org/project/geometric-banner/).
