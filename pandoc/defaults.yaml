@@ -1,0 +1,17 @@
+# Pandoc defaults file used by pelican-pandoc-reader (see PANDOC_DEFAULTS_FILES in pelicanconf.py).
+# pandoc-reader requires `from`/`to` here and reads `citeproc` to decide whether to look for a
+# `<post-stem>.bib` next to each post.
+# implicit_figures is off so a paragraph holding only an image stays a plain <p><img>, as before, instead
+# of becoming a <figure> whose caption repeats the alt text.
+from: markdown-implicit_figures
+to: html5
+# Keep the source line breaks in the HTML (Python-Markdown did too) rather than re-wrapping at 72 columns.
+wrap: preserve
+# Math: emit native MathML; no JavaScript is needed in the browser.
+html-math-method:
+  method: mathml
+# Citations: `[@key]` in a post, bibliography generated under the `::: {#refs}` div.
+citeproc: true
+metadata:
+  link-citations: true
+csl: ${.}/ieee.csl
