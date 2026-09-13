@@ -109,7 +109,7 @@ just html            # build to output/
 just publish         # build with production settings
 just check-precommit # all pre-commit hooks
 just check-scripts   # shfmt + shellcheck
-just validate        # htmlhint/stylelint over output/  -- CURRENTLY FAILS, see TODO.md
+just validate        # htmlhint/stylelint over output/ (also runs in CI, off the deploy path)
 just init            # submodule, pre-commit hooks, npm install
 ```
 
