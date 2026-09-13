@@ -11,6 +11,21 @@ DEFAULT_LANG = "en"
 
 THEME = "hyde-personalized"
 
+# Plugins. Setting PLUGINS explicitly disables Pelican's auto-discovery of namespace plugins, so every
+# plugin in use must be listed here: the three pip-installed ones that were previously auto-discovered,
+# pelican-cite2 for BibTeX citations, and the local sibling_bib plugin (see plugins/sibling_bib/).
+PLUGIN_PATHS = ["plugins"]
+PLUGINS = ["render_math", "seo", "sitemap", "pelican_cite2", "sibling_bib"]
+
+# Citations (pelican-cite2). A post content/<slug>.md cites entries from content/<slug>.bib with the
+# [@key] syntax; sibling_bib wires the file up. Numeric labels render inline as [1], and "none" sorting
+# lists references in first-citation order.
+BIBLIOGRAPHY_LABEL_STYLE = "number"
+BIBLIOGRAPHY_SORTING_STYLE = "none"
+
+# Pelican ignores dotfiles by default; also keep it from treating .bib files as content.
+IGNORE_FILES = ["**/.*", "*.bib"]
+
 # Settings specific to the theme
 BIO = "Machine learning engineer and data scientist. <nobr>BS Mathematics</nobr>, <nobr>MS Computer Science.</nobr>"
 PROFILE_IMAGE = "github-profile.jpg"
