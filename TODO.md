@@ -26,15 +26,12 @@ configured, and covers the same ground.
 To do, in this repository:
 
 - drop the `npx csslint output/` line from the `validate` recipe in `justfile`
-- drop the `diff .csslintrc hyde-personalized/.csslintrc` line from the same recipe
 - delete `.csslintrc`
 - remove the csslint dependency from `package.json` and re-lock
 - remove `csslint` and `csslintrc` from `cSpell.words` in `.vscode/settings.json`
 
-And in the `hyde-personalized` submodule (a fork at `github.com/JEHoctor/pelican-hyde`):
-
-- delete `.csslintrc`
-- remove the `mirrors-csslint` hook from `.pre-commit-config.yaml`
+The theme's own copy of `.csslintrc` and its csslint pre-commit hook went away when the theme was
+vendored into `hyde-personalized/`; only the top-level ones remain.
 
 ---
 
@@ -43,7 +40,7 @@ And in the `hyde-personalized` submodule (a fork at `github.com/JEHoctor/pelican
 **Status:** analysed in full, not applied. **Blocks:** `just validate`, item 3.
 
 `npx stylelint hyde-personalized/static/css/*.css` reports 18 errors. They fall into three groups
-and need three different treatments. All of this is in the submodule.
+and need three different treatments.
 
 ### 2a. `no-descending-specificity` in `hyde.css` — 7 errors, suppress
 
@@ -55,7 +52,7 @@ to the same document and no cascade conflict is possible. These are false positi
 Reordering to satisfy the rule would mean abandoning the file's one-block-per-colour layout for
 no benefit. Suppress it for this file instead, via an `overrides` entry in `.stylelintrc.json`
 matching `**/hyde.css`. Use a glob rather than a fixed path: the same config is applied both to
-the sources in the submodule and to the built copies under `output/theme/css/` in the parent.
+the sources in `hyde-personalized/` and to the built copies under `output/theme/css/`.
 
 ### 2b. `syntax.css` — 8 errors, suppress
 
@@ -76,7 +73,8 @@ regenerated. Suppress both rules for `**/syntax.css` through the same `overrides
 Keep the rule enabled everywhere else — it is meaningful in `poole.css` and only inapplicable in
 the two files above.
 
-Whoever does this needs to push to the theme fork and then update the submodule pointer here.
+The theme used to run stylelint as a pre-commit hook of its own; that hook was dropped along with
+the submodule, so until this item is done nothing lints the theme's CSS at commit time.
 
 ---
 
