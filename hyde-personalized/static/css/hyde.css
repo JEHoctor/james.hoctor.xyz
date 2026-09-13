@@ -324,3 +324,31 @@ a.sidebar-social-item:focus:not(:focus-visible) {
 .theme-base-0f .related-posts li a:hover {
   color: #8f5536;
 }
+
+
+/*
+ * Citations
+ *
+ * Inline labels from pelican-cite2 and the References list rendered by article.html.
+ */
+
+.post a.cite {
+  white-space: nowrap;
+}
+
+.references ol {
+  padding-left: 1.5rem;
+}
+
+.references li {
+  margin-bottom: .5rem;
+}
+
+.references li:target {
+  background-color: #f9f9f9;
+}
+
+.references .cite-backref {
+  margin-left: .25em;
+  font-size: 85%;
+}
