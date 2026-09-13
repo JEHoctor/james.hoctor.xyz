@@ -37,6 +37,11 @@ REPLACE_TEXT_PATH = REPO_ROOT / "mirror-redacted-config" / "replace-text.txt"
 # themselves are not posts.
 FILTERED_PREFIXES = ("content/", "mirror-redacted-config/", "notebooks/", "private/")
 
+# Per-post files that sit next to a post under content/ with the same stem, such as the BibTeX
+# file a post cites from. They are published only when their post is, because the filename alone
+# discloses the post's title.
+SIDECAR_SUFFIXES = (".bib",)
+
 # Most of this job's output comes from git and git-filter-repo. Prefixing our own lines makes it
 # obvious which are which, and makes the whole narration greppable. Colour is not used, because the
 # job log is not a terminal and rich drops styling there.
@@ -108,17 +113,38 @@ def is_pelican_draft(path: Path) -> bool:
     return False
 
 
+def is_withheld_sidecar(path: Path) -> bool:
+    """Return True if a per-post sidecar file belongs to a draft, or to no post at all.
+
+    A post's bibliography lives next to it as ``<slug>.bib``, so the filename alone names the
+    post. It is withheld under exactly the conditions the post itself is withheld, and also when
+    there is no ``<slug>.md`` to compare against, so that an orphaned sidecar is private by
+    default rather than public by accident.
+
+    Args:
+        path (Path): Path to a file under content/ with a suffix in SIDECAR_SUFFIXES.
+
+    Returns:
+        bool: True if the sidecar must not be mirrored.
+    """
+    post = path.with_suffix(".md")
+    return not post.is_file() or is_pelican_draft(post)
+
+
 def non_draft_content_files() -> list[Path]:
     """Return all files under content/ that should be mirrored.
 
-    Non-Markdown files (images, static assets, etc.) are always included.
-    Markdown files are included only if they are not Pelican drafts.
+    Markdown files are included only if they are not Pelican drafts. Sidecar files that share a
+    post's stem (see SIDECAR_SUFFIXES) follow their post. All other non-Markdown files (images,
+    static assets, etc.) are always included.
     """
     result = []
     for f in CONTENT_DIR.rglob("*"):
         if not f.is_file():
             continue
         if f.suffix == ".md" and is_pelican_draft(f):
+            continue
+        if f.suffix in SIDECAR_SUFFIXES and is_withheld_sidecar(f):
             continue
         result.append(f)
     return result
@@ -378,6 +404,9 @@ def plan_published_paths() -> set[str]:
     included_markdown = {f for f in extra_paths if f.suffix == ".md"}
     included_notebooks = sorted(f for f in extra_paths if f.suffix == ".ipynb")
     excluded_drafts = sorted(f for f in CONTENT_DIR.rglob("*.md") if f.is_file() and f not in included_markdown)
+    excluded_sidecars = sorted(
+        f for f in CONTENT_DIR.rglob("*") if f.is_file() and f.suffix in SIDECAR_SUFFIXES and f not in extra_paths
+    )
 
     log(f"Publishing {len(included_markdown)} post(s):")
     for post in sorted(included_markdown):
@@ -388,6 +417,9 @@ def plan_published_paths() -> set[str]:
     log(f"Withholding {len(excluded_drafts)} draft post(s):")
     for draft in excluded_drafts:
         log(f"  - {draft.relative_to(REPO_ROOT)}")
+    log(f"Withholding {len(excluded_sidecars)} sidecar file(s) of drafts or of no post:")
+    for sidecar in excluded_sidecars:
+        log(f"  - {sidecar.relative_to(REPO_ROOT)}")
 
     return {str(f.relative_to(REPO_ROOT)) for f in extra_paths}
 
