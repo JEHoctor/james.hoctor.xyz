@@ -10,8 +10,8 @@ wrap: preserve
 # Math: emit native MathML; no JavaScript is needed in the browser.
 html-math-method:
   method: mathml
-# Citations: `[@key]` in a post, bibliography generated under the `::: {#refs}` div.
+# Citations: `[@key]` in a post, bibliography generated under the `::: {#refs}` div. No `csl:` is set, so
+# pandoc's built-in Chicago author-date style is used.
 citeproc: true
 metadata:
   link-citations: true
-csl: ${.}/ieee.csl

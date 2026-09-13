@@ -332,12 +332,19 @@ a.sidebar-social-item:focus:not(:focus-visible) {
  * centred block with the same vertical rhythm as a paragraph. Long formulas scroll sideways
  * rather than overflowing the column on narrow screens.
  */
+/*
+ * Chromium does not resolve the generic `math` font family through fontconfig, so without an explicit
+ * math font it falls back to the body font: display math is left-aligned, \left( \right) fences do not
+ * stretch and glyphs are generic italics. Name the common OpenType MATH fonts directly: STIX Two Math
+ * (macOS, iOS, Fedora), Latin Modern Math (TeX installs), Cambria Math (Windows), then the generic.
+ */
 math {
+  font-family: "STIX Two Math", "Latin Modern Math", "Cambria Math", math, serif;
   font-size: inherit;
 }
 
 math[display="block"] {
-  display: block;
+  display: block math;
   margin: 0 auto 1rem;
   max-width: 100%;
   overflow-x: auto;
@@ -360,18 +367,29 @@ p:has(> math[display="block"]:only-child) {
 }
 
 /*
- * Bibliography (pandoc --citeproc with a numeric CSL)
+ * Bibliography (pandoc --citeproc)
  *
- * Numeric styles emit each entry as a label cell (.csl-left-margin) beside the reference text
- * (.csl-right-inline). Lay them out as a hanging list so labels line up.
+ * Author-date styles such as the default Chicago mark the list `hanging-indent` and emit each
+ * entry as a plain `.csl-entry`. Numeric styles instead split an entry into a label cell
+ * (.csl-left-margin) beside the reference text (.csl-right-inline); lay those out as a flex row so
+ * the labels line up, in case the style is ever switched.
  */
 div#refs {
   margin-bottom: 1rem;
 }
 
 div#refs .csl-entry {
-  display: flex;
   margin-bottom: .5rem;
+  overflow-wrap: anywhere;
+}
+
+div#refs.hanging-indent .csl-entry {
+  padding-left: 1.5em;
+  text-indent: -1.5em;
+}
+
+div#refs .csl-entry:has(> .csl-left-margin) {
+  display: flex;
 }
 
 div#refs .csl-left-margin {
@@ -381,7 +399,6 @@ div#refs .csl-left-margin {
 
 div#refs .csl-right-inline {
   flex: 1 1 auto;
-  overflow-wrap: anywhere;
 }
 
 .citation a {
