@@ -80,9 +80,7 @@ check-scripts:
 
 # initialize the repo for development
 init:
-    git submodule update --init
     uv run --group=dev pre-commit install
-    (cd hyde-personalized/ && uv run --group=dev pre-commit install)
     npm install
 
 # run pre-commit checks
@@ -95,8 +93,6 @@ validate:
     npx htmlhint output/
     npx csslint output/
     npx stylelint $(find output -name '*.css')
-    diff .csslintrc hyde-personalized/.csslintrc
-    diff .stylelintrc.json hyde-personalized/.stylelintrc.json
 
 # mirror repo without drafts
 mirror-redacted:
