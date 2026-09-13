@@ -122,7 +122,10 @@ groups reinstalls packages each time. That is expected, not a fault.
 `automation/mirror-redacted.py` publishes a filtered copy of this repository to GitHub. The
 invariant is simple and absolute: **unpublished drafts must never reach the mirror**. Everything
 under `content/`, `notebooks/`, `mirror-redacted-config/` and `private/` is withheld unless
-explicitly listed, so a new draft is private by default.
+explicitly listed, so a new draft is private by default. Non-Markdown files under `content/`
+(images, static assets) are listed unconditionally, with one exception: a per-post sidecar such
+as `content/<slug>.bib` follows its post — published only when `content/<slug>.md` exists and is
+not a draft — because its filename alone is a disclosure.
 
 `private/` is withheld in full — nothing in it is ever added back to the published set. Notes that
 name or describe an unpublished draft go there, not in the top-level `TODO.md`, which *is*
