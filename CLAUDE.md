@@ -170,12 +170,13 @@ reports every branch as updated, something is wrong.
   `git ls-files --deduplicate`, added in git 2.31, so `pre-commit run --all-files` cannot work
   there. The `code-quality` job pins a bookworm image for this reason. Do not remove that pin
   without checking the runner's default image first.
-- **There are two ruffs.** The `dev` group resolves one version and the pre-commit hook pins
-  another, so they can disagree about which rules exist. See TODO.md.
+- **ruff is pinned in two places.** The `dev` and `notebook` groups pin `ruff==X.Y.Z` in
+  `pyproject.toml` and the pre-commit hook pins `rev: vX.Y.Z`. They must move together, or
+  `ruff check .` and `just check-precommit` start disagreeing about which rules exist.
 - **Rich markup is disabled** in `mirror-redacted.py`. It would otherwise read a bracketed word,
   including the log prefix and any path containing a bracket, as a style tag and silently drop it.
-- **`.claude/worktrees/` is a git worktree**, not part of the source tree. Linters will descend
-  into it unless excluded.
+- **`.claude/worktrees/` holds git worktrees**, not part of the source tree. ruff excludes
+  `.claude` via `extend-exclude`; any other linter you add needs the same exclusion.
 
 ## Conventions
 
