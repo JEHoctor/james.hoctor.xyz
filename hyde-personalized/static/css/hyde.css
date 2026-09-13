@@ -324,3 +324,66 @@ a.sidebar-social-item:focus:not(:focus-visible) {
 .theme-base-0f .related-posts li a:hover {
   color: #8f5536;
 }
+
+/*
+ * Math (MathML emitted by pandoc --mathml)
+ *
+ * Inline math should sit in the running text at the text's own size; display math gets its own
+ * centred block with the same vertical rhythm as a paragraph. Long formulas scroll sideways
+ * rather than overflowing the column on narrow screens.
+ */
+math {
+  font-size: inherit;
+}
+
+math[display="block"] {
+  display: block;
+  margin: 0 auto 1rem;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+/*
+ * pandoc turns align/gather environments into an <mtable>, and MathML Core's UA stylesheet makes
+ * table cells "compact" (inline) style: fractions shrink and \prod / \lim limits move to the side.
+ * Restore display style inside block math so multi-line derivations look like single-line ones.
+ */
+math[display="block"] mtable {
+  math-style: normal;
+}
+
+/* pandoc wraps a lone display formula in <p>; keep that paragraph from adding a second margin. */
+p:has(> math[display="block"]:only-child) {
+  margin-bottom: 0;
+}
+
+/*
+ * Bibliography (pandoc --citeproc with a numeric CSL)
+ *
+ * Numeric styles emit each entry as a label cell (.csl-left-margin) beside the reference text
+ * (.csl-right-inline). Lay them out as a hanging list so labels line up.
+ */
+div#refs {
+  margin-bottom: 1rem;
+}
+
+div#refs .csl-entry {
+  display: flex;
+  margin-bottom: .5rem;
+}
+
+div#refs .csl-left-margin {
+  flex: 0 0 2.25em;
+  white-space: nowrap;
+}
+
+div#refs .csl-right-inline {
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+}
+
+.citation a {
+  white-space: nowrap;
+}
