@@ -66,3 +66,48 @@
 
 .highlight .lineno { color: #ccc; display:inline-block; padding: 0 5px; border-right:1px solid #ccc; }
 .highlight pre code { display: block; white-space: pre; overflow-x: auto; word-wrap: normal; padding: 0.6rem; }
+
+/*
+ * pandoc / skylighting
+ *
+ * pandoc's built-in highlighter emits <div class="sourceCode"><pre class="sourceCode LANG"><code>
+ * with its own two-letter token classes instead of Pygments' <div class="highlight"> markup. The
+ * rules below give those blocks the same box as .highlight and map skylighting's token classes
+ * onto the Pygments palette above, so old and new markup look the same.
+ */
+.sourceCode { margin-bottom: 1rem; border-radius: 4px; }
+.sourceCode pre { margin-bottom: 0; }
+div.sourceCode pre code,
+pre:not(.sourceCode) > code { display: block; white-space: pre; overflow-x: auto; word-wrap: normal; padding: 0.6rem; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span > a:first-child { display: none; } /* per-line anchors from --number-lines */
+
+code.sourceCode span.al { color: #a00; background-color: #faa } /* Alert */
+code.sourceCode span.an { color: #999; font-style: italic } /* Annotation */
+code.sourceCode span.at { color: #4f9fcf } /* Attribute */
+code.sourceCode span.bn { color: #f60 } /* BaseN */
+code.sourceCode span.bu { color: #366 } /* BuiltIn */
+code.sourceCode span.cf { color: #069 } /* ControlFlow */
+code.sourceCode span.ch { color: #c30 } /* Char */
+code.sourceCode span.cn { color: #360 } /* Constant */
+code.sourceCode span.co { color: #999 } /* Comment */
+code.sourceCode span.cv { color: #999; font-style: italic } /* CommentVar */
+code.sourceCode span.do { color: #c30; font-style: italic } /* Documentation */
+code.sourceCode span.dt { color: #078 } /* DataType */
+code.sourceCode span.dv { color: #f60 } /* DecVal */
+code.sourceCode span.er { color: #a00; background-color: #faa } /* Error */
+code.sourceCode span.ex { color: #366 } /* Extension */
+code.sourceCode span.fl { color: #f60 } /* Float */
+code.sourceCode span.fu { color: #c0f } /* Function */
+code.sourceCode span.im { color: #069 } /* Import */
+code.sourceCode span.in { color: #999 } /* Information */
+code.sourceCode span.kw { color: #069 } /* Keyword */
+code.sourceCode span.op { color: #555 } /* Operator */
+code.sourceCode span.ot { color: #000 } /* Other */
+code.sourceCode span.pp { color: #099 } /* Preprocessor */
+code.sourceCode span.sc { color: #c30 } /* SpecialChar */
+code.sourceCode span.ss { color: #fc3 } /* SpecialString */
+code.sourceCode span.st { color: #c30 } /* String */
+code.sourceCode span.va { color: #033 } /* Variable */
+code.sourceCode span.vs { color: #c30 } /* VerbatimString */
+code.sourceCode span.wa { color: #a00 } /* Warning */
