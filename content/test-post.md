@@ -1,6 +1,8 @@
-Title: Test post
-Date: 2025-01-23 15:55
-Category: Blog
-Status: published
+---
+title: Test post
+date: "2025-01-23 15:55"
+category: Blog
+status: published
+---
 
 Please ignore.

@@ -1,4 +1,6 @@
-Title: About me
+---
+title: About me
+---
 
 Hi, I'm James.
 

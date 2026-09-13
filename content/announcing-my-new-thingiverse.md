@@ -1,7 +1,9 @@
-Title: Announcing my new Thingiverse
-Date: 2023-02-05 23:55
-Category: Blog
-Status: published
+---
+title: Announcing my new Thingiverse
+date: "2023-02-05 23:55"
+category: Blog
+status: published
+---
 
 Big announcement.
 
