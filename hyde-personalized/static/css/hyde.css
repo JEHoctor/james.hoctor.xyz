@@ -336,8 +336,14 @@ a.sidebar-social-item:focus:not(:focus-visible) {
   white-space: nowrap;
 }
 
-.references ol {
-  padding-left: 1.5rem;
+.references ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.references .cite-label {
+  margin-right: .25em;
+  font-weight: bold;
 }
 
 .references li {

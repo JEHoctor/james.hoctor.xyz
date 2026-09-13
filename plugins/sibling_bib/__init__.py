@@ -25,8 +25,8 @@ replacing ``CitationsProcessor._get_bib`` with a corrected copy. Drop that patch
 fixes it.
 
 Finally, pelican-cite2's inline label markup is tidied after it runs: the whitespace its template
-leaves inside the anchor is removed, the label is wrapped in square brackets so the ``number``
-label style reads as ``[1]``, and the anchor gets ``class="cite"`` for styling.
+leaves inside the anchor is removed, the label is wrapped in square brackets so the ``alpha``
+label style reads as ``[JHCN06]``, and the anchor gets ``class="cite"`` for styling.
 """
 
 from __future__ import annotations

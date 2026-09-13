@@ -24,16 +24,17 @@
 		   id="ref-<ref_id>-<n>" for the n-th citation of that entry, which the back-references target. #}
 		<section class="references">
 			<h2>References</h2>
-			<ol>
-				{% for cite in article.bibliography.cites %}
+			<ul>
+				{% for cite in article.bibliography.cites|sort(attribute="rendered_label") %}
 					<li id="{{ cite.ref_id }}">
+						<span class="cite-label">[{{ cite.rendered_label }}]</span>
 						{{ cite.rendered_entry }}
 						{% for i in range(1, cite.count + 1) %}
 							<a class="cite-backref" href="#ref-{{ cite.ref_id }}-{{ i }}" title="Back to citation {{ i }}">&#8617;</a>
 						{% endfor %}
 					</li>
 				{% endfor %}
-			</ol>
+			</ul>
 		</section>
 	{% endif %}
 
