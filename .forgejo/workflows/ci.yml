@@ -44,6 +44,32 @@ jobs:
             output/
             !**/.gitkeep
           if-no-files-found: error
+  validate:
+    name: validate
+    # Needs build for the artifact, but nothing needs validate. A failure here shows as a red mark
+    # and never holds up a deployment: deploy waits on build alone.
+    #
+    # The runner's default node:20-bullseye image supplies node and npm, which is all htmlhint and
+    # stylelint need; its old git only matters for pre-commit, which does not run here.
+    needs: build
+    runs-on: docker
+    steps:
+      - name: checkout
+        uses: https://code.forgejo.org/actions/checkout@v4
+      - name: download-artifacts
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        with:
+          name: web-content-${{ github.sha }}
+          path: output
+      - name: setup uv
+        uses: https://github.com/astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
+      - name: install node dependencies
+        run: npm ci
+      - name: validate
+        run: uv run --group=dev just validate
   deploy:
     name: deploy
     needs: build
