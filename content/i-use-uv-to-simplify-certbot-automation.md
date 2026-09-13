@@ -1,7 +1,9 @@
-Title: I use uv to simplify Certbot automation
-Date: 2025-01-25 00:44
-Category: Blog
-Status: published
+---
+title: "I use uv to simplify Certbot automation"
+date: "2025-01-25 00:44"
+category: "Blog"
+status: "published"
+---
 
 The VPS hosting this blog is configured to use nginx with a certificate from Let's Encrypt.
 I chose Certbot to automate certificate renewal.
