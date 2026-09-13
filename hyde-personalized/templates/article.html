@@ -19,6 +19,24 @@
 	<span class="post-date">{{ article.locale_date }}</span>
 	{{ article.content }}
 
+	{% if article.bibliography is defined %}
+		{# pelican-cite2 sets article.bibliography.cites; its inline labels link to #<ref_id> and carry
+		   id="ref-<ref_id>-<n>" for the n-th citation of that entry, which the back-references target. #}
+		<section class="references">
+			<h2>References</h2>
+			<ol>
+				{% for cite in article.bibliography.cites %}
+					<li id="{{ cite.ref_id }}">
+						{{ cite.rendered_entry }}
+						{% for i in range(1, cite.count + 1) %}
+							<a class="cite-backref" href="#ref-{{ cite.ref_id }}-{{ i }}" title="Back to citation {{ i }}">&#8617;</a>
+						{% endfor %}
+					</li>
+				{% endfor %}
+			</ol>
+		</section>
+	{% endif %}
+
 	{% if article.tags %}
 		<span class="post-tags">
 			Tags:
