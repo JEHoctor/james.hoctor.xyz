@@ -18,9 +18,9 @@ PLUGIN_PATHS = ["plugins"]
 PLUGINS = ["render_math", "seo", "sitemap", "pelican_cite2", "sibling_bib"]
 
 # Citations (pelican-cite2). A post content/<slug>.md cites entries from content/<slug>.bib with the
-# [@key] syntax; sibling_bib wires the file up. Numeric labels render inline as [1], and "none" sorting
-# lists references in first-citation order.
-BIBLIOGRAPHY_LABEL_STYLE = "number"
+# [@key] syntax; sibling_bib wires the file up. Alpha labels render inline as [JHCN06]. Sorting "none" keeps
+# first-citation order internally; the theme sorts the References list by label, as BibTeX alpha does.
+BIBLIOGRAPHY_LABEL_STYLE = "alpha"
 BIBLIOGRAPHY_SORTING_STYLE = "none"
 
 # Pelican ignores dotfiles by default; also keep it from treating .bib files as content.
