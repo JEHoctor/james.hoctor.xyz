@@ -5,10 +5,11 @@ description = "Static site generation for james.hoctor.xyz powered by Pelican"
 readme = "readme.md"
 requires-python = ">=3.13"
 dependencies = [
-    "pelican-render-math>=1.0.4",
+    "pelican-pandoc-reader>=3.0.2",
     "pelican-seo>=1.4.0",
     "pelican-sitemap>=1.2.2",
     "pelican[markdown]>=4.11.0",
+    "pypandoc-binary>=1.17",
 ]
 
 [dependency-groups]

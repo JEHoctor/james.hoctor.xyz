@@ -1,9 +1,26 @@
+import os
+from pathlib import Path
+
+import pypandoc
+
 AUTHOR = "James Hoctor"
 SITENAME = "James Hoctor"
 SITEURL = "https://james.hoctor.xyz"
 SITESUBTITLE = "machine learning engineer"
 
 PATH = "content"
+
+# Markdown is rendered by pelican-pandoc-reader instead of Pelican's built-in Markdown reader. The pandoc
+# binary is the one bundled in the pypandoc-binary package, so no system pandoc is needed (the CI runner's
+# apt pandoc is too old anyway). All pandoc options live in pandoc/defaults.yaml; a post's bibliography is
+# content/<post-stem>.bib, picked up automatically.
+# pypandoc.get_pandoc_path() would probe $PATH first and log a spurious ERROR when no system pandoc exists,
+# so point straight at the bundled binary. PYPANDOC_PANDOC still overrides it if ever needed.
+PANDOC_EXECUTABLE_PATH = os.environ.get("PYPANDOC_PANDOC", str(Path(pypandoc.__file__).parent / "files" / "pandoc"))
+PANDOC_DEFAULTS_FILES = [str(Path(__file__).resolve().parent / "pandoc" / "defaults.yaml")]
+
+# Bibliographies sit next to their posts but are not content in their own right.
+IGNORE_FILES = [".#*", "*.bib"]
 
 TIMEZONE = "America/New_York"
 
