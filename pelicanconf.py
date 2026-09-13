@@ -1,9 +1,23 @@
+from pathlib import Path
+
+import pypandoc
+
 AUTHOR = "James Hoctor"
 SITENAME = "James Hoctor"
 SITEURL = "https://james.hoctor.xyz"
 SITESUBTITLE = "machine learning engineer"
 
 PATH = "content"
+
+# Markdown is converted by pandoc (via pelican-pandoc-reader) rather than Python-Markdown.
+# The pandoc binary comes from the pypandoc-binary wheel so that no system pandoc is needed;
+# the conversion settings live in pandoc-config/defaults.yaml. Posts may keep a BibTeX file next
+# to them (content/<slug>.bib); it is picked up automatically as that post's bibliography.
+PANDOC_EXECUTABLE_PATH = pypandoc.get_pandoc_path()
+PANDOC_DEFAULTS_FILES = [str(Path(__file__).parent / "pandoc-config" / "defaults.yaml")]
+
+# Bibliographies live next to their posts, but they are not content.
+IGNORE_FILES = [".#*", "*.bib"]
 
 TIMEZONE = "America/New_York"
 

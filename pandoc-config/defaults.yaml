@@ -1,0 +1,24 @@
+# Pandoc defaults file used by pelican-pandoc-reader (see PANDOC_DEFAULTS_FILES in
+# pelicanconf.py). Every Markdown post and page is converted with these settings.
+#
+# "smart" is disabled so that quotes and dashes come out exactly as typed, and
+# "implicit_figures" so that a lone image stays a plain image rather than becoming a
+# <figure> with a visible caption. Both match what the Python-Markdown reader this
+# replaces did.
+from: markdown-smart-implicit_figures
+to: html5
+wrap: none
+
+# Math is emitted as MathJax delimiters, \(...\) and \[...\], inside
+# <span class="math ...">; the theme loads MathJax on pages that contain them.
+html-math-method:
+  method: mathjax
+
+# Citations: [@key] in a post resolves against content/<post-stem>.bib, which
+# pelican-pandoc-reader passes as --bibliography automatically. The bibliography is
+# rendered into the post's "::: {#refs}" div. IEEE is a numeric style, so citations
+# render as [1] and entries are listed in citation order.
+citeproc: true
+csl: ${.}/ieee.csl
+metadata:
+  link-citations: true
