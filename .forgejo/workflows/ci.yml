@@ -10,9 +10,11 @@ jobs:
       image: data.forgejo.org/oci/node:20-bookworm
     steps:
       - name: checkout
-        uses: https://code.forgejo.org/actions/checkout@v4
+        # v4 = v4.4.0+backports
+        uses: https://code.forgejo.org/actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: setup uv
-        uses: https://github.com/astral-sh/setup-uv@v6
+        # v6.8.0
+        uses: https://github.com/astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e
         with:
           enable-cache: true
           prune-cache: false
@@ -28,16 +30,19 @@ jobs:
     runs-on: docker
     steps:
       - name: checkout
-        uses: https://code.forgejo.org/actions/checkout@v4
+        # v4 = v4.4.0+backports
+        uses: https://code.forgejo.org/actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: setup uv
-        uses: https://github.com/astral-sh/setup-uv@v6
+        # v6.8.0
+        uses: https://github.com/astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e
         with:
           enable-cache: true
           prune-cache: false
       - name: build
         run: uv run --group=dev just publish
       - name: upload-artifacts
-        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        # v4 = v4.3.1+patch
+        uses: https://code.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e
         with:
           name: web-content-${{ github.sha }}
           path: |
@@ -55,14 +60,17 @@ jobs:
     runs-on: docker
     steps:
       - name: checkout
-        uses: https://code.forgejo.org/actions/checkout@v4
+        # v4 = v4.4.0+backports
+        uses: https://code.forgejo.org/actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: download-artifacts
-        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        # v4 = v4.1.4+patch
+        uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e
         with:
           name: web-content-${{ github.sha }}
           path: output
       - name: setup uv
-        uses: https://github.com/astral-sh/setup-uv@v6
+        # v6.8.0
+        uses: https://github.com/astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e
         with:
           enable-cache: true
           prune-cache: false
@@ -77,7 +85,8 @@ jobs:
     runs-on: docker
     steps:
       - name: download-artifacts
-        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        # v4 = v4.1.4+patch
+        uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e
         with:
           name: web-content-${{ github.sha }}
           path: output
@@ -97,12 +106,14 @@ jobs:
     runs-on: docker
     steps:
       - name: checkout
-        uses: https://code.forgejo.org/actions/checkout@v4
+        # v4 = v4.4.0+backports
+        uses: https://code.forgejo.org/actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: main
           fetch-depth: 0
       - name: setup uv
-        uses: https://github.com/astral-sh/setup-uv@v6
+        # v6.8.0
+        uses: https://github.com/astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e
         with:
           enable-cache: true
           prune-cache: false
