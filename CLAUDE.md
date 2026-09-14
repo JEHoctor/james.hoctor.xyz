@@ -8,16 +8,6 @@ cost real time to work out.
 A Pelican static site for a personal blog. It is built, deployed and mirrored by Forgejo Actions
 running on a self-hosted forge. A **redacted** copy of the repository is published to GitHub.
 
-## The forge is Forgejo, not GitHub
-
-`gh` does not work here and will tell you no remote matches a known GitHub host. Use `tea`
-(authenticated as the Forgejo user `claude`) or `fj`.
-
-- A draft PR reports `mergeable=false` and cannot be merged; removing the `WIP: ` title prefix
-  is what un-drafts it.
-- When reading CI logs, the run-level `status` can still say `running` after every job has
-  finished; check the jobs rather than trusting the run.
-
 ## Building and checking locally
 
 Everything goes through `just` (the Makefile was removed; anything telling you to run `make` is
@@ -101,9 +91,8 @@ reports every branch as updated, something is wrong.
 
 ## Conventions
 
-- Agent PRs start with a bold line identifying the agent and its supervision, for example
-  **This PR was written by an agent (Claude Code), reviewed by the agent's operator.** — even
-  though the `claude` user already marks them as agent work.
+- Agent PRs start with a bold line that makes them identifiable at a glance, for example
+  **This PR was written by an agent (Claude Code).**
 - Commit messages: a short subject, then prose explaining *why*. Wrap around 88 characters. Avoid
   bullet-point summaries of the diff.
 - End commits made by an agent with the `Co-Authored-By:` and `Claude-Session:` trailers.
