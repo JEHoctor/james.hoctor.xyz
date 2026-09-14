@@ -92,33 +92,6 @@ The job needs the build artifact and an `npm install`, since htmlhint and stylel
 
 ---
 
-## 4. Ruff tooling debt
-
-**Status:** found while working on something else, not addressed. Three separate problems.
-
-### 4a. Two different ruff versions
-
-The `dev` dependency group resolves ruff **0.16.1**; `.pre-commit-config.yaml` pins the
-ruff-pre-commit hook at **v0.15.7**. They disagree about which rules exist, so
-`uv run --group=dev ruff check .` and `just check-precommit` can give different answers on the
-same code. Pick one version and make both use it. Note that pinning the dev group was supposed to
-end exactly this class of problem, so leaving the two out of step defeats it.
-
-### 4b. `CPY001` fires under 0.16.1
-
-`select = ["ALL"]` now enables `missing-copyright-notice`, which reports `pelicanconf.py`,
-`publishconf.py`, `automation/mirror-redacted.py` and one notebook. A personal blog does not want
-copyright headers. Add `CPY001` to the `ignore` list in `pyproject.toml`. CI does not currently
-fail on this only because CI runs the older pre-commit-pinned ruff.
-
-### 4c. ruff descends into `.claude/worktrees/`
-
-`ruff check .` reports `RUF100` in `.claude/worktrees/devcontainer/publishconf.py`. That path is a
-git worktree — a separate checkout, not part of this source tree. Add an `exclude` for `.claude`
-in `pyproject.toml`.
-
----
-
 ## 5. Give the other automation scripts the same logging treatment
 
 **Status:** not started.
@@ -134,24 +107,10 @@ terminal rather than greppability, and the design need not match exactly.
 
 ---
 
-## 6. Decide about the `rich` version floor
-
-**Status:** open question, no action needed unless you care.
-
-The original combined branch raised the `automation` group's `rich` floor to `>=14.3.3`. When the
-work was split up that change was not carried across, so `pyproject.toml` still says `>=14.0.0`
-and the lockfile pins 14.0.0. The script runs fine on 14.0.0 in CI. Bump it or do not, but the
-divergence was unintentional.
-
----
-
 ## 7. Housekeeping
 
 - Around 25 remote branches have zero commits ahead of `main` and could be deleted. Several
   `automate/*` branches were abandoned in 2025 and are superseded.
-- The old Makefile's `help` target documented the `make DEBUG=1 html` idiom. `just --list` shows
-  that `html` takes `debug` and `relative` parameters but does not explain them. A line in
-  `readme.md` would close the gap.
 - Mirror runs leave their temporary config directory behind in `/tmp`. The secret mailmap inside
   it is deleted as soon as git-filter-repo has consumed it, so nothing sensitive persists, but the
   directories accumulate.
