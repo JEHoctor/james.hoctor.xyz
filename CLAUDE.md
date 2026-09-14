@@ -10,94 +10,13 @@ running on a self-hosted forge. A **redacted** copy of the repository is publish
 
 ## The forge is Forgejo, not GitHub
 
-`gh` does not work here and will tell you no remote matches a known GitHub host. Use `tea`, which
-is already authenticated, or `fj`.
+`gh` does not work here and will tell you no remote matches a known GitHub host. Use `tea`
+(authenticated as the Forgejo user `claude`) or `fj`.
 
-`tea`'s login is configured to match this remote, so commands work from inside the checkout with
-no `--repo` flag. If you ever see it print a `NOTE: no login matched this repository` line, the
-configuration has regressed; the flag is the workaround, not the norm.
-
-`tea api` takes any REST path and expands `{owner}` and `{repo}` placeholders:
-
-```bash
-tea api "repos/{owner}/{repo}/actions/runs?limit=5"
-```
-
-Useful commands beyond the obvious:
-
-```bash
-# Edit a pull request. Removing a "WIP: " title prefix is what un-drafts it;
-# a draft PR reports mergeable=false and cannot be merged.
-tea api -X PATCH -f title="New title" "repos/{owner}/{repo}/pulls/31"
-
-# Comment on a PR or issue. (Needs the write:issue scope, which the token has had since
-# 2026-09-14; before that this call was refused and the workaround was a review of type
-# COMMENT on the pulls endpoint, or PATCHing the PR description.)
-tea api -X POST -f body='text' "repos/{owner}/{repo}/issues/27/comments"
-
-tea pr merge 30 --style merge
-tea pr close 27
-```
-
-`fj` has `actions tasks|variables|secrets|dispatch` but no log subcommand, so `tea api` is the
-better tool for CI work.
-
-### Do not scrape tea's human-facing output
-
-`tea pr ls` draws a Unicode box (`│`, `─`, `┌`) and `tea pr <n>` embeds OSC-8 hyperlink escapes,
-so its output is for eyes only. Grep patterns against it fail in confusing ways — a literal `│`
-in a pattern is rejected outright as an invalid escape by some greps, and the escape sequences
-smear across the fields you were trying to read.
-
-Ask for structured output instead. Either JSON from `tea` itself:
-
-```bash
-tea pr ls --output json | jq -r '.[] | "\(.index) \(.title)"'
-```
-
-or go through the API, which is the better choice whenever you want a field the table does not
-show, such as `draft` or `mergeable`:
-
-```bash
-tea api "repos/{owner}/{repo}/pulls?state=open&limit=20" \
-  | jq -r '.[] | "#\(.number) draft=\(.draft) \(.head.ref) \(.title)"'
-```
-
-While on the subject of pipelines: resist `2>/dev/null` on commands whose success you have not
-otherwise confirmed. It hides real failures. A `git add` whose pathspec matched nothing once
-looked like a clean run here, and the commit that followed was missing four of its five files.
-Redirect stderr somewhere you still read it, rather than discarding it.
-
-## Reading CI logs
-
-This is the part worth knowing. Forgejo 16 added log endpoints; on 15 they did not exist at all,
-and no amount of guessing paths would have found them. Check `/swagger.v1.json` if you suspect an
-endpoint is missing rather than that you have the path wrong.
-
-Three steps, because the log is per job and jobs are per run:
-
-```bash
-# 1. Find the run. Note both numbers: the web UI URL uses index_in_repo,
-#    but every API call below wants id.
-tea api "repos/{owner}/{repo}/actions/runs?limit=5" \
-  | jq -r '.workflow_runs[] | "id=\(.id) index=\(.index_in_repo) \(.status) \(.title)"'
-
-# 2. Jobs for that run. Returns a bare array, not an object.
-tea api "repos/{owner}/{repo}/actions/runs/433/jobs" \
-  | jq -r '.[] | "job_id=\(.id) \(.name) \(.status)"'
-
-# 3. The log, as plain text. Download it whole before filtering.
-tea api "repos/{owner}/{repo}/actions/jobs/1833/logs" > job.log
-```
-
-The run-level `status` can still say `running` after every job has finished, so check the jobs
-rather than trusting the run.
-
-Logs are prefixed with a timestamp on every line. To read one comfortably:
-
-```bash
-sed 's/^[0-9T:.Z-]* //' job.log
-```
+- A draft PR reports `mergeable=false` and cannot be merged; removing the `WIP: ` title prefix
+  is what un-drafts it.
+- When reading CI logs, the run-level `status` can still say `running` after every job has
+  finished; check the jobs rather than trusting the run.
 
 ## Building and checking locally
 
@@ -182,12 +101,12 @@ reports every branch as updated, something is wrong.
 
 ## Conventions
 
-- Agent PRs should identify themselves as such at the top, unless the PR is created with a
-  designated agent user who can be identified as an agent by their username. We don't have that
-  yet, so be explicit.
+- Agent PRs start with a bold line identifying the agent and its supervision, for example
+  **This PR was written by an agent (Claude Code), reviewed by the agent's operator.** — even
+  though the `claude` user already marks them as agent work.
 - Commit messages: a short subject, then prose explaining *why*. Wrap around 88 characters. Avoid
   bullet-point summaries of the diff.
-- End commits made by an agent with a `Co-Authored-By:` trailer.
+- End commits made by an agent with the `Co-Authored-By:` and `Claude-Session:` trailers.
 - `main` is a protected branch and the `claude` user cannot push to it (`Forgejo: Not allowed to
   push to protected branch main`); that is deliberate. Everything an agent does lands through a
   pull request, including one-line documentation fixes. The human commits content directly to
