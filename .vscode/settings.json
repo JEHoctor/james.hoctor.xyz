@@ -1,5 +1,9 @@
 {
     "files.insertFinalNewline": true,
+    "editor.rulers": [120],
+    "[yaml]": {
+        "editor.rulers": [130]
+    },
     "cSpell.words": [
         "ACADEMICONS",
         "Blogroll",

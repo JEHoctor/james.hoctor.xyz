@@ -28,6 +28,12 @@ terminal rather than greppability, and the design need not match exactly.
 
 ## 2. Housekeeping
 
+- The actions in `.forgejo/workflows/ci.yml` are pinned to commit SHAs, with the tag they
+  corresponded to in a trailing comment. Nothing bumps them automatically (no Renovate on the
+  forge), so re-resolve them now and then: `git ls-remote --tags <action-url>` for the
+  code.forgejo.org ones, `gh api repos/astral-sh/setup-uv/git/ref/tags/v6` (then peel the tag
+  object) for setup-uv. Newer majors already exist for all four (checkout v7, upload-artifact v5,
+  download-artifact v7); moving majors is a separate decision from refreshing pins.
 - Around 25 remote branches have zero commits ahead of `main` and could be deleted. Several
   `automate/*` branches were abandoned in 2025 and are superseded.
 - Mirror runs leave their temporary config directory behind in `/tmp`. The secret mailmap inside
