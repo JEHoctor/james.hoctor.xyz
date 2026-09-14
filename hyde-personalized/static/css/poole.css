@@ -69,10 +69,6 @@ a {
   text-decoration: none;
 }
 
-a strong {
-  color: inherit;
-}
-
 /* `:focus` is linked to `:hover` for basic accessibility */
 a:hover,
 a:focus {
@@ -115,6 +111,12 @@ p {
 
 strong {
   color: #303030;
+}
+
+/* Kept after `strong` so source order matches specificity order (stylelint's
+   no-descending-specificity). Functionally inert: `a strong` wins on specificity anyway. */
+a strong {
+  color: inherit;
 }
 
 
@@ -387,11 +389,11 @@ tbody tr:nth-child(odd) th {
   display: inline;
 }
 
-.post-tags li:after {
+.post-tags li::after {
   content: ", ";
 }
 
-.post-tags li:last-child:after {
+.post-tags li:last-child::after {
   content: "";
 }
 
