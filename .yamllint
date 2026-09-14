@@ -8,5 +8,5 @@ rules:
   truthy:
     ignore: /.forgejo/workflows/*.yml
   line-length:
-    max: 120
+    max: 130
     allow-non-breakable-words: true
