@@ -30,7 +30,9 @@ Useful commands beyond the obvious:
 # a draft PR reports mergeable=false and cannot be merged.
 tea api -X PATCH -f title="New title" "repos/{owner}/{repo}/pulls/31"
 
-# Comment on a PR or issue.
+# Comment on a PR or issue. (Needs the write:issue scope, which the token has had since
+# 2026-09-14; before that this call was refused and the workaround was a review of type
+# COMMENT on the pulls endpoint, or PATCHing the PR description.)
 tea api -X POST -f body='text' "repos/{owner}/{repo}/issues/27/comments"
 
 tea pr merge 30 --style merge
@@ -186,9 +188,9 @@ reports every branch as updated, something is wrong.
 - Commit messages: a short subject, then prose explaining *why*. Wrap around 88 characters. Avoid
   bullet-point summaries of the diff.
 - End commits made by an agent with a `Co-Authored-By:` trailer.
-- Direct commits to `main` are normal for blog/post/content/notebook changes, but mostly that
-  content is updated by a human. Anything touching automation or CI should go through a pull
-  request. If you are unsure or need to mix types of changes, use a PR. In some circumstances, a
-  direct automation commit to main can make sense, but get human approval.
+- `main` is a protected branch and the `claude` user cannot push to it (`Forgejo: Not allowed to
+  push to protected branch main`); that is deliberate. Everything an agent does lands through a
+  pull request, including one-line documentation fixes. The human commits content directly to
+  `main` themselves.
 - Drafts carry `Status: draft` in their Pelican metadata. That is what keeps them off both the
   public site and the mirror.
