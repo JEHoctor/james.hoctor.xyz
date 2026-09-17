@@ -19,7 +19,7 @@ just publish         # build with production settings
 just check-precommit # all pre-commit hooks
 just check-scripts   # shfmt + shellcheck
 just validate        # htmlhint/stylelint over output/ (also runs in CI, off the deploy path)
-just init            # submodule, pre-commit hooks, npm install
+just init            # pre-commit hooks, npm install
 ```
 
 Development tooling is pinned in dependency groups, so prefix with the group when calling a tool
