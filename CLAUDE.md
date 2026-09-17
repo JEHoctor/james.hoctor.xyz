@@ -17,10 +17,25 @@ stale). `just --list` shows all recipes. The common ones:
 just html            # build to output/
 just publish         # build with production settings
 just check-precommit # all pre-commit hooks
-just check-scripts   # shfmt + shellcheck
+just test            # pytest: front-matter parser and the mirror's publication rule
 just validate        # htmlhint/stylelint over output/ (also runs in CI, off the deploy path)
 just init            # pre-commit hooks, npm install
+just new-post        # also retitle-post, publish-post, modify-post -> automation/post.py
 ```
+
+## Post metadata
+
+Every file under `content/` starts with a YAML front-matter block fenced by `---`, which
+pandoc-reader requires. Values are double-quoted (`date: "2025-04-24 11:27"` is ambiguous YAML
+unquoted, and `"True"` would become a boolean). `automation/frontmatter.py` is the one parser for
+this block, used by both the post CLI and the mirror script so the two cannot disagree; it uses
+ruamel.yaml in round-trip mode, so editing a key preserves everything else byte for byte
+(`tests/test_frontmatter.py` proves this against every real post). Do not edit headers with `sed`.
+
+The post commands are subcommands of `automation/post.py` (`new`, `retitle`, `publish`, `modify`),
+run via `just`. `new` names the file with Pelican's own slugify of the title, so file, URL and any
+`<slug>.bib` sidecar agree. `retitle` is deliberately careful: it writes the new file (and a copy
+of the sidecar), leaves the old ones as `.old`, and prints the diff/rm commands for you to run.
 
 Development tooling is pinned in dependency groups, so prefix with the group when calling a tool
 directly: `uv run --group=dev ruff check .`. Groups are `dev`, `automation` and `notebook`.
@@ -131,10 +146,10 @@ reports every branch as updated, something is wrong.
   push to protected branch main`); that is deliberate. Everything an agent does lands through a
   pull request, including one-line documentation fixes. The human commits content directly to
   `main` themselves.
-- Every post and page declares a `status` in its metadata header (YAML front matter, as
-  pandoc-reader requires): `published`, `hidden` (pages that are built but not listed) or `draft`.
-  The mirror **fails closed** on it: a file is published only if the header says `published` or
-  `hidden`; a draft, an unknown value, a missing status or a header the script cannot read are all
-  withheld and listed in the log with the status it saw. If you change how metadata is written,
-  read the `mirror-preview` job's log before merging (see above) — an earlier fail-open check once
-  matched nothing and put every draft on GitHub.
+- Every post and page declares a `status` in its front matter: `published`, `hidden` (pages that
+  are built but not listed) or `draft`. The mirror **fails closed** on it: a file is published
+  only if the header parses and says `published` or `hidden`; a draft, an unknown value, a missing
+  status (`none`) or an unparseable header (`unreadable`) are all withheld and listed in the log
+  with what the script saw. If you change how metadata is written, read the `mirror-preview` job's
+  log before merging (see above) — an earlier fail-open check once matched nothing and put every
+  draft on GitHub.

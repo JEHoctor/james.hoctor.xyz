@@ -16,12 +16,10 @@ jobs:
         with:
           enable-cache: true
           prune-cache: false
-      - name: run ShellCheck and shfmt
-        run: |
-          uv run --group=dev shfmt -d **/*.sh
-          uv run --group=dev shellcheck **/*.sh
       - name: run pre-commit checks
-        run: SKIP="shellcheck,shfmt" uv run --group=dev pre-commit run --all-files
+        run: uv run --group=dev pre-commit run --all-files
+      - name: run tests
+        run: uv run --group=dev --group=automation pytest
   build:
     name: build
     needs: quality
