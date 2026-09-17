@@ -56,7 +56,7 @@ uvx --with='certbot-nginx' certbot --nginx
 Maybe you will run into issues with this if using sudo instead of a root shell.
 If so, you could try `sudo su`.
 
-(Note that step 7 has an alternate version in the official instructions that I haven't tested. I'm guessing it would work as expected -- just add "certonly" to the command.)
+(Note that step 7 has an alternate version in the official instructions that I haven't tested. I'm guessing it would work as expected -- just add `certonly` to the command.)
 
 ## Step 8: Set up automatic renewal
 
@@ -89,7 +89,7 @@ The Python code is the same in both versions, but the official version is carefu
 I don't think this matters at all, so I've chosen to rely on whatever version of Python 3 is installed.
 This is typically going to end up being the exact same interpreter, since the official instructions use system Python to create the Certbot venv.
 
-My final command uses `uvx` (a tool packaged with uv) to run "certbot renew -q" in a temporary venv. The "--with='certbot-nginx'" flag ensures that this venv includes the `certbot-nginx` package. The venv will include the `certbot` package because uv infers this dependency from the command "certbot renew -q". The "--refresh" command ensures that uv checks for a new version of Certbot on PyPI before creating the venv.
+My final command uses `uvx` (a tool packaged with uv) to run `certbot renew -q` in a temporary venv. The `--with='certbot-nginx'` flag ensures that this venv includes the `certbot-nginx` package. The venv will include the `certbot` package because uv infers this dependency from the command `certbot renew -q`. The `--refresh` flag ensures that uv checks for a new version of Certbot on PyPI before creating the venv.
 
 ## Step 9: Confirm that Certbot worked
 
@@ -107,7 +107,7 @@ You might be thinking that this approach will be slow and inefficient because it
 Actually, uv makes it fast and efficient to create venvs, which is why it provides the `uvx` command for single use venvs.
 Building virtual environments with pip and venv is pretty slow.
 
-We could save some network bandwidth by removing the "--refresh" flag for uvx in the cron job, but I'm not sure how to keep uv's package cache reasonably up-to-date without it.
+We could save some network bandwidth by removing the `--refresh` flag for uvx in the cron job, but I'm not sure how to keep uv's package cache reasonably up-to-date without it.
 
 I mainly find using uv is superior because it eliminates a monthly manual update.
 It also reduces the number of setup commands, but this is just an extra benefit to me.
