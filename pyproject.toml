@@ -18,7 +18,7 @@ automation = [
     # Floor kept deliberately low: mirror-redacted.py only uses Console.print, and CI runs 14.0.0.
     "rich>=14.0.0",
     "ruamel-yaml>=0.18.0",
-    "typer>=0.24.1",
+    "typer>=0.27.0",
 ]
 dev = [
     "ipython>=9.11.0",
