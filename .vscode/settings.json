@@ -30,7 +30,6 @@
         "pydocstyle",
         "pylsp",
         "rrsync",
-        "shellcheck",
         "SITENAME",
         "SITESUBTITLE",
         "SITEURL"
