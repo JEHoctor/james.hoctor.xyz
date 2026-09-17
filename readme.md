@@ -20,6 +20,11 @@ parameters, `debug` and `relative`, whose defaults come from the `DEBUG` and `RE
 traceback instead of a one-line `CRITICAL`), and `just RELATIVE=1 html` passes `--relative-urls` so
 the output can be browsed from the local filesystem. They combine: `just DEBUG=1 RELATIVE=1 serve`.
 
+Posts are created and updated with `just new-post`, `just retitle-post`, `just publish-post` and
+`just modify-post`, which drive `automation/post.py`. Each post starts with a YAML front-matter
+block; the commands edit one key at a time and leave the rest of the block untouched. `just test`
+runs the test suite.
+
 ## Credit
 
 I generated the favicon package with https://realfavicongenerator.net/.
