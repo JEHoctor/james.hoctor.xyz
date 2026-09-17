@@ -19,6 +19,15 @@ PANDOC_DEFAULTS_FILES = [str(Path(__file__).parent / "pandoc-config" / "defaults
 # Bibliographies live next to their posts, but they are not content.
 IGNORE_FILES = [".#*", "*.bib"]
 
+# Name the plugins explicitly. Left unset, Pelican loads every installed pelican.plugins.* package,
+# and `uv run` does not uninstall packages a previous branch needed, so a stale .venv would silently
+# add (or crash on) plugins this branch never asked for.
+PLUGINS = [
+    "pelican.plugins.pandoc_reader",
+    "pelican.plugins.seo",
+    "pelican.plugins.sitemap",
+]
+
 TIMEZONE = "America/New_York"
 
 DEFAULT_LANG = "en"
