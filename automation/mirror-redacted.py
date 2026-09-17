@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, Annotated
 import typer
 from rich.console import Console
 
+import frontmatter
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -90,61 +92,35 @@ def print_for_dry_run(*, arg_groups: Sequence[Sequence[str]]) -> None:
     console.print(code, soft_wrap=True)
 
 
-# Only a post whose metadata header explicitly says so is published. Anything else, including a
+# Only a post whose front matter explicitly says so is published. Anything else, including a
 # header this code cannot read, is withheld: the failure mode of a wrong guess must be a missing
-# post on the mirror, never a draft on it. (A header conversion once quoted every value, the old
-# exact-string draft check matched nothing, and every draft was published.) Both header styles
-# are read: Pelican's own `Key: value` block ended by the first blank line, and a YAML
-# front-matter block fenced by `---`, as pandoc-reader requires.
+# post on the mirror, never a draft on it. (A header conversion once quoted every value, an
+# exact-string draft check matched nothing, and every draft was published.) The header is parsed
+# by the same module the post CLI writes it with, so the two cannot disagree about its shape.
 PUBLISHED_STATUSES = frozenset({"published", "hidden"})
-STATUS_LINE_RE = re.compile(r"""^status\s*:\s*["']?(?P<value>[^"'\s]*)["']?\s*$""", re.IGNORECASE)
+UNREADABLE = "unreadable"
 
 
-def header_lines(text: str) -> list[str]:
-    """Return the metadata header lines of a Markdown source, without the fences.
-
-    Args:
-        text (str): The whole file.
-
-    Returns:
-        list[str]: Lines of the YAML front-matter block if the file starts with `---`, otherwise
-            the Pelican-style block that runs up to the first blank line.
-    """
-    lines = text.splitlines()
-    if lines and lines[0].strip() == "---":
-        body = []
-        for line in lines[1:]:
-            if line.strip() in ("---", "..."):
-                return body
-            body.append(line)
-        return body  # unterminated block: treat everything as header, the safe direction
-    header = []
-    for line in lines:
-        if not line.strip():
-            break
-        header.append(line)
-    return header
-
-
-def publication_status(text: str) -> str | None:
-    """Return the lower-cased status declared in a Markdown source's header, or None if absent."""
-    for line in header_lines(text):
-        match = STATUS_LINE_RE.match(line.strip())
-        if match:
-            return match.group("value").lower()
-    return None
-
-
-def is_publishable(path: Path) -> bool:
-    """Return True only if a Markdown file's header declares a status that means published.
+def publication_status(path: Path) -> str | None:
+    """Return the status a Markdown file declares, lower-cased.
 
     Args:
         path (Path): Path to the Markdown file.
 
     Returns:
-        bool: True for `published` or `hidden`; False for `draft`, any other value, and no status.
+        str | None: The status value; None if the header has no status; the marker string
+            ``"unreadable"`` if the file has no front matter or it does not parse. Only
+            ``"published"`` and ``"hidden"`` lead to publication.
     """
-    return publication_status(path.read_text()) in PUBLISHED_STATUSES
+    try:
+        return frontmatter.status_of(frontmatter.read(path))
+    except (frontmatter.FrontMatterError, UnicodeDecodeError):
+        return UNREADABLE
+
+
+def is_publishable(path: Path) -> bool:
+    """Return True only if a Markdown file's header declares a status that means published."""
+    return publication_status(path) in PUBLISHED_STATUSES
 
 
 def is_withheld_sidecar(path: Path) -> bool:
@@ -185,16 +161,11 @@ def non_draft_content_files() -> list[Path]:
 
 
 def associated_notebooks(content_path: Path) -> list[Path]:
-    """Return all Jupyter notebooks listed in the metadata of a Pelican Markdown file."""
-    with content_path.open() as f:
-        for line in f:
-            stripped = line.strip()
-            if not stripped:
-                break  # End of Pelican metadata block
-            if stripped.lower().startswith("notebooks:"):
-                notebooks = stripped.split(":", maxsplit=1)[1].strip()
-                return [NOTEBOOKS_DIR / f"{n.strip()}.ipynb" for n in notebooks.split(",")]
-    return []
+    """Return all Jupyter notebooks listed in the metadata of a published Markdown file.
+
+    Only called for files that passed `is_publishable`, so the header is known to parse.
+    """
+    return [NOTEBOOKS_DIR / f"{name}.ipynb" for name in frontmatter.notebooks_of(frontmatter.read(content_path))]
 
 
 def notebooks_to_include(included_content: list[Path]) -> list[Path]:
@@ -458,7 +429,7 @@ def plan_published_paths() -> set[str]:
         log(f"  + {notebook.relative_to(REPO_ROOT)}")
     log(f"Withholding {len(excluded_drafts)} post(s) whose header does not say published or hidden:")
     for draft in excluded_drafts:
-        status = publication_status(draft.read_text())
+        status = publication_status(draft)
         log(f"  - {draft.relative_to(REPO_ROOT)}  (status: {status if status is not None else 'none'})")
     log(f"Withholding {len(draft_sidecars)} sidecar file(s) belonging to withheld posts:")
     for sidecar in draft_sidecars:
