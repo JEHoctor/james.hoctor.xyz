@@ -3,7 +3,7 @@
 
 Each command edits a post's YAML front matter through `frontmatter`, so a change to one key leaves
 the rest of the header exactly as it was. Run through just (`just new-post` and friends) or
-directly; every command is interactive and prints what it did with a `[post]` prefix.
+directly; every command is interactive and prints what it did with a `[post-<command>]` prefix.
 """
 
 from __future__ import annotations
@@ -30,7 +30,16 @@ import frontmatter as fm
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = REPO_ROOT / "content"
 DATE_FORMAT = "%Y-%m-%d %H:%M"
-LOG_PREFIX = "[post]"
+LOG_PREFIX = "[post]"  # narrowed to e.g. "[post-publish]" once the subcommand is known
+
+
+class _Log:
+    """Holds the current log prefix; the app callback narrows it to the running subcommand."""
+
+    prefix: str = LOG_PREFIX
+
+
+_log = _Log()
 
 # Files that sit next to a post under the same stem and must follow it when it is renamed.
 SIDECAR_SUFFIXES = (".bib",)
@@ -42,13 +51,20 @@ err_console = Console(markup=False, highlight=False, stderr=True, soft_wrap=True
 
 def log(message: str) -> None:
     """Print a line of progress."""
-    console.print(f"{LOG_PREFIX} {message}")
+    console.print(f"{_log.prefix} {message}")
 
 
 def fail(message: str) -> NoReturn:
     """Print an error and exit with status 1."""
-    err_console.print(f"{LOG_PREFIX} {message}", style="red")
+    err_console.print(f"{_log.prefix} {message}", style="red")
     raise typer.Exit(1)
+
+
+@app.callback()
+def _name_the_subcommand(ctx: typer.Context) -> None:
+    """Prefix every log line with the subcommand, e.g. `[post-publish]`."""
+    if ctx.invoked_subcommand:
+        _log.prefix = f"[post-{ctx.invoked_subcommand}]"
 
 
 def now() -> str:
