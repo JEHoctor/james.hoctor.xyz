@@ -310,12 +310,18 @@ def find_merged_draft_branches(source_dir: str, target_dir: str) -> list[str]:
         # rev-parse below cannot resolve it.
         if not branch or branch in ("origin/main", "origin/HEAD -> origin/main"):
             continue
-        source_branch_commit = subprocess.run(
-            args=["git", "-C", source_dir, "rev-parse", "--verify", f"{branch}^{{commit}}"],
+        source_lookup = subprocess.run(
+            args=["git", "-C", source_dir, "rev-parse", "--verify", "--quiet", f"{branch}^{{commit}}"],
             capture_output=True,
             text=True,
-            check=True,
-        ).stdout.strip()
+            check=False,
+        )
+        if source_lookup.returncode != 0:
+            # The mirror still has a branch the source no longer does (deleted since the last run).
+            # The push prunes it, so there is nothing to decide here.
+            log(f"  {branch} exists on the mirror but not in the source; the push will prune it.")
+            continue
+        source_branch_commit = source_lookup.stdout.strip()
         target_merged_commit = subprocess.run(
             args=["git", "-C", target_dir, "rev-parse", "--verify", f"{branch}^{{commit}}"],
             capture_output=True,
@@ -441,6 +447,8 @@ def plan_published_paths() -> set[str]:
     excluded_sidecars = sorted(
         f for f in CONTENT_DIR.rglob("*") if f.is_file() and f.suffix in SIDECAR_SUFFIXES and f not in extra_paths
     )
+    orphan_sidecars = [f for f in excluded_sidecars if not f.with_suffix(".md").is_file()]
+    draft_sidecars = [f for f in excluded_sidecars if f not in orphan_sidecars]
 
     log(f"Publishing {len(included_markdown)} post(s):")
     for post in sorted(included_markdown):
@@ -452,11 +460,52 @@ def plan_published_paths() -> set[str]:
     for draft in excluded_drafts:
         status = publication_status(draft.read_text())
         log(f"  - {draft.relative_to(REPO_ROOT)}  (status: {status if status is not None else 'none'})")
-    log(f"Withholding {len(excluded_sidecars)} sidecar file(s) of drafts or of no post:")
-    for sidecar in excluded_sidecars:
+    log(f"Withholding {len(draft_sidecars)} sidecar file(s) belonging to withheld posts:")
+    for sidecar in draft_sidecars:
+        log(f"  - {sidecar.relative_to(REPO_ROOT)}")
+    log(f"Withholding {len(orphan_sidecars)} sidecar file(s) with no post of the same name (a rename leftover?):")
+    for sidecar in orphan_sidecars:
         log(f"  - {sidecar.relative_to(REPO_ROOT)}")
 
     return {str(f.relative_to(REPO_ROOT)) for f in extra_paths}
+
+
+def report_publication_delta(target_dir: str, allowed_paths: set[str]) -> None:
+    """Say which posts this run would publish or withdraw compared with the mirror's current main.
+
+    This is the line a reviewer needs: a pull request that is not meant to publish anything should
+    show no change here, and one that publishes should name exactly the post it publishes. More
+    than one newly published post in a single run is unusual enough to be flagged.
+
+    Args:
+        target_dir (str): Path to the clone of the mirror, before filtering.
+        allowed_paths (set[str]): Repository-relative paths this run allows under filtered prefixes.
+    """
+    on_mirror = {
+        path
+        for path in subprocess.run(
+            args=["git", "-C", target_dir, "ls-tree", "-r", "--name-only", "refs/remotes/origin/main"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.splitlines()
+        if path.startswith("content/") and path.endswith(".md")
+    }
+    planned = {path for path in allowed_paths if path.startswith("content/") and path.endswith(".md")}
+    newly_published = sorted(planned - on_mirror)
+    withdrawn = sorted(on_mirror - planned)
+
+    log(f"Compared with the mirror's current main, this run newly publishes {len(newly_published)} post(s):")
+    for path in newly_published:
+        log(f"  + {path}")
+    log(f"and withdraws {len(withdrawn)} post(s) that the mirror currently shows:")
+    for path in withdrawn:
+        log(f"  - {path}")
+    if len(newly_published) > 1:
+        log(f"WARNING: {len(newly_published)} posts would be newly published at once. Publishing is normally")
+        log("WARNING: one post per change; more than that deserves an explanation before merging.")
+    if withdrawn:
+        log("WARNING: withdrawing a post from the mirror is unusual. Intended retraction, or a status regression?")
 
 
 def checkout_all_branches(target_dir: str) -> None:
@@ -581,14 +630,15 @@ def report_changes(before: dict[str, str], after: dict[str, str]) -> None:
     log("=" * RULE_WIDTH)
 
 
-def check_preconditions() -> tuple[str, str]:
+def check_preconditions(*, dry_run: bool) -> tuple[str, str]:
     """Check that the required secrets are present and that we are somewhere safe to mirror from.
 
     Returns:
         tuple[str, str]: The mirror access URL and the contents of the secret mailmap.
 
     Raises:
-        typer.Exit: If a secret is missing, or this is not the root of a checkout of main.
+        typer.Exit: If a secret is missing, this is not the root of a checkout, or the checkout is
+            not on main and this is not a dry run.
     """
     mirror_access_url = os.environ.get("MIRROR_ACCESS_URL")
     secret_mailmap = os.environ.get("SECRET_MAILMAP")
@@ -605,9 +655,13 @@ def check_preconditions() -> tuple[str, str]:
         text=True,
         check=True,
     )
-    if branch_result.stdout.strip() != "main":
-        err_console.print(f"{LOG_PREFIX} Must mirror from the main branch.")
-        raise typer.Exit(1)
+    branch = branch_result.stdout.strip()
+    if branch != "main":
+        if not dry_run:
+            err_console.print(f"{LOG_PREFIX} Must mirror from the main branch.")
+            raise typer.Exit(1)
+        log(f"On branch {branch!r}, not main. Allowed for a dry run: the result shows what the mirror")
+        log("would publish if this branch were main, which is the point of previewing a pull request.")
 
     toplevel = subprocess.run(
         args=["git", "rev-parse", "--show-toplevel"],
@@ -619,7 +673,7 @@ def check_preconditions() -> tuple[str, str]:
         err_console.print(f"{LOG_PREFIX} Must be run from the root of the repository.")
         raise typer.Exit(1)
 
-    log("Secrets present, on main, at the repository root.")
+    log("Secrets present, at the repository root.")
     return mirror_access_url, secret_mailmap
 
 
@@ -629,7 +683,7 @@ def mirror(
 ) -> None:
     """Mirror a filtered version of this repository to a remote."""
     log_step("Checking preconditions")
-    mirror_access_url, secret_mailmap = check_preconditions()
+    mirror_access_url, secret_mailmap = check_preconditions(dry_run=dry_run)
 
     # Create separate temp dirs: one for the git clone, one for filter-repo config files.
     source_dir = "."
@@ -651,6 +705,7 @@ def mirror(
 
     log_step("Deciding what may be published")
     allowed_paths = plan_published_paths()
+    report_publication_delta(target_dir, allowed_paths)
     paths_lines = [f"regex:^(?!{'|'.join(FILTERED_PREFIXES)}).*$", ""]
     paths_lines.extend(f"literal:{path}" for path in sorted(allowed_paths))
     paths_path = Path(config_dir) / "paths.txt"
