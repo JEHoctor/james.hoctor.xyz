@@ -90,27 +90,61 @@ def print_for_dry_run(*, arg_groups: Sequence[Sequence[str]]) -> None:
     console.print(code, soft_wrap=True)
 
 
-def is_pelican_draft(path: Path) -> bool:
-    """Return True if a Pelican Markdown file has Status: draft in its metadata.
+# Only a post whose metadata header explicitly says so is published. Anything else, including a
+# header this code cannot read, is withheld: the failure mode of a wrong guess must be a missing
+# post on the mirror, never a draft on it. (A header conversion once quoted every value, the old
+# exact-string draft check matched nothing, and every draft was published.) Both header styles
+# are read: Pelican's own `Key: value` block ended by the first blank line, and a YAML
+# front-matter block fenced by `---`, as pandoc-reader requires.
+PUBLISHED_STATUSES = frozenset({"published", "hidden"})
+STATUS_LINE_RE = re.compile(r"""^status\s*:\s*["']?(?P<value>[^"'\s]*)["']?\s*$""", re.IGNORECASE)
 
-    Pelican metadata is a block of key-value lines at the top of the file,
-    terminated by the first blank line. Only this header section is checked,
-    avoiding false positives from post body content.
+
+def header_lines(text: str) -> list[str]:
+    """Return the metadata header lines of a Markdown source, without the fences.
+
+    Args:
+        text (str): The whole file.
+
+    Returns:
+        list[str]: Lines of the YAML front-matter block if the file starts with `---`, otherwise
+            the Pelican-style block that runs up to the first blank line.
+    """
+    lines = text.splitlines()
+    if lines and lines[0].strip() == "---":
+        body = []
+        for line in lines[1:]:
+            if line.strip() in ("---", "..."):
+                return body
+            body.append(line)
+        return body  # unterminated block: treat everything as header, the safe direction
+    header = []
+    for line in lines:
+        if not line.strip():
+            break
+        header.append(line)
+    return header
+
+
+def publication_status(text: str) -> str | None:
+    """Return the lower-cased status declared in a Markdown source's header, or None if absent."""
+    for line in header_lines(text):
+        match = STATUS_LINE_RE.match(line.strip())
+        if match:
+            return match.group("value").lower()
+    return None
+
+
+def is_publishable(path: Path) -> bool:
+    """Return True only if a Markdown file's header declares a status that means published.
 
     Args:
         path (Path): Path to the Markdown file.
 
     Returns:
-        bool: True if the file is a draft.
+        bool: True for `published` or `hidden`; False for `draft`, any other value, and no status.
     """
-    with path.open() as f:
-        for line in f:
-            stripped = line.strip()
-            if not stripped:
-                break  # End of Pelican metadata block
-            if stripped.lower() == "status: draft":
-                return True
-    return False
+    return publication_status(path.read_text()) in PUBLISHED_STATUSES
 
 
 def is_withheld_sidecar(path: Path) -> bool:
@@ -128,13 +162,13 @@ def is_withheld_sidecar(path: Path) -> bool:
         bool: True if the sidecar must not be mirrored.
     """
     post = path.with_suffix(".md")
-    return not post.is_file() or is_pelican_draft(post)
+    return not post.is_file() or not is_publishable(post)
 
 
 def non_draft_content_files() -> list[Path]:
     """Return all files under content/ that should be mirrored.
 
-    Markdown files are included only if they are not Pelican drafts. Sidecar files that share a
+    Markdown files are included only if their header declares them published. Sidecar files that share a
     post's stem (see SIDECAR_SUFFIXES) follow their post. All other non-Markdown files (images,
     static assets, etc.) are always included.
     """
@@ -142,7 +176,7 @@ def non_draft_content_files() -> list[Path]:
     for f in CONTENT_DIR.rglob("*"):
         if not f.is_file():
             continue
-        if f.suffix == ".md" and is_pelican_draft(f):
+        if f.suffix == ".md" and not is_publishable(f):
             continue
         if f.suffix in SIDECAR_SUFFIXES and is_withheld_sidecar(f):
             continue
@@ -414,9 +448,10 @@ def plan_published_paths() -> set[str]:
     log(f"Publishing {len(included_notebooks)} notebook(s) referenced by those posts:")
     for notebook in included_notebooks:
         log(f"  + {notebook.relative_to(REPO_ROOT)}")
-    log(f"Withholding {len(excluded_drafts)} draft post(s):")
+    log(f"Withholding {len(excluded_drafts)} post(s) whose header does not say published or hidden:")
     for draft in excluded_drafts:
-        log(f"  - {draft.relative_to(REPO_ROOT)}")
+        status = publication_status(draft.read_text())
+        log(f"  - {draft.relative_to(REPO_ROOT)}  (status: {status if status is not None else 'none'})")
     log(f"Withholding {len(excluded_sidecars)} sidecar file(s) of drafts or of no post:")
     for sidecar in excluded_sidecars:
         log(f"  - {sidecar.relative_to(REPO_ROOT)}")

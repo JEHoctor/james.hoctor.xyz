@@ -108,5 +108,10 @@ reports every branch as updated, something is wrong.
   push to protected branch main`); that is deliberate. Everything an agent does lands through a
   pull request, including one-line documentation fixes. The human commits content directly to
   `main` themselves.
-- Drafts carry `Status: draft` in their Pelican metadata. That is what keeps them off both the
-  public site and the mirror.
+- Every post and page declares a `status` in its metadata header (YAML front matter, as
+  pandoc-reader requires): `published`, `hidden` (pages that are built but not listed) or `draft`.
+  The mirror **fails closed** on it: a file is published only if the header says `published` or
+  `hidden`; a draft, an unknown value, a missing status or a header the script cannot read are all
+  withheld and listed in the log with the status it saw. If you change how metadata is written,
+  run the sandbox dry-run below before merging and read the `Withholding N post(s)` line — an
+  earlier fail-open check once matched nothing and put every draft on GitHub.
