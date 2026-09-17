@@ -58,7 +58,7 @@ uvx --with='certbot-nginx' certbot --nginx
 Maybe you will run into issues with this if using sudo instead of a root shell.
 If so, you could try `sudo su`.
 
-(Note that step 7 has an alternate version in the official instructions that I haven't tested. I'm guessing it would work as expected -- just add `certonly` to the command.)
+(Note that step 7 has an alternate version in the official instructions that I haven't tested. I'm guessing it would work as expected---just add `certonly` to the command.)
 
 ## Step 8: Set up automatic renewal
 
