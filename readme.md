@@ -19,9 +19,6 @@ parameters, `debug` and `relative`, whose defaults come from the `DEBUG` and `RE
 `just DEBUG=1 html` passes `-D` to Pelican for debug-level logging (and makes it print a full
 traceback instead of a one-line `CRITICAL`), and `just RELATIVE=1 html` passes `--relative-urls` so
 the output can be browsed from the local filesystem. They combine: `just DEBUG=1 RELATIVE=1 serve`.
-Note that `just html debug=1` does *not* work — `just` passes the literal string `debug=1` as the
-first positional parameter and no `-D` is emitted; use the `VAR=value` form before the recipe name,
-or positional `just html 1 1`.
 
 ## Credit
 
