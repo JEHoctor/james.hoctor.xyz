@@ -87,11 +87,17 @@ def test_body_is_preserved_verbatim_including_leading_blank_line() -> None:
     ("header", "expected"),
     [
         ('notebooks: "Wordle_with_BREAD"', ["Wordle_with_BREAD"]),
-        ("notebooks: a, b ,c", ["a", "b", "c"]),
         ("notebooks: [a, b]", ["a", "b"]),
+        ("notebooks:\n  - a\n  - b", ["a", "b"]),
         ("title: none", []),
     ],
 )
 def test_notebooks_of(header: str, expected: list[str]) -> None:
-    """The quoted form once produced a path containing literal quote characters."""
+    """One string or a YAML list; the quoted form once produced a path with literal quotes in it."""
     assert fm.notebooks_of(fm.parse(f"---\n{header}\n---\n")) == expected
+
+
+@pytest.mark.parametrize("header", ["notebooks: 3", "notebooks: [a, 1]", "notebooks: {a: b}"])
+def test_notebooks_of_rejects_other_shapes(header: str) -> None:
+    with pytest.raises(fm.FrontMatterError):
+        fm.notebooks_of(fm.parse(f"---\n{header}\n---\n"))

@@ -134,14 +134,17 @@ def status_of(post: Post) -> str | None:
 
 
 def notebooks_of(post: Post) -> list[str]:
-    """Return the notebook names listed in the post's `notebooks` field, if any.
+    """Return the notebook names in the post's `notebooks` field: one string, or a YAML list of them.
 
-    The field is a comma-separated string, as Pelican metadata conventionally is; a YAML list is
-    accepted too.
+    Raises:
+        FrontMatterError: If the field is neither a string nor a list of strings.
     """
     value = post.metadata.get("notebooks")
     if value is None:
         return []
     if isinstance(value, str):
-        return [name.strip() for name in value.split(",") if name.strip()]
-    return [str(name).strip() for name in value]
+        return [value.strip()]
+    if isinstance(value, list) and all(isinstance(name, str) for name in value):
+        return [name.strip() for name in value]
+    msg = f"`notebooks` must be a string or a list of strings, not {type(value).__name__}"
+    raise FrontMatterError(msg)

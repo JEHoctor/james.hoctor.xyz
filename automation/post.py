@@ -9,7 +9,9 @@ directly; every command is interactive and prints what it did with a `[post]` pr
 from __future__ import annotations
 
 import datetime
+import glob
 import shutil
+import sys
 from pathlib import Path
 from typing import Annotated, NoReturn
 
@@ -17,6 +19,11 @@ import typer
 from pelican.settings import DEFAULT_CONFIG
 from pelican.utils import slugify
 from rich.console import Console
+
+try:
+    import readline
+except ImportError:  # not available on every platform; the prompt then has no completion
+    readline = None
 
 import frontmatter as fm
 
@@ -97,11 +104,61 @@ def relative(path: Path) -> Path:
 PathArgument = Annotated[Path | None, typer.Argument(help="Path to the post; prompted for if omitted.")]
 
 
+def _candidates(text: str) -> list[str]:
+    """Filesystem completions for `text`, as bash's `read -e` would offer them.
+
+    A bare name with no directory part is completed under content/ as well, and the match is
+    returned with the `content/` prefix, so that typing `how<Tab>` at the prompt yields
+    `content/how-to-....md`. This stands in for bash's `-i "content/"` pre-fill, which libedit
+    (the line editor uv's CPython is built with) does not support.
+    """
+    content = CONTENT_DIR.relative_to(Path.cwd()) if CONTENT_DIR.is_relative_to(Path.cwd()) else CONTENT_DIR
+    if text == "":
+        return [f"{p}/" if p.is_dir() else str(p) for p in sorted(content.iterdir())]
+    prefix = Path(text)
+    directory, stem = (prefix, "") if text.endswith("/") else (prefix.parent, prefix.name)
+    pattern = f"{glob.escape(stem)}*"
+    found = sorted(directory.glob(pattern))
+    if not found and "/" not in text:
+        found = sorted(content.glob(pattern))
+    return [f"{p}/" if p.is_dir() else str(p) for p in found]
+
+
+def _complete_path(text: str, state: int) -> str | None:
+    """Readline completer entry point: the `state`-th candidate, or None when exhausted."""
+    matches = _candidates(text)
+    return matches[state] if state < len(matches) else None
+
+
 def prompt_for_path(path: Path | None, prompt: str) -> Path:
-    """Use the given path or ask for one, defaulting the prompt to the content directory."""
-    if path is None:
-        path = Path(typer.prompt(prompt, default="content/"))
-    return path
+    """Use the given path or ask for one at a tab-completing prompt.
+
+    Tab completes file names (see `_candidates`), and a bare file name typed without a directory
+    is looked up under content/. Line editing is only wired up on a terminal; piped input just
+    reads a line.
+    """
+    if path is not None:
+        return path
+    if readline is not None and sys.stdin.isatty():
+        readline.set_completer_delims(" \t\n")  # keep '/' inside the word being completed
+        readline.set_completer(_complete_path)
+        # uv's managed CPython links libedit, which spells the binding differently from GNU readline
+        # and ignores the pre-fill below (harmless: the completer covers that case).
+        if getattr(readline, "backend", "readline") == "editline":
+            readline.parse_and_bind("bind ^I rl_complete")
+        else:
+            readline.parse_and_bind("tab: complete")
+        readline.set_startup_hook(lambda: readline.insert_text("content/"))
+    try:
+        answer = input(f"{prompt}: ").strip()
+    finally:
+        if readline is not None:
+            readline.set_startup_hook(None)
+            readline.set_completer(None)
+    candidate = Path(answer)
+    if not candidate.exists() and "/" not in answer and (CONTENT_DIR / answer).exists():
+        candidate = CONTENT_DIR / answer
+    return candidate
 
 
 @app.command()

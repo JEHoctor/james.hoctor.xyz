@@ -1,3 +1,4 @@
+#!/usr/bin/env -S uv run --group=automation
 """Mirror a filtered version of this repository to a remote, redacting draft posts."""
 
 from __future__ import annotations
@@ -98,24 +99,37 @@ def print_for_dry_run(*, arg_groups: Sequence[Sequence[str]]) -> None:
 # exact-string draft check matched nothing, and every draft was published.) The header is parsed
 # by the same module the post CLI writes it with, so the two cannot disagree about its shape.
 PUBLISHED_STATUSES = frozenset({"published", "hidden"})
-UNREADABLE = "unreadable"
 
 
-def publication_status(path: Path) -> str | None:
+class _Unreadable:
+    """Sentinel for a file whose front matter cannot be read at all.
+
+    Distinct from ``None`` (a header that parses but declares no status) so that the log can say
+    which of the two it saw. Prints as ``unreadable``; never equal to any status string.
+    """
+
+    def __str__(self) -> str:
+        return "unreadable"
+
+
+_UNREADABLE = _Unreadable()
+
+
+def publication_status(path: Path) -> str | _Unreadable | None:
     """Return the status a Markdown file declares, lower-cased.
 
     Args:
         path (Path): Path to the Markdown file.
 
     Returns:
-        str | None: The status value; None if the header has no status; the marker string
-            ``"unreadable"`` if the file has no front matter or it does not parse. Only
+        str | _Unreadable | None: The status value; None if the header has no status; the
+            unreadable sentinel if the file has no front matter or it does not parse. Only
             ``"published"`` and ``"hidden"`` lead to publication.
     """
     try:
         return frontmatter.status_of(frontmatter.read(path))
     except (frontmatter.FrontMatterError, UnicodeDecodeError):
-        return UNREADABLE
+        return _UNREADABLE
 
 
 def is_publishable(path: Path) -> bool:
@@ -165,7 +179,12 @@ def associated_notebooks(content_path: Path) -> list[Path]:
 
     Only called for files that passed `is_publishable`, so the header is known to parse.
     """
-    return [NOTEBOOKS_DIR / f"{name}.ipynb" for name in frontmatter.notebooks_of(frontmatter.read(content_path))]
+    try:
+        names = frontmatter.notebooks_of(frontmatter.read(content_path))
+    except frontmatter.FrontMatterError as error:
+        log(f"  {content_path.relative_to(REPO_ROOT)}: ignoring its notebooks field: {error}")
+        return []
+    return [NOTEBOOKS_DIR / f"{name}.ipynb" for name in names]
 
 
 def notebooks_to_include(included_content: list[Path]) -> list[Path]:
