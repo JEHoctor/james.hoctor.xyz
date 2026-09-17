@@ -11,6 +11,13 @@
         "declaration-block-single-line-max-declarations": null,
         "block-no-empty": null
       }
+    },
+    {
+      "files": ["**/pandoc.css"],
+      "rules": {
+        "selector-class-pattern": null,
+        "declaration-block-single-line-max-declarations": null
+      }
     }
   ]
 }
