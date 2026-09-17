@@ -57,26 +57,24 @@ devserver debug=DEBUG relative=RELATIVE port=PORT:
 devserver-global debug=DEBUG relative=RELATIVE port=PORT:
     {{PELICAN}} -lr "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just _pelican_opts {{debug}} {{relative}} {{port}}) -b 0.0.0.0
 
+# Post commands share one Python CLI; `uv run` keeps its environment in sync.
+POST := "uv run --group=automation automation/post.py"
+
 # create an empty blog post
 new-post:
-    @./automation/new-post.sh
+    @{{POST}} new
 
-# rename a blog post
+# rename a blog post (keeps .old copies for you to diff and remove)
 retitle-post:
-    @./automation/retitle-post.sh
+    @{{POST}} retitle
 
 # remove draft status and set date
 publish-post:
-    @./automation/publish-post.sh
+    @{{POST}} publish
 
 # set modified date
 modify-post:
-    @./automation/modify-post.sh
-
-# run ShellCheck+shfmt on all scripts
-check-scripts:
-    uv run --group=dev shfmt -d **/*.sh
-    uv run --group=dev shellcheck **/*.sh
+    @{{POST}} modify
 
 # initialize the repo for development
 init:
@@ -86,6 +84,10 @@ init:
 # run pre-commit checks
 check-precommit:
     uv run --group=dev pre-commit run --all-files
+
+# run the test suite (front matter parser, mirror publication rule)
+test:
+    uv run --group=dev --group=automation pytest
 
 # validate generated HTML and CSS
 validate:
