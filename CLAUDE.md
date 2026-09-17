@@ -19,7 +19,7 @@ just publish         # build with production settings
 just check-precommit # all pre-commit hooks
 just check-scripts   # shfmt + shellcheck
 just validate        # htmlhint/stylelint over output/ (also runs in CI, off the deploy path)
-just init            # submodule, pre-commit hooks, npm install
+just init            # pre-commit hooks, npm install
 ```
 
 Development tooling is pinned in dependency groups, so prefix with the group when calling a tool
@@ -84,6 +84,14 @@ reports every branch as updated, something is wrong.
 - **ruff is pinned in two places.** The `dev` and `notebook` groups pin `ruff==X.Y.Z` in
   `pyproject.toml` and the pre-commit hook pins `rev: vX.Y.Z`. They must move together, or
   `ruff check .` and `just check-precommit` start disagreeing about which rules exist.
+- **`just html debug=1` silently does nothing.** just passes `debug=1` as the literal positional
+  value, so `-D` is never emitted and a failing build shows a one-line `CRITICAL` with no
+  traceback. Use `just DEBUG=1 html` (variable override) or positional `just html 1`.
+- **`uv run` syncs inexactly**: it installs what the lockfile needs but leaves packages that are
+  no longer in it. After switching between branches with different dependencies, run `uv sync`
+  (exact) or the leftovers stay importable — and Pelican auto-discovers every installed
+  `pelican.plugins.*` package unless `PLUGINS` is set explicitly, so a stale plugin can crash a
+  build that is fine in a fresh checkout.
 - **Rich markup is disabled** in `mirror-redacted.py`. It would otherwise read a bracketed word,
   including the log prefix and any path containing a bracket, as a style tag and silently drop it.
 - **`.claude/worktrees/` holds git worktrees**, not part of the source tree. ruff excludes
