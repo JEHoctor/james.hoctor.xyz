@@ -1,0 +1,23 @@
+# Pandoc defaults file used by pelican-pandoc-reader (see PANDOC_DEFAULTS_FILES in
+# pelicanconf.py). Every Markdown post and page is converted with these settings.
+#
+# "implicit_figures" is disabled so that a lone image stays a plain image rather than
+# becoming a <figure> with a visible caption, as under the Python-Markdown reader this
+# replaces. pandoc's "smart" extension stays on, so straight quotes, dashes and
+# ellipses in prose become typographic ones (code spans are left alone).
+from: markdown-implicit_figures
+to: html5
+wrap: none
+
+# Math is emitted as MathJax delimiters, \(...\) and \[...\], inside
+# <span class="math ...">; the theme loads MathJax on pages that contain them.
+html-math-method:
+  method: mathjax
+
+# Citations: [@key] in a post resolves against content/<post-stem>.bib, which
+# pelican-pandoc-reader passes as --bibliography automatically. The bibliography is
+# rendered into the post's "::: {#refs}" div. No csl is given, so pandoc's built-in
+# default, Chicago author-date, applies: citations render as (Author Year).
+citeproc: true
+metadata:
+  link-citations: true

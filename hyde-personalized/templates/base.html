@@ -27,6 +27,7 @@
 		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/poole.css" />
 		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/hyde.css" />
 		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/syntax.css" />
+		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/pandoc.css" />
 		{% if FONT_AWESOME_JS %}
 			<script src="{{ FONT_AWESOME_JS }}" crossorigin="anonymous"></script>
 		{% elif FONT_AWESOME_CSS %}
@@ -55,6 +56,14 @@
 
 		<!-- Analytics -->
 		{% include 'fragments/google_analytics.html' %}
+
+		{# MathJax, only on pages whose content or summaries contain math. pandoc marks every
+		   formula with <span class="math inline"> or <span class="math display">. #}
+		{% set MATH_MARKER = '<span class="math ' %}
+		{% set SUMMARIES = articles_page.object_list|map(attribute='summary')|join if articles_page else '' %}
+		{% if (article and MATH_MARKER in article.content) or (page and MATH_MARKER in page.content) or MATH_MARKER in SUMMARIES %}
+			<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+		{% endif %}
 	</head>
 
 	<body class="theme-base-{{ COLOR_THEME if COLOR_THEME else '0d' }}">
