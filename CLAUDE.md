@@ -48,9 +48,32 @@ string that should have been redacted, or a pre-mailmap email address. If you ch
 do not weaken that check.
 
 It also runs on every branch push, not only on main, because the mirror publishes all non-draft
-branches. The job checks out `main` regardless of which branch triggered it, which means **a
-change to the mirror command cannot be tested before it merges** — the job runs main's checkout
-with the branch's workflow file. Plan for that.
+branches. The `mirror` job checks out `main` regardless of which branch triggered it, so a change
+to the script or to post metadata is only exercised for real after it merges. That is what the
+**`mirror-preview`** job is for.
+
+### Reviewing `mirror-preview` — required reading before merging
+
+`mirror-preview` runs on every non-main push. It executes the *branch's* checkout of the script
+with `--dry-run` against a read-only clone of the public mirror, so its log shows exactly what
+the mirror would publish if that branch were `main`. It is a **required status check** for
+merging into `main`, but it is designed to be *read*, not to gate: it only fails if the script
+errors or refuses to push. A green tick means nothing on its own. Before merging any PR, open the
+job's log (`tea api` recipe in the handbook; the job is named `mirror-preview`) and check:
+
+1. `Publishing N post(s)` — the list must be exactly the posts you expect to be public. For a PR
+   that publishes nothing, it must equal what `main` publishes today.
+2. `Compared with the mirror's current main, this run newly publishes N post(s)` — normally 0; for
+   a publish PR, exactly the one post being published. `WARNING:` lines here (more than one new
+   post, or a post being withdrawn) need an explanation in the PR before merging.
+3. `Withholding N post(s)` — every draft, each with `(status: draft)`. A different status, or
+   `none`, means a header the script did not understand; that post is withheld, which is the safe
+   direction, but the header should be fixed. A sidecar listed under "no post of the same name" is
+   almost always a rename leftover — delete or rename it.
+4. `Verified N branch(es)` present, and no `REFUSING TO PUSH`.
+
+The one fact this job cannot show you is how the *merged* result differs from the branch, so
+merge PRs that touch `content/` or the script one at a time.
 
 ### Testing it safely
 
@@ -113,5 +136,5 @@ reports every branch as updated, something is wrong.
   The mirror **fails closed** on it: a file is published only if the header says `published` or
   `hidden`; a draft, an unknown value, a missing status or a header the script cannot read are all
   withheld and listed in the log with the status it saw. If you change how metadata is written,
-  run the sandbox dry-run below before merging and read the `Withholding N post(s)` line — an
-  earlier fail-open check once matched nothing and put every draft on GitHub.
+  read the `mirror-preview` job's log before merging (see above) — an earlier fail-open check once
+  matched nothing and put every draft on GitHub.
