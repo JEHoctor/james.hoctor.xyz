@@ -11,22 +11,7 @@ theme is forked). It can be deleted.
 
 ---
 
-## 1. Give the other automation scripts the same logging treatment
-
-**Status:** not started.
-
-`automation/mirror-redacted.py` writes a `[mirror-redacted]` prefix on every line it emits,
-announces each stage of its work, and closes with a framed summary. This made a previously
-unreadable job log usable, and the same would help elsewhere.
-
-`automation/new-post.sh`, `retitle-post.sh`, `publish-post.sh` and `modify-post.sh` are
-interactive shell scripts with plain `echo` output. Give them a consistent prefix and clearer
-stage markers. They are user-facing rather than CI-facing, so the goal is legibility at a
-terminal rather than greppability, and the design need not match exactly.
-
----
-
-## 2. Housekeeping
+## 1. Housekeeping
 
 - The actions in `.forgejo/workflows/ci.yml` are pinned to commit SHAs, with the tag they
   corresponded to in a trailing comment. Nothing bumps them automatically (no Renovate on the
@@ -42,11 +27,8 @@ terminal rather than greppability, and the design need not match exactly.
 
 ---
 
-## 3. Improve `mirror-redacted.py`
+## 2. Improve `mirror-redacted.py`
 
-- Improve the parsing of metadata at the head of content markdown files. How does Pelican do it?
-- Require the presence of a status in the metadata and validate its value.
-- Hide posts with statuses other than "published" defensively.
 - In mirror(), source_dir is set to ".", but at the top of the script we explicitly anchor to REPO_ROOT. This looks like it could cause a mismatch.
 - With `git push`, `--mirror` may imply `--prune`.
 - Streamline plan_published_paths and the functions called in that call tree. The
