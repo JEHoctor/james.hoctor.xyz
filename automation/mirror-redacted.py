@@ -8,6 +8,7 @@ import re
 import shlex
 import subprocess
 import tempfile
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated
 
@@ -155,55 +156,71 @@ def is_withheld_sidecar(path: Path) -> bool:
     return not post.is_file() or not is_publishable(post)
 
 
-def non_draft_content_files() -> list[Path]:
-    """Return all files under content/ that should be mirrored.
+@dataclass
+class ContentPlan:
+    """Every file under content/, sorted into what may be published and what may not, and why.
 
-    Markdown files are included only if their header declares them published. Sidecar files that share a
-    post's stem (see SIDECAR_SUFFIXES) follow their post. All other non-Markdown files (images,
-    static assets, etc.) are always included.
+    One walk of the tree produces this; the plan step logs it and the filter consumes it, so the
+    two cannot disagree. Paths are absolute.
     """
-    result = []
-    for f in CONTENT_DIR.rglob("*"):
-        if not f.is_file():
-            continue
-        if f.suffix == ".md" and not is_publishable(f):
-            continue
-        if f.suffix in SIDECAR_SUFFIXES and is_withheld_sidecar(f):
-            continue
-        result.append(f)
-    return result
+
+    posts: list[Path] = field(default_factory=list)  # Markdown whose header says published/hidden
+    withheld_posts: list[Path] = field(default_factory=list)  # every other Markdown file
+    sidecars: list[Path] = field(default_factory=list)  # e.g. .bib next to a published post
+    withheld_sidecars: list[Path] = field(default_factory=list)  # next to a withheld post
+    orphan_sidecars: list[Path] = field(default_factory=list)  # next to no post at all
+    assets: list[Path] = field(default_factory=list)  # images, static files: always published
+    notebooks: list[Path] = field(default_factory=list)  # referenced by a published post
+
+    def published(self) -> list[Path]:
+        """Everything that may leave the repository."""
+        return self.posts + self.sidecars + self.assets + self.notebooks
 
 
-def associated_notebooks(content_path: Path) -> list[Path]:
-    """Return all Jupyter notebooks listed in the metadata of a published Markdown file.
+def associated_notebooks(content_path: Path, notebooks_dir: Path) -> list[Path]:
+    """Return the notebooks a published Markdown file lists in its metadata.
 
-    Only called for files that passed `is_publishable`, so the header is known to parse.
+    Only called for files that passed `is_publishable`, so the header is known to parse; a
+    malformed `notebooks` field is reported and ignored rather than allowed to stop the run.
     """
     try:
         names = frontmatter.notebooks_of(frontmatter.read(content_path))
     except frontmatter.FrontMatterError as error:
         log(f"  {content_path.relative_to(REPO_ROOT)}: ignoring its notebooks field: {error}")
         return []
-    return [NOTEBOOKS_DIR / f"{name}.ipynb" for name in names]
+    return [notebooks_dir / f"{name}.ipynb" for name in names]
 
 
-def notebooks_to_include(included_content: list[Path]) -> list[Path]:
-    """Return all Jupyter notebooks that should be mirrored."""
-    result = []
-    for content_path in included_content:
-        # Only Markdown files carry Pelican metadata. The included content also contains images and
-        # other binary assets, which cannot be read as text.
-        if content_path.suffix != ".md":
-            continue
-        result.extend(associated_notebooks(content_path))
-    return list(set(result))
+def classify_content(content_dir: Path = CONTENT_DIR, notebooks_dir: Path = NOTEBOOKS_DIR) -> ContentPlan:
+    """Walk content/ once and decide, file by file, what may be published.
 
+    Args:
+        content_dir (Path): The content tree to walk. A parameter so tests can use a scratch tree.
+        notebooks_dir (Path): Where a post's listed notebooks live.
 
-def extra_paths_to_include() -> list[Path]:
-    """Return paths under content/ or notebooks/ that should be mirrored."""
-    non_draft_content = non_draft_content_files()
-    notebooks = notebooks_to_include(non_draft_content)
-    return non_draft_content + notebooks
+    Returns:
+        ContentPlan: The classification, with every list sorted.
+    """
+    plan = ContentPlan()
+    for path in sorted(p for p in content_dir.rglob("*") if p.is_file()):
+        if path.suffix == ".md":
+            if is_publishable(path):
+                plan.posts.append(path)
+                plan.notebooks.extend(associated_notebooks(path, notebooks_dir))
+            else:
+                plan.withheld_posts.append(path)
+        elif path.suffix in SIDECAR_SUFFIXES:
+            post = path.with_suffix(".md")
+            if not post.is_file():
+                plan.orphan_sidecars.append(path)
+            elif is_publishable(post):
+                plan.sidecars.append(path)
+            else:
+                plan.withheld_sidecars.append(path)
+        else:
+            plan.assets.append(path)
+    plan.notebooks = sorted(set(plan.notebooks))
+    return plan
 
 
 def find_unmerged_draft_branches(source_dir: str, target_dir: str) -> list[str]:
@@ -430,34 +447,27 @@ def plan_published_paths() -> set[str]:
     Returns:
         set[str]: Repository-relative paths under a filtered prefix that may be published.
     """
-    extra_paths = extra_paths_to_include()
-    included_markdown = {f for f in extra_paths if f.suffix == ".md"}
-    included_notebooks = sorted(f for f in extra_paths if f.suffix == ".ipynb")
-    excluded_drafts = sorted(f for f in CONTENT_DIR.rglob("*.md") if f.is_file() and f not in included_markdown)
-    excluded_sidecars = sorted(
-        f for f in CONTENT_DIR.rglob("*") if f.is_file() and f.suffix in SIDECAR_SUFFIXES and f not in extra_paths
-    )
-    orphan_sidecars = [f for f in excluded_sidecars if not f.with_suffix(".md").is_file()]
-    draft_sidecars = [f for f in excluded_sidecars if f not in orphan_sidecars]
+    plan = classify_content()
 
-    log(f"Publishing {len(included_markdown)} post(s):")
-    for post in sorted(included_markdown):
-        log(f"  + {post.relative_to(REPO_ROOT)}")
-    log(f"Publishing {len(included_notebooks)} notebook(s) referenced by those posts:")
-    for notebook in included_notebooks:
-        log(f"  + {notebook.relative_to(REPO_ROOT)}")
-    log(f"Withholding {len(excluded_drafts)} post(s) whose header does not say published or hidden:")
-    for draft in excluded_drafts:
-        status = publication_status(draft)
-        log(f"  - {draft.relative_to(REPO_ROOT)}  (status: {status if status is not None else 'none'})")
-    log(f"Withholding {len(draft_sidecars)} sidecar file(s) belonging to withheld posts:")
-    for sidecar in draft_sidecars:
-        log(f"  - {sidecar.relative_to(REPO_ROOT)}")
-    log(f"Withholding {len(orphan_sidecars)} sidecar file(s) with no post of the same name (a rename leftover?):")
-    for sidecar in orphan_sidecars:
-        log(f"  - {sidecar.relative_to(REPO_ROOT)}")
+    def show(paths: list[Path], marker: str) -> None:
+        for path in paths:
+            log(f"  {marker} {path.relative_to(REPO_ROOT)}")
 
-    return {str(f.relative_to(REPO_ROOT)) for f in extra_paths}
+    log(f"Publishing {len(plan.posts)} post(s):")
+    show(plan.posts, "+")
+    log(f"Publishing {len(plan.notebooks)} notebook(s) referenced by those posts:")
+    show(plan.notebooks, "+")
+    log(f"Publishing {len(plan.sidecars)} sidecar file(s) of published posts and {len(plan.assets)} other file(s).")
+    log(f"Withholding {len(plan.withheld_posts)} post(s) whose header does not say published or hidden:")
+    for post in plan.withheld_posts:
+        status = publication_status(post)
+        log(f"  - {post.relative_to(REPO_ROOT)}  (status: {status if status is not None else 'none'})")
+    log(f"Withholding {len(plan.withheld_sidecars)} sidecar file(s) belonging to withheld posts:")
+    show(plan.withheld_sidecars, "-")
+    log(f"Withholding {len(plan.orphan_sidecars)} sidecar file(s) with no post of the same name (a rename leftover?):")
+    show(plan.orphan_sidecars, "-")
+
+    return {str(path.relative_to(REPO_ROOT)) for path in plan.published()}
 
 
 def report_publication_delta(target_dir: str, allowed_paths: set[str]) -> None:
@@ -627,8 +637,9 @@ def check_preconditions(*, dry_run: bool) -> tuple[str, str]:
         tuple[str, str]: The mirror access URL and the contents of the secret mailmap.
 
     Raises:
-        typer.Exit: If a secret is missing, this is not the root of a checkout, or the checkout is
-            not on main and this is not a dry run.
+        typer.Exit: If a secret is missing; if the working directory is not the root of the
+            checkout this script lives in; or if the checkout is not on main and this is not a dry
+            run.
     """
     mirror_access_url = os.environ.get("MIRROR_ACCESS_URL")
     secret_mailmap = os.environ.get("SECRET_MAILMAP")
@@ -639,11 +650,26 @@ def check_preconditions(*, dry_run: bool) -> tuple[str, str]:
         err_console.print(f"{LOG_PREFIX} SECRET_MAILMAP environment variable is not set.")
         raise typer.Exit(1)
 
+    toplevel = subprocess.run(
+        args=["git", "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if toplevel.returncode != 0 or Path(toplevel.stdout.strip()).resolve() != Path.cwd().resolve():
+        err_console.print(f"{LOG_PREFIX} Must be run from the root of the repository.")
+        raise typer.Exit(1)
+    if Path.cwd().resolve() != REPO_ROOT:
+        # Content is scanned relative to this file's checkout while git runs against the working
+        # directory's; if those are two different checkouts the plan and the filter would disagree.
+        err_console.print(f"{LOG_PREFIX} Must be run from the checkout that contains this script ({REPO_ROOT}).")
+        raise typer.Exit(1)
+
     branch_result = subprocess.run(
         args=["git", "branch", "--show-current"],
         capture_output=True,
         text=True,
-        check=True,
+        check=False,
     )
     branch = branch_result.stdout.strip()
     if branch != "main":
@@ -653,16 +679,6 @@ def check_preconditions(*, dry_run: bool) -> tuple[str, str]:
         log(f"On branch {branch!r}, not main. Allowed for a dry run: the result shows what the mirror")
         log("would publish if this branch were main, which is the point of previewing a pull request.")
 
-    toplevel = subprocess.run(
-        args=["git", "rev-parse", "--show-toplevel"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if toplevel.returncode != 0 or Path(toplevel.stdout.strip()) != Path.cwd():
-        err_console.print(f"{LOG_PREFIX} Must be run from the root of the repository.")
-        raise typer.Exit(1)
-
     log("Secrets present, at the repository root.")
     return mirror_access_url, secret_mailmap
 
@@ -670,17 +686,40 @@ def check_preconditions(*, dry_run: bool) -> tuple[str, str]:
 def mirror(
     *,
     dry_run: Annotated[bool, typer.Option(help="Print the final push command instead of running it")] = False,
+    keep_temp_dirs: Annotated[
+        bool,
+        typer.Option(help="Leave the filtered clone and config directory behind for inspection"),
+    ] = False,
 ) -> None:
     """Mirror a filtered version of this repository to a remote."""
     log_step("Checking preconditions")
     mirror_access_url, secret_mailmap = check_preconditions(dry_run=dry_run)
 
-    # Create separate temp dirs: one for the git clone, one for filter-repo config files.
-    source_dir = "."
-    target_dir = tempfile.mkdtemp()
-    config_dir = tempfile.mkdtemp()
-    log(f"Clone directory: {target_dir}")
-    log(f"Config directory: {config_dir}")
+    # Two temp dirs: one for the clone of the mirror, one for filter-repo's config files. Both are
+    # removed on exit unless asked otherwise; the mailmap inside the second is removed earlier still.
+    with (
+        tempfile.TemporaryDirectory(delete=not keep_temp_dirs) as target_dir,
+        tempfile.TemporaryDirectory(
+            delete=not keep_temp_dirs,
+        ) as config_dir,
+    ):
+        log(f"Clone directory: {target_dir}")
+        log(f"Config directory: {config_dir}")
+        _mirror_into(target_dir, config_dir, mirror_access_url, secret_mailmap, dry_run=dry_run)
+        if keep_temp_dirs:
+            log("Temporary directories kept, as requested.")
+
+
+def _mirror_into(
+    target_dir: str,
+    config_dir: str,
+    mirror_access_url: str,
+    secret_mailmap: str,
+    *,
+    dry_run: bool,
+) -> None:
+    """The body of `mirror`, once the temporary directories exist."""
+    source_dir = str(REPO_ROOT)
 
     # Clone the target repository. The URL carries an access token, so it is never printed.
     log_step("Fetching the current mirror")
@@ -711,13 +750,13 @@ def mirror(
                 "--group=automation",
                 "git-filter-repo",
                 "--source",
-                ".",
+                source_dir,
                 "--target",
                 target_dir,
                 "--mailmap",
                 str(mailmap_path),
                 "--replace-text",
-                "mirror-redacted-config/replace-text.txt",
+                str(REPLACE_TEXT_PATH),
                 "--paths-from-file",
                 str(paths_path),
             ],
@@ -741,9 +780,11 @@ def mirror(
     log_step("Verifying the result")
     verify_redaction(target_dir, secret_mailmap, allowed_paths)
 
-    # Push the changes to the target repository.
+    # Push the changes to the target repository. --mirror already forces updates and deletes refs
+    # the source no longer has, so neither --force nor --prune adds anything; --force stays as a
+    # statement of intent for whoever reads this line.
     log_step("Publishing" if not dry_run else "Publishing (skipped: dry run)")
-    push_arg_groups: list[list[str]] = [["git", "-C", target_dir, "push", "--force", "--mirror", "--prune", "origin"]]
+    push_arg_groups: list[list[str]] = [["git", "-C", target_dir, "push", "--force", "--mirror", "origin"]]
     if dry_run:
         print_for_dry_run(arg_groups=push_arg_groups)
     else:
