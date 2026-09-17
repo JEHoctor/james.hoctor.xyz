@@ -14,10 +14,11 @@ The Node.js environment is managed with [fnm](https://github.com/Schniz/fnm).
 
 Before beginning development, install the pre-commit hooks with `just init`.
 Run `just` on its own to list the recipes.
-Build recipes such as `html`, `regenerate`, `serve` and `devserver` take two optional parameters:
-`just html debug=1` passes `-D` to Pelican for debug-level logging, and
-`just html relative=1` passes `--relative-urls` so the output can be browsed from the local filesystem.
-They combine, e.g. `just serve debug=1 relative=1`.
+Build recipes such as `html`, `regenerate`, `serve` and `devserver` take two optional positional
+parameters, `debug` and `relative`, whose defaults come from the `DEBUG` and `RELATIVE` variables.
+`just DEBUG=1 html` passes `-D` to Pelican for debug-level logging (and makes it print a full
+traceback instead of a one-line `CRITICAL`), and `just RELATIVE=1 html` passes `--relative-urls` so
+the output can be browsed from the local filesystem. They combine: `just DEBUG=1 RELATIVE=1 serve`.
 
 ## Credit
 
