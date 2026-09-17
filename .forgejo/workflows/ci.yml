@@ -113,3 +113,31 @@ jobs:
         env:
           MIRROR_ACCESS_URL: ${{ secrets.MIRROR_ACCESS_URL }}
           SECRET_MAILMAP: ${{ secrets.SECRET_MAILMAP }}
+  mirror-preview:
+    name: mirror-preview
+    runs-on: docker
+    # The mirror job above runs main's checkout, so a change to the mirroring script or to post
+    # metadata is only exercised for real after it merges. This job runs the *pushed branch's*
+    # checkout in --dry-run mode against a read-only clone of the public mirror, so the log shows
+    # what the mirror would publish if this branch were main. It is meant to be read, not to gate:
+    # it fails only if the script errors or refuses, and a reviewer compares its "Publishing" and
+    # "newly publishes" lines with what the pull request claims to do (see CLAUDE.md).
+    if: github.ref != 'refs/heads/main'
+    steps:
+      - name: checkout
+        uses: https://code.forgejo.org/actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 = v4.4.0+backports
+        with:
+          fetch-depth: 0
+      - name: setup uv
+        uses: https://github.com/astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e  # v6.8.0
+        with:
+          enable-cache: true
+          prune-cache: false
+      - name: mirror-redacted --dry-run
+        run: uv run --group=automation ./automation/mirror-redacted.py --dry-run
+        env:
+          # The public, token-less URL: this run only clones from it and prints the push.
+          MIRROR_ACCESS_URL: https://github.com/JEHoctor/james.hoctor.xyz.git
+          # The real mailmap, so that the summary's changed/unchanged branch hashes are meaningful.
+          SECRET_MAILMAP: ${{ secrets.SECRET_MAILMAP }}
+          GIT_TERMINAL_PROMPT: "0"
