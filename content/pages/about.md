@@ -1,5 +1,6 @@
 ---
 title: "About me"
+status: "published"
 ---
 
 Hi, I'm James.
