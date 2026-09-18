@@ -57,24 +57,24 @@ devserver debug=DEBUG relative=RELATIVE port=PORT:
 devserver-global debug=DEBUG relative=RELATIVE port=PORT:
     {{PELICAN}} -lr "{{INPUTDIR}}" -o "{{OUTPUTDIR}}" -s "{{CONFFILE}}" $(just _pelican_opts {{debug}} {{relative}} {{port}}) -b 0.0.0.0
 
-# Post commands share one Python CLI; `uv run` keeps its environment in sync.
-POST := "uv run --group=automation automation/post.py"
+# The `blog` command lives in the automation/ workspace member; `uv run` keeps it in sync.
+BLOG := "uv run --group=automation blog"
 
 # create an empty blog post
 new-post:
-    @{{POST}} new
+    @{{BLOG}} post new
 
 # rename a blog post (keeps .old copies for you to diff and remove)
 retitle-post:
-    @{{POST}} retitle
+    @{{BLOG}} post retitle
 
 # remove draft status and set date
 publish-post:
-    @{{POST}} publish
+    @{{BLOG}} post publish
 
 # set modified date
 modify-post:
-    @{{POST}} modify
+    @{{BLOG}} post modify
 
 # initialize the repo for development
 init:
@@ -97,7 +97,11 @@ validate:
 
 # mirror repo without drafts
 mirror-redacted:
-    uv run --group=automation automation/mirror-redacted.py
+    {{BLOG}} mirror
+
+# show what the mirror would publish if this branch were main (what CI's mirror-preview job runs)
+mirror-preview:
+    {{BLOG}} mirror --dry-run
 
 # launch Jupyter Lab
 notebook:
