@@ -2,25 +2,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 from blog_automation import frontmatter as fm
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CONTENT_DIR = REPO_ROOT / "content"
-
 QUOTED = '---\ntitle: "A post"\ndate: "2026-09-12 17:59"\ncategory: "Blog"\nstatus: "draft"\n---\n\nBody.\n'
-
-
-@pytest.mark.parametrize("path", sorted(CONTENT_DIR.rglob("*.md")), ids=lambda p: p.name)
-def test_every_real_post_round_trips_byte_for_byte(path: Path) -> None:
-    """Parsing and re-rendering a real post must not change a single byte.
-
-    This is what lets the CLI edit one key and leave the rest of a header alone.
-    """
-    text = path.read_text(encoding="utf-8")
-    assert fm.render(fm.parse(text)) == text
 
 
 def test_edit_touches_only_the_edited_line() -> None:

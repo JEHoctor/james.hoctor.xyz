@@ -71,7 +71,7 @@ ignore = [
     "S603",      # Every subprocess call is a literal git/git-filter-repo argv with no shell.
     "S607",      # ... invoked by bare name on purpose, so the environment's git is used.
 ]
-"tests/*" = [
+"{tests,automation/tests}/*" = [
     "S101",      # assert is how pytest tests assert.
     "INP001",    # tests/ is not a package.
     "D103",      # Test names are the documentation.
@@ -81,7 +81,7 @@ ignore = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "automation/tests"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
