@@ -13,6 +13,12 @@ resolution-markers = [
     "python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 
+[manifest]
+members = [
+    "blog-automation",
+    "james-hoctor-xyz",
+]
+
 [[package]]
 name = "about-time"
 version = "4.2.1"
@@ -287,6 +293,27 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/21/28/9b3f50ce0e048515135495f198351908d99540d69bfdc8c1d15b73dc55ce/blinker-1.9.0.tar.gz", hash = "sha256:b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf", size = 22460, upload-time = "2024-11-08T17:25:47.436Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/10/cb/f2ad4230dc2eb1a74edf38f1a38b9b52277f75bef262d8908e60d957e13c/blinker-1.9.0-py3-none-any.whl", hash = "sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc", size = 8458, upload-time = "2024-11-08T17:25:46.184Z" },
+]
+
+[[package]]
+name = "blog-automation"
+version = "0.1.0"
+source = { editable = "automation" }
+dependencies = [
+    { name = "git-filter-repo" },
+    { name = "pelican" },
+    { name = "rich" },
+    { name = "ruamel-yaml" },
+    { name = "typer" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "git-filter-repo", specifier = ">=2.47.0" },
+    { name = "pelican", specifier = ">=4.11.0" },
+    { name = "rich", specifier = ">=14.0.0" },
+    { name = "ruamel-yaml", specifier = ">=0.18.0" },
+    { name = "typer", specifier = ">=0.27.0" },
 ]
 
 [[package]]
@@ -924,10 +951,7 @@ dependencies = [
 
 [package.dev-dependencies]
 automation = [
-    { name = "git-filter-repo" },
-    { name = "rich" },
-    { name = "ruamel-yaml" },
-    { name = "typer" },
+    { name = "blog-automation" },
 ]
 dev = [
     { name = "ipython" },
@@ -966,12 +990,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-automation = [
-    { name = "git-filter-repo", specifier = ">=2.47.0" },
-    { name = "rich", specifier = ">=14.0.0" },
-    { name = "ruamel-yaml", specifier = ">=0.18.0" },
-    { name = "typer", specifier = ">=0.27.0" },
-]
+automation = [{ name = "blog-automation", editable = "automation" }]
 dev = [
     { name = "ipython", specifier = ">=9.11.0" },
     { name = "nbconvert", specifier = ">=7.17.0" },

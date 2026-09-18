@@ -1,5 +1,4 @@
-#!/usr/bin/env -S uv run --group=automation
-"""Mirror a filtered version of this repository to a remote, redacting draft posts."""
+"""`blog mirror`: publish a filtered copy of this repository to a remote, redacting draft posts."""
 
 from __future__ import annotations
 
@@ -15,7 +14,8 @@ from typing import TYPE_CHECKING, Annotated
 import typer
 from rich.console import Console
 
-import frontmatter
+from blog_automation import frontmatter
+from blog_automation.repo import NotAtRepositoryRootError, repo_root
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -26,10 +26,10 @@ if TYPE_CHECKING:
 console = Console(markup=False)
 err_console = Console(stderr=True, style="bold red", markup=False)
 
-# Anchored on this file so that scanning for content does not depend on the caller's working
-# directory. Paths written to the git-filter-repo config must still be repository-relative, so they
+# The checkout is the working directory; check_preconditions verifies that it is a repository root
+# and sets these. Paths written to the git-filter-repo config must be repository-relative, so they
 # are converted back with Path.relative_to(REPO_ROOT) before being written out.
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path.cwd()
 CONTENT_DIR = REPO_ROOT / "content"
 NOTEBOOKS_DIR = REPO_ROOT / "notebooks"
 REPLACE_TEXT_PATH = REPO_ROOT / "mirror-redacted-config" / "replace-text.txt"
@@ -175,16 +175,19 @@ def associated_notebooks(content_path: Path, notebooks_dir: Path) -> list[Path]:
     return [notebooks_dir / f"{name}.ipynb" for name in names]
 
 
-def classify_content(content_dir: Path = CONTENT_DIR, notebooks_dir: Path = NOTEBOOKS_DIR) -> ContentPlan:
+def classify_content(content_dir: Path | None = None, notebooks_dir: Path | None = None) -> ContentPlan:
     """Walk content/ once and decide, file by file, what may be published.
 
     Args:
-        content_dir (Path): The content tree to walk. A parameter so tests can use a scratch tree.
-        notebooks_dir (Path): Where a post's listed notebooks live.
+        content_dir (Path | None): The content tree to walk; defaults to the checkout's. A parameter
+            so tests can use a scratch tree.
+        notebooks_dir (Path | None): Where a post's listed notebooks live; defaults likewise.
 
     Returns:
         ContentPlan: The classification, with every list sorted.
     """
+    content_dir = CONTENT_DIR if content_dir is None else content_dir
+    notebooks_dir = NOTEBOOKS_DIR if notebooks_dir is None else notebooks_dir
     plan = ContentPlan()
     for path in sorted(p for p in content_dir.rglob("*") if p.is_file()):
         if path.suffix == ".md":
@@ -634,9 +637,8 @@ def check_preconditions(*, dry_run: bool) -> tuple[str, str]:
         tuple[str, str]: The mirror access URL and the contents of the secret mailmap.
 
     Raises:
-        typer.Exit: If a secret is missing; if the working directory is not the root of the
-            checkout this script lives in; or if the checkout is not on main and this is not a dry
-            run.
+        typer.Exit: If a secret is missing; if the working directory is not the root of a
+            checkout of the site; or if the checkout is not on main and this is not a dry run.
     """
     mirror_access_url = os.environ.get("MIRROR_ACCESS_URL")
     secret_mailmap = os.environ.get("SECRET_MAILMAP")
@@ -647,20 +649,15 @@ def check_preconditions(*, dry_run: bool) -> tuple[str, str]:
         err_console.print(f"{LOG_PREFIX} SECRET_MAILMAP environment variable is not set.")
         raise typer.Exit(1)
 
-    toplevel = subprocess.run(
-        args=["git", "rev-parse", "--show-toplevel"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if toplevel.returncode != 0 or Path(toplevel.stdout.strip()).resolve() != Path.cwd().resolve():
-        err_console.print(f"{LOG_PREFIX} Must be run from the root of the repository.")
-        raise typer.Exit(1)
-    if Path.cwd().resolve() != REPO_ROOT:
-        # Content is scanned relative to this file's checkout while git runs against the working
-        # directory's; if those are two different checkouts the plan and the filter would disagree.
-        err_console.print(f"{LOG_PREFIX} Must be run from the checkout that contains this script ({REPO_ROOT}).")
-        raise typer.Exit(1)
+    global REPO_ROOT, CONTENT_DIR, NOTEBOOKS_DIR, REPLACE_TEXT_PATH  # noqa: PLW0603 — set once, up front
+    try:
+        REPO_ROOT = repo_root()
+    except NotAtRepositoryRootError as error:
+        err_console.print(f"{LOG_PREFIX} {error}")
+        raise typer.Exit(1) from error
+    CONTENT_DIR = REPO_ROOT / "content"
+    NOTEBOOKS_DIR = REPO_ROOT / "notebooks"
+    REPLACE_TEXT_PATH = REPO_ROOT / "mirror-redacted-config" / "replace-text.txt"
 
     branch_result = subprocess.run(
         args=["git", "branch", "--show-current"],
@@ -742,9 +739,6 @@ def _mirror_into(
     try:
         subprocess.run(
             args=[
-                "uv",
-                "run",
-                "--group=automation",
                 "git-filter-repo",
                 "--source",
                 source_dir,
@@ -789,12 +783,3 @@ def _mirror_into(
         subprocess.run(args=flatten_arg_groups(push_arg_groups), check=True)
 
     report_changes(published_before, ref_map(target_dir, "refs/heads"))
-
-
-def main() -> None:
-    """Entrypoint for the script."""
-    typer.run(mirror)
-
-
-if __name__ == "__main__":
-    main()
