@@ -170,7 +170,9 @@ class ContentPlan:
     withheld_sidecars: list[Path] = field(default_factory=list)  # next to a withheld post
     orphan_sidecars: list[Path] = field(default_factory=list)  # next to no post at all
     assets: list[Path] = field(default_factory=list)  # images, static files: always published
-    notebooks: list[Path] = field(default_factory=list)  # referenced by a published post
+    notebooks: list[Path] = field(default_factory=list)  # referenced by a published post, and present
+    withheld_notebooks: list[Path] = field(default_factory=list)  # present but not referenced by one
+    missing_notebooks: list[Path] = field(default_factory=list)  # referenced by a published post, absent
 
     def published(self) -> list[Path]:
         """Everything that may leave the repository."""
@@ -219,7 +221,11 @@ def classify_content(content_dir: Path = CONTENT_DIR, notebooks_dir: Path = NOTE
                 plan.withheld_sidecars.append(path)
         else:
             plan.assets.append(path)
-    plan.notebooks = sorted(set(plan.notebooks))
+    referenced = set(plan.notebooks)
+    present = {p for p in notebooks_dir.rglob("*.ipynb") if p.is_file()} if notebooks_dir.is_dir() else set()
+    plan.notebooks = sorted(referenced & present)
+    plan.missing_notebooks = sorted(referenced - present)
+    plan.withheld_notebooks = sorted(present - referenced)
     return plan
 
 
@@ -466,6 +472,11 @@ def plan_published_paths() -> set[str]:
     show(plan.withheld_sidecars, "-")
     log(f"Withholding {len(plan.orphan_sidecars)} sidecar file(s) with no post of the same name (a rename leftover?):")
     show(plan.orphan_sidecars, "-")
+    log(f"Withholding {len(plan.withheld_notebooks)} notebook(s) that no published post references:")
+    show(plan.withheld_notebooks, "-")
+    if plan.missing_notebooks:
+        log(f"WARNING: {len(plan.missing_notebooks)} notebook(s) referenced by a published post do not exist:")
+        show(plan.missing_notebooks, "?")
 
     return {str(path.relative_to(REPO_ROOT)) for path in plan.published()}
 
@@ -633,6 +644,10 @@ def report_changes(before: dict[str, str], after: dict[str, str]) -> None:
 def check_preconditions(*, dry_run: bool) -> tuple[str, str]:
     """Check that the required secrets are present and that we are somewhere safe to mirror from.
 
+    Args:
+        dry_run (bool): Whether this run will only print the push. A dry run may start from any
+            branch, since that is how a pull request is previewed; a real run must start from main.
+
     Returns:
         tuple[str, str]: The mirror access URL and the contents of the secret mailmap.
 
@@ -780,11 +795,12 @@ def _mirror_into(
     log_step("Verifying the result")
     verify_redaction(target_dir, secret_mailmap, allowed_paths)
 
-    # Push the changes to the target repository. --mirror already forces updates and deletes refs
-    # the source no longer has, so neither --force nor --prune adds anything; --force stays as a
-    # statement of intent for whoever reads this line.
+    # Make the remote's refs match the filtered clone's exactly: refs the clone has and the remote
+    # lacks are created, refs whose history was rewritten are overwritten rather than rejected as
+    # non-fast-forward, and refs the remote has but the clone no longer does are deleted. All of
+    # that is what --mirror means on its own.
     log_step("Publishing" if not dry_run else "Publishing (skipped: dry run)")
-    push_arg_groups: list[list[str]] = [["git", "-C", target_dir, "push", "--force", "--mirror", "origin"]]
+    push_arg_groups: list[list[str]] = [["git", "-C", target_dir, "push", "--mirror", "origin"]]
     if dry_run:
         print_for_dry_run(arg_groups=push_arg_groups)
     else:
