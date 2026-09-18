@@ -138,24 +138,6 @@ def is_publishable(path: Path) -> bool:
     return publication_status(path) in PUBLISHED_STATUSES
 
 
-def is_withheld_sidecar(path: Path) -> bool:
-    """Return True if a per-post sidecar file belongs to a draft, or to no post at all.
-
-    A post's bibliography lives next to it as ``<slug>.bib``, so the filename alone names the
-    post. It is withheld under exactly the conditions the post itself is withheld, and also when
-    there is no ``<slug>.md`` to compare against, so that an orphaned sidecar is private by
-    default rather than public by accident.
-
-    Args:
-        path (Path): Path to a file under content/ with a suffix in SIDECAR_SUFFIXES.
-
-    Returns:
-        bool: True if the sidecar must not be mirrored.
-    """
-    post = path.with_suffix(".md")
-    return not post.is_file() or not is_publishable(post)
-
-
 @dataclass
 class ContentPlan:
     """Every file under content/, sorted into what may be published and what may not, and why.

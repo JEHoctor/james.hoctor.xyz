@@ -76,14 +76,6 @@ def test_unreadable_files_are_withheld_and_reported_as_such(mirror: ModuleType, 
     assert mirror.is_publishable(path) is False
 
 
-def test_sidecar_follows_its_post(mirror: ModuleType, tmp_path: Path) -> None:
-    write(tmp_path, "a.md", '---\nstatus: "published"\n---\n')
-    write(tmp_path, "b.md", '---\nstatus: "draft"\n---\n')
-    assert mirror.is_withheld_sidecar(write(tmp_path, "a.bib", "")) is False
-    assert mirror.is_withheld_sidecar(write(tmp_path, "b.bib", "")) is True
-    assert mirror.is_withheld_sidecar(write(tmp_path, "orphan.bib", "")) is True
-
-
 def test_every_current_post_is_classified_and_drafts_outnumber_nothing_silently(mirror: ModuleType) -> None:
     """A regression guard against the incident: the real content tree must yield some withheld drafts.
 
