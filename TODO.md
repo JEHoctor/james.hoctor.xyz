@@ -6,9 +6,6 @@ what is left. Read `CLAUDE.md` first for how to operate in this repository.
 This file is published to the GitHub mirror. **Anything that names or describes an unpublished
 draft belongs in `private/TODO.md` instead**, which the mirroring script withholds in full.
 
-`todo.txt` predates this file and both of its items are long finished (the favicon exists, the
-theme is forked). It can be deleted.
-
 ---
 
 ## 1. Housekeeping
