@@ -20,32 +20,43 @@ just check-precommit # all pre-commit hooks
 just test            # pytest: front-matter parser and the mirror's publication rule
 just validate        # htmlhint/stylelint over output/ (also runs in CI, off the deploy path)
 just init            # pre-commit hooks, npm install
-just new-post        # also retitle-post, publish-post, modify-post -> automation/post.py
+just new-post        # also retitle-post, publish-post, modify-post -> `blog post ...`
+just mirror-preview  # what the mirror would publish if this branch were main (dry run)
 ```
+
+`automation/` is a uv workspace member, `blog-automation`, providing the `blog` command
+(`blog post new|retitle|publish|modify`, `blog mirror [--dry-run]`). Run it as
+`uv run --group=automation blog ...` from the repository root — both subcommands refuse to run
+anywhere else, and they act on the checkout you are standing in. Its code is under
+`automation/src/blog_automation/` with its tests in `automation/tests/`; `tests/` at the root holds
+the checks that read the real `content/` tree (every post round-trips through the parser, every
+post has a recognised status). `just test` runs both.
 
 ## Post metadata
 
 Every file under `content/` starts with a YAML front-matter block fenced by `---`, which
 pandoc-reader requires. Values are double-quoted (`date: "2025-04-24 11:27"` is ambiguous YAML
-unquoted, and `"True"` would become a boolean). `automation/frontmatter.py` is the one parser for
+unquoted, and `"True"` would become a boolean). `blog_automation/frontmatter.py` is the one parser for
 this block, used by both the post CLI and the mirror script so the two cannot disagree; it uses
 ruamel.yaml in round-trip mode, so editing a key preserves everything else byte for byte
 (`tests/test_frontmatter.py` proves this against every real post). Do not edit headers with `sed`.
 
-The post commands are subcommands of `automation/post.py` (`new`, `retitle`, `publish`, `modify`),
-run via `just`. `new` names the file with Pelican's own slugify of the title, so file, URL and any
+The post commands are `blog post new|retitle|publish|modify` (`blog_automation/post.py`), run via
+`just`. `new` names the file with Pelican's own slugify of the title, so file, URL and any
 `<slug>.bib` sidecar agree. `retitle` is deliberately careful: it writes the new file (and a copy
 of the sidecar), leaves the old ones as `.old`, and prints the diff/rm commands for you to run.
 
 Development tooling is pinned in dependency groups, so prefix with the group when calling a tool
-directly: `uv run --group=dev ruff check .`. Groups are `dev`, `automation` and `notebook`.
+directly: `uv run --group=dev ruff check .`. Groups are `dev`, `automation` (just the `blog`
+command) and `notebook`.
 
 Note that `uv run --group=X` syncs the environment to exactly that group, so alternating between
 groups reinstalls packages each time. That is expected, not a fault.
 
 ## The mirror, and the invariant that matters
 
-`automation/mirror-redacted.py` publishes a filtered copy of this repository to GitHub. The
+`blog mirror` (`automation/src/blog_automation/mirror.py`) publishes a filtered copy of this
+repository to GitHub. The
 invariant is simple and absolute: **unpublished drafts must never reach the mirror**. Everything
 under `content/`, `notebooks/`, `mirror-redacted-config/` and `private/` is withheld unless
 explicitly listed, so a new draft is private by default. Non-Markdown files under `content/`
@@ -106,7 +117,7 @@ git -C "$SB/mirror.git" symbolic-ref HEAD refs/heads/main   # else HEAD is an un
 cd "$SB/source"
 export MIRROR_ACCESS_URL="$SB/mirror.git"
 export SECRET_MAILMAP="Redacted <redacted@example.invalid> <real@example.com>"
-uv run --group=automation ./automation/mirror-redacted.py --dry-run
+uv run --group=automation blog mirror --dry-run
 ```
 
 Because git-filter-repo rewrites deterministically, the summary at the end is meaningful: a
@@ -130,7 +141,7 @@ reports every branch as updated, something is wrong.
   (exact) or the leftovers stay importable — and Pelican auto-discovers every installed
   `pelican.plugins.*` package unless `PLUGINS` is set explicitly, so a stale plugin can crash a
   build that is fine in a fresh checkout.
-- **Rich markup is disabled** in `mirror-redacted.py`. It would otherwise read a bracketed word,
+- **Rich markup is disabled** in `mirror.py`. It would otherwise read a bracketed word,
   including the log prefix and any path containing a bracket, as a style tag and silently drop it.
 - **`.claude/worktrees/` holds git worktrees**, not part of the source tree. ruff excludes
   `.claude` via `extend-exclude`; any other linter you add needs the same exclusion.

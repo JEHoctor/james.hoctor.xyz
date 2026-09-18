@@ -5,7 +5,7 @@ I also deploy the blog using a [Forgejo Actions workflow](.forgejo/workflows/ci.
 The workflow doesn't run on GitHub, and likely wouldn't work with GitHub Actions.
 
 If you are viewing this on GitHub, then you are looking at a copy, which is downstream of the working copy on my forge.
-The copy on GitHub is redacted using this [script](automation/mirror-redacted.py), whose purpose is to remove draft posts from the git history until they are published.
+The copy on GitHub is redacted using this [script](automation/src/blog_automation/mirror.py), whose purpose is to remove draft posts from the git history until they are published.
 The redacted copy will regularly receive force pushes that rewrite its history, so it is not suitable for forking.
 
 The site is built with [Pelican](https://getpelican.com/), a static site generator.
@@ -21,9 +21,9 @@ traceback instead of a one-line `CRITICAL`), and `just RELATIVE=1 html` passes `
 the output can be browsed from the local filesystem. They combine: `just DEBUG=1 RELATIVE=1 serve`.
 
 Posts are created and updated with `just new-post`, `just retitle-post`, `just publish-post` and
-`just modify-post`, which drive `automation/post.py`. Each post starts with a YAML front-matter
-block; the commands edit one key at a time and leave the rest of the block untouched. `just test`
-runs the test suite.
+`just modify-post`, which run the `blog post` command from the `automation/` package. Each post
+starts with a YAML front-matter block; the commands edit one key at a time and leave the rest of
+the block untouched. `just test` runs the test suite.
 
 ## Credit
 

@@ -1,34 +1,14 @@
-"""Tests for the mirror script's fail-closed publication rule.
-
-The script is a typer application in a file with a hyphen in its name, so it is loaded from its
-path rather than imported.
-"""
+"""Tests for the mirror's fail-closed publication rule and its classification of content/."""
 
 from __future__ import annotations
 
-import importlib.util
-import sys
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from blog_automation import mirror
 
 if TYPE_CHECKING:
-    from types import ModuleType
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-SCRIPT = REPO_ROOT / "automation" / "mirror-redacted.py"
-
-
-@pytest.fixture(scope="module")
-def mirror() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("mirror_redacted", SCRIPT)
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module  # dataclasses resolve deferred annotations through sys.modules
-    spec.loader.exec_module(module)
-    return module
+    from pathlib import Path
 
 
 def write(tmp_path: Path, name: str, text: str) -> Path:
@@ -50,7 +30,6 @@ def write(tmp_path: Path, name: str, text: str) -> Path:
     ],
 )
 def test_only_an_explicit_published_or_hidden_status_publishes(
-    mirror: ModuleType,
     tmp_path: Path,
     header: str,
     *,
@@ -68,7 +47,7 @@ def test_only_an_explicit_published_or_hidden_status_publishes(
         "no header at all\n",
     ],
 )
-def test_unreadable_files_are_withheld_and_reported_as_such(mirror: ModuleType, tmp_path: Path, text: str) -> None:
+def test_unreadable_files_are_withheld_and_reported_as_such(tmp_path: Path, text: str) -> None:
     path = write(tmp_path, "post.md", text)
     status = mirror.publication_status(path)
     assert str(status) == "unreadable"
@@ -76,20 +55,7 @@ def test_unreadable_files_are_withheld_and_reported_as_such(mirror: ModuleType, 
     assert mirror.is_publishable(path) is False
 
 
-def test_every_current_post_is_classified_and_drafts_outnumber_nothing_silently(mirror: ModuleType) -> None:
-    """A regression guard against the incident: the real content tree must yield some withheld drafts.
-
-    If every post suddenly reads as publishable, or none does, the parser and the headers have
-    drifted apart again.
-    """
-    posts = sorted(p for p in (REPO_ROOT / "content").rglob("*.md"))
-    statuses = {p.name: mirror.publication_status(p) for p in posts}
-    assert all(isinstance(status, str) for status in statuses.values()), statuses
-    assert "draft" in statuses.values()
-    assert "published" in statuses.values()
-
-
-def test_classify_content_sorts_every_kind_of_file(mirror: ModuleType, tmp_path: Path) -> None:
+def test_classify_content_sorts_every_kind_of_file(tmp_path: Path) -> None:
     content = tmp_path / "content"
     notebooks = tmp_path / "notebooks"
     (content / "pages").mkdir(parents=True)

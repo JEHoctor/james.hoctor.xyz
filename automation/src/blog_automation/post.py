@@ -1,9 +1,9 @@
-#!/usr/bin/env -S uv run --group=automation
-"""Create and update posts: `new`, `retitle`, `publish`, `modify`.
+"""`blog post`: create and update posts with `new`, `retitle`, `publish`, `modify`.
 
 Each command edits a post's YAML front matter through `frontmatter`, so a change to one key leaves
-the rest of the header exactly as it was. Run through just (`just new-post` and friends) or
-directly; every command is interactive and prints what it did with a `[post-<command>]` prefix.
+the rest of the header exactly as it was. Run through just (`just new-post` and friends) or as
+`blog post <command>` from the repository root; every command is interactive and prints what it did
+with a `[post-<command>]` prefix.
 """
 
 from __future__ import annotations
@@ -25,9 +25,12 @@ try:
 except ImportError:  # not available on every platform; the prompt then has no completion
     readline = None
 
-import frontmatter as fm
+from blog_automation import frontmatter as fm
+from blog_automation.repo import NotAtRepositoryRootError, repo_root
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+# Both are set from the working directory by the app callback, which also refuses to run anywhere
+# but the repository root; module-level so that the completer and the commands can share them.
+REPO_ROOT = Path.cwd()
 CONTENT_DIR = REPO_ROOT / "content"
 DATE_FORMAT = "%Y-%m-%d %H:%M"
 LOG_PREFIX = "[post]"  # narrowed to e.g. "[post-publish]" once the subcommand is known
@@ -44,7 +47,7 @@ _log = _Log()
 # Files that sit next to a post under the same stem and must follow it when it is renamed.
 SIDECAR_SUFFIXES = (".bib",)
 
-app = typer.Typer(add_completion=False, no_args_is_help=True, help=__doc__)
+app = typer.Typer(add_completion=False, no_args_is_help=True, help="Create and update posts.")
 console = Console(markup=False, highlight=False, soft_wrap=True)
 err_console = Console(markup=False, highlight=False, stderr=True, soft_wrap=True)
 
@@ -61,10 +64,16 @@ def fail(message: str) -> NoReturn:
 
 
 @app.callback()
-def _name_the_subcommand(ctx: typer.Context) -> None:
-    """Prefix every log line with the subcommand, e.g. `[post-publish]`."""
+def _before_each_command(ctx: typer.Context) -> None:
+    """Prefix every log line with the subcommand, and anchor paths on the repository root."""
+    global REPO_ROOT, CONTENT_DIR  # noqa: PLW0603 — set once per process, before any command runs
     if ctx.invoked_subcommand:
         _log.prefix = f"[post-{ctx.invoked_subcommand}]"
+    try:
+        REPO_ROOT = repo_root()
+    except NotAtRepositoryRootError as error:
+        fail(str(error))
+    CONTENT_DIR = REPO_ROOT / "content"
 
 
 def now() -> str:
@@ -279,7 +288,3 @@ def modify(path: PathArgument = None) -> None:
         post.metadata.insert(position, "modified", stamp)
     fm.write(path, post)
     log(f"Set modified date of {relative(path)} to {stamp}.")
-
-
-if __name__ == "__main__":
-    app()

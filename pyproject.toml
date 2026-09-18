@@ -14,11 +14,8 @@ dependencies = [
 
 [dependency-groups]
 automation = [
-    "git-filter-repo>=2.47.0",
-    # Floor kept deliberately low: mirror-redacted.py only uses Console.print, and CI runs 14.0.0.
-    "rich>=14.0.0",
-    "ruamel-yaml>=0.18.0",
-    "typer>=0.27.0",
+    # The `blog` command (post and mirror subcommands): a workspace member under automation/.
+    "blog-automation",
 ]
 dev = [
     "ipython>=9.11.0",
@@ -47,6 +44,12 @@ notebook = [
     "tqdm>=4.67.3",
 ]
 
+[tool.uv.workspace]
+members = ["automation"]
+
+[tool.uv.sources]
+blog-automation = { workspace = true }
+
 [tool.ruff]
 line-length = 120
 indent-width = 4
@@ -64,12 +67,11 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"automation/*" = [
-    "INP001",    # No need to create __init__.py files in the automation/ directory.
-    "S603",      # subprocess-without-shell-equals-true: these scripts exist to drive git and uv.
-    "S607",      # start-process-with-partial-path: git and uv are resolved via PATH on purpose.
+"automation/src/blog_automation/{mirror,repo}.py" = [
+    "S603",      # Every subprocess call is a literal git/git-filter-repo argv with no shell.
+    "S607",      # ... invoked by bare name on purpose, so the environment's git is used.
 ]
-"tests/*" = [
+"{tests,automation/tests}/*" = [
     "S101",      # assert is how pytest tests assert.
     "INP001",    # tests/ is not a package.
     "D103",      # Test names are the documentation.
@@ -78,12 +80,8 @@ ignore = [
     "ERA001",    # These are conf files and sometimes config settings are commented out.
 ]
 
-[tool.ruff.lint.isort]
-known-first-party = ["frontmatter"]
-
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["automation"]
+testpaths = ["tests", "automation/tests"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

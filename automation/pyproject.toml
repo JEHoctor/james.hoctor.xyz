@@ -1,0 +1,20 @@
+[project]
+name = "blog-automation"
+version = "0.1.0"
+description = "Post and mirror automation for james.hoctor.xyz, as the `blog` command"
+requires-python = ">=3.13"
+dependencies = [
+    "git-filter-repo>=2.47.0",
+    "pelican>=4.11.0",
+    # Floor kept deliberately low: only Console.print is used, and CI has run 14.0.0 for a long time.
+    "rich>=14.0.0",
+    "ruamel-yaml>=0.18.0",
+    "typer>=0.27.0",
+]
+
+[project.scripts]
+blog = "blog_automation.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.8,<0.13"]
+build-backend = "uv_build"
