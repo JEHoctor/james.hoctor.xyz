@@ -109,20 +109,27 @@ def test_classify_content_sorts_every_kind_of_file(mirror: ModuleType, tmp_path:
     write(content / "pages", "hidden.md", '---\nstatus: "hidden"\n---\n')
     write(content, "broken.md", "no front matter\n")
     write(content, "image.png", "")
+    write(content, "wants-missing.md", '---\nstatus: "published"\nnotebooks: [nb, gone]\n---\n')
+    notebooks.mkdir()
+    write(notebooks, "nb.ipynb", "{}")
+    write(notebooks, "unreferenced.ipynb", "{}")
 
     plan = mirror.classify_content(content, notebooks)
 
     names = lambda paths: [p.relative_to(tmp_path).as_posix() for p in paths]  # noqa: E731
-    assert names(plan.posts) == ["content/pages/hidden.md", "content/pub.md"]
+    assert names(plan.posts) == ["content/pages/hidden.md", "content/pub.md", "content/wants-missing.md"]
     assert names(plan.withheld_posts) == ["content/broken.md", "content/draft.md"]
     assert names(plan.sidecars) == ["content/pub.bib"]
     assert names(plan.withheld_sidecars) == ["content/draft.bib"]
     assert names(plan.orphan_sidecars) == ["content/orphan.bib"]
     assert names(plan.assets) == ["content/image.png"]
     assert names(plan.notebooks) == ["notebooks/nb.ipynb"]
+    assert names(plan.withheld_notebooks) == ["notebooks/unreferenced.ipynb"]
+    assert names(plan.missing_notebooks) == ["notebooks/gone.ipynb"]
     assert set(names(plan.published())) == {
         "content/pages/hidden.md",
         "content/pub.md",
+        "content/wants-missing.md",
         "content/pub.bib",
         "content/image.png",
         "notebooks/nb.ipynb",
