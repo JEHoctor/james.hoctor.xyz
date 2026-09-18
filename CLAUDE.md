@@ -28,7 +28,9 @@ just mirror-preview  # what the mirror would publish if this branch were main (d
 (`blog post new|retitle|publish|modify`, `blog mirror [--dry-run]`). Run it as
 `uv run --group=automation blog ...` from the repository root — both subcommands refuse to run
 anywhere else, and they act on the checkout you are standing in. Its code is under
-`automation/src/blog_automation/`; tests import it as a normal package.
+`automation/src/blog_automation/` with its tests in `automation/tests/`; `tests/` at the root holds
+the checks that read the real `content/` tree (every post round-trips through the parser, every
+post has a recognised status). `just test` runs both.
 
 ## Post metadata
 
