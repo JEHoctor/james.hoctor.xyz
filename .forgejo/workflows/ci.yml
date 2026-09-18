@@ -105,9 +105,9 @@ jobs:
           enable-cache: true
           prune-cache: false
       - name: mirror-redacted
-        # Invoked directly rather than through just, because this job checks out main and main will
-        # not have a justfile until this branch is merged.
-        run: uv run --group=automation ./automation/mirror-redacted.py
+        # Through just, so that this job (which always runs main's checkout, see below) uses main's
+        # own idea of how the mirror is invoked, and a branch that changes that cannot break it.
+        run: uv run --group=dev just mirror-redacted
         env:
           MIRROR_ACCESS_URL: ${{ secrets.MIRROR_ACCESS_URL }}
           SECRET_MAILMAP: ${{ secrets.SECRET_MAILMAP }}
@@ -131,8 +131,8 @@ jobs:
         with:
           enable-cache: true
           prune-cache: false
-      - name: mirror-redacted --dry-run
-        run: uv run --group=automation ./automation/mirror-redacted.py --dry-run
+      - name: mirror-preview
+        run: uv run --group=dev just mirror-preview
         env:
           # The public, token-less URL: this run only clones from it and prints the push.
           MIRROR_ACCESS_URL: https://github.com/JEHoctor/james.hoctor.xyz.git
