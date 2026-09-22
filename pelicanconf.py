@@ -34,6 +34,50 @@ DEFAULT_LANG = "en"
 
 THEME = "hyde-personalized"
 
+# Meta descriptions. Search engines want roughly 150-160 characters, and want them to differ
+# from page to page; the theme's old fallback (SITENAME + BIO) was 96 characters and identical
+# on every listing page, which is what Bing Webmaster Tools flagged. Articles build their own
+# description from their summary (see the theme's article.html), and pages may set `description`
+# in their front matter. Everything else is keyed here by the `page_name` Pelican passes to its
+# direct templates. tests/test_descriptions.py checks the rendered lengths.
+META_DESCRIPTIONS = {
+    "index": (
+        "James Hoctor is a machine learning engineer and data scientist with a BS in "
+        "Mathematics and an MS in Computer Science. Notes on math, Python tooling and Linux."
+    ),
+    "archives": (
+        "Every post on James Hoctor's blog, newest first: writing on machine learning, "
+        "mathematics, Python tooling such as uv, and running a self-hosted Linux server."
+    ),
+    "tags": (
+        "Browse James Hoctor's blog by tag. Topics span mathematics and probability, machine "
+        "learning, Python packaging and tooling, and self-hosted Linux server notes."
+    ),
+    "categories": (
+        "Browse James Hoctor's blog by category. Posts on machine learning, mathematics, "
+        "Python tooling and the Linux servers that host this site, grouped by subject."
+    ),
+    "authors": (
+        "Posts on james.hoctor.xyz listed by author. James Hoctor is a machine learning "
+        "engineer and data scientist writing about math, Python tooling and Linux servers."
+    ),
+}
+
+# Per-term listing pages interpolate the tag, category or author name. The surrounding text is
+# sized so that a term of a realistic length lands inside the 150-160 character window.
+TAG_META_DESCRIPTION = (
+    "Posts on James Hoctor's blog tagged {}: notes on machine learning, mathematics and "
+    "Python tooling from a machine learning engineer and data scientist."
+)
+CATEGORY_META_DESCRIPTION = (
+    "Every post in the {} category on James Hoctor's blog covering machine learning, "
+    "mathematics, Python tooling and self-hosted Linux from an ML engineer."
+)
+AUTHOR_META_DESCRIPTION = (
+    "Every post written by {} on james.hoctor.xyz, a blog about machine learning, "
+    "mathematics, Python tooling and running a self-hosted Linux server."
+)
+
 # Settings specific to the theme
 BIO = "Machine learning engineer and data scientist. <nobr>BS Mathematics</nobr>, <nobr>MS Computer Science.</nobr>"
 PROFILE_IMAGE = "github-profile.jpg"
