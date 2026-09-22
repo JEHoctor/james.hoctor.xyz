@@ -7,8 +7,26 @@
 
 		<!-- Metadata -->
 		{% set BIO_FOR_DESCRIPTION = BIO|striptags() %}{% block metadata %}
-			<meta name="description" content="{{ SITENAME }}: {{ BIO_FOR_DESCRIPTION }}" />
-			<meta property="og:description" content="{{ SITENAME }}: {{ BIO_FOR_DESCRIPTION }}" />
+			{#- The listing templates (archives, tags, categories, authors, and the per-tag,
+			    per-category and per-author pages) come from Pelican's built-in simple theme
+			    and so do not override this block. Their descriptions are therefore chosen
+			    here, from META_DESCRIPTIONS in pelicanconf.py, keyed by the page_name that
+			    Pelican passes to each one. Articles override the block in article.html. -#}
+			{%- if page is defined -%}
+				{%- set PAGE_DESCRIPTION = page.description if page.description else SITENAME ~ ": " ~ BIO_FOR_DESCRIPTION -%}
+			{%- elif page_name is defined and page_name in META_DESCRIPTIONS -%}
+				{%- set PAGE_DESCRIPTION = META_DESCRIPTIONS[page_name] -%}
+			{%- elif tag is defined -%}
+				{%- set PAGE_DESCRIPTION = TAG_META_DESCRIPTION.format(tag) -%}
+			{%- elif category is defined -%}
+				{%- set PAGE_DESCRIPTION = CATEGORY_META_DESCRIPTION.format(category) -%}
+			{%- elif author is defined -%}
+				{%- set PAGE_DESCRIPTION = AUTHOR_META_DESCRIPTION.format(author) -%}
+			{%- else -%}
+				{%- set PAGE_DESCRIPTION = SITENAME ~ ": " ~ BIO_FOR_DESCRIPTION -%}
+			{%- endif %}
+			<meta name="description" content="{{ PAGE_DESCRIPTION }}" />
+			<meta property="og:description" content="{{ PAGE_DESCRIPTION }}" />
 			<meta property="og:title" content="{{ SITENAME }}{% if SITESUBTITLE %} - {{ SITESUBTITLE }}{% endif %}" />
 			<meta property="og:type" content="website" />
 			<meta property="og:url" content="{{ SITEURL }}" />

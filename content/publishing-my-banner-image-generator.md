@@ -3,6 +3,7 @@ title: "Publishing my banner image generator"
 date: "2026-09-12 15:18"
 category: "Blog"
 status: "published"
+description: "geometric-banner is now on PyPI. It draws colorful abstract banner images from Gaussian process noise in the Viridis scheme, and runs as a one-liner under uv."
 ---
 
 Back in 2021, I wrote a script to create the colorful banner images I use on LinkedIn, GitHub, and Thingiverse.

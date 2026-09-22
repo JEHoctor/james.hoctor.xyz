@@ -1,6 +1,7 @@
 ---
 title: "About me"
 status: "published"
+description: "About James Hoctor, a machine learning engineer and data scientist with a BS in Mathematics and an MS in Computer Science, with links to GitHub and LinkedIn."
 ---
 
 Hi, I'm James.
