@@ -67,3 +67,19 @@ def test_front_matter_description_fits_the_window(path: Path) -> None:
     if description is None:
         pytest.skip("no description in this post's front matter")
     assert _in_window(str(description)), f"{path.name}: {len(str(description))} characters"
+
+
+@pytest.mark.parametrize("path", sorted(CONTENT_DIR.rglob("*.md")), ids=lambda p: p.name)
+def test_noindex_is_spelled_the_one_way_the_theme_recognises(path: Path) -> None:
+    """A `noindex` key the theme does not recognise is worse than none: it reads as protection.
+
+    base.html compares the value as a lowercased string against "true", precisely so that a
+    quoted "False" does not pass a bare truthiness test. That makes any other spelling a silent
+    no-op, which is the failure mode this guards.
+    """
+    metadata = fm.read(path).metadata
+    if "noindex" not in metadata:
+        pytest.skip("this post does not ask to be de-indexed")
+    assert str(metadata["noindex"]).lower() == "true", (
+        f'{path.name}: noindex is {metadata["noindex"]!r}; the theme only honours "True"'
+    )

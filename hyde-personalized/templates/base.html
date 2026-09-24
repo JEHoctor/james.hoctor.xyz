@@ -5,6 +5,19 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
+		<!-- Robots -->
+		{#- A real noindex directive. pelican-seo's `noindex` front-matter key only writes a
+		    (non-standard, and unsupported by Google since 2019) Noindex line into the robots.txt
+		    it generates, and pelicanconf.py overwrites that file with content/extra/robots.txt,
+		    so the key never reached a crawler at all. This emits the meta tag that actually
+		    de-indexes a page. "follow" keeps the links out of the page counting, which is the
+		    usual pairing. The value is compared as a string because YAML front matter here is
+		    quoted, so a bare truthiness test would also accept "False". -#}
+		{%- if article is defined %}{% set NOINDEX = article.noindex %}{% elif page is defined %}{% set NOINDEX = page.noindex %}{% else %}{% set NOINDEX = "" %}{% endif %}
+		{%- if NOINDEX|string|lower == "true" %}
+			<meta name="robots" content="noindex, follow" />
+		{%- endif %}
+
 		<!-- Metadata -->
 		{% set BIO_FOR_DESCRIPTION = BIO|striptags() %}{% block metadata %}
 			{#- The listing templates (archives, tags, categories, authors, and the per-tag,
