@@ -89,11 +89,13 @@ check-precommit:
 test:
     uv run --group=dev --group=automation pytest
 
-# validate generated HTML and CSS
+# validate generated HTML and CSS, and check robots.txt and sitemap.xml against the built pages
+# (see tests/check_built_site.py for what those last checks are defending)
 validate:
     @if [ ! -d output ]; then echo "No output/ directory - run 'just html' or another similar recipe first" >&2; exit 1; fi
     npx htmlhint output/
     npx stylelint $(find output -name '*.css')
+    uv run --group=dev python tests/check_built_site.py
 
 # mirror repo without drafts
 mirror-redacted:

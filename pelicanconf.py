@@ -131,8 +131,18 @@ SEO_ENHANCER_TWITTER_CARDS = True
 # SEO_PAGES_LIMIT = 10
 
 # Sitemap plugin configuration. Drafts are excluded automatically (they aren't "published"),
-# but /drafts/ is excluded explicitly too, to match the Disallow rule in content/extra/robots.txt.
+# but drafts/ is excluded explicitly too, to match the Disallow rule in content/extra/robots.txt.
+#
+# These patterns are matched against the URL *relative to the output root*, with no leading
+# slash: the plugin writes SITEURL + "/" + pageurl and matches pageurl. A pattern written as
+# "^/drafts/" therefore matches nothing at all, which is what this one used to say.
+#
+# A page carrying <meta name="robots" content="noindex"> has no business in the sitemap either:
+# the sitemap asks a crawler to index the URL and the page then asks it not to. The plugin drops
+# anything whose status is not exactly "published" of its own accord, so only a page that stays
+# published while asking to be de-indexed needs naming here. tests/check_built_site.py checks
+# the built output for that contradiction, so a forgotten entry cannot ship.
 SITEMAP = {
     "format": "xml",
-    "exclude": ["^/drafts/"],
+    "exclude": [r"^drafts/", r"^test-post\.html$"],
 }

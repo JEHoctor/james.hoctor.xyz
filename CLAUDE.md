@@ -124,6 +124,36 @@ Because git-filter-repo rewrites deterministically, the summary at the end is me
 branch whose hash is unchanged genuinely did not change. If a change you believe is cosmetic
 reports every branch as updated, something is wrong.
 
+## SEO: what the plugins actually do
+
+Four things here are not guessable from the code, and each one cost real time.
+
+- **`pelican-seo`'s `noindex:` and `disallow:` front-matter keys never emit a meta tag.** They
+  only add lines to a robots.txt the plugin generates (`seo_enhancer/__init__.py`). Both sat on
+  `content/pages/404.md` for months doing nothing. The real directive is
+  `<meta name="robots" content="noindex, follow">`, which `base.html` now emits from the same
+  `noindex` key. The value is compared as a lowercased string against `"true"`, because these
+  headers are quoted and a bare truthiness test would accept `"False"` as a request to de-index;
+  that makes any other spelling a silent no-op, which `tests/test_meta_descriptions.py` guards.
+- **`content/extra/robots.txt` wins over the generated one by signal ordering, not by luck.** The
+  plugin writes robots.txt on `all_generators_finalized`, which fires *before* static files are
+  copied, so the static copy lands on top. This is what keeps the plugin's non-standard
+  `Noindex:` lines (Google dropped support in 2019; Bing never had it) out of the deployed file.
+  There is no setting to disable just the robots.txt generation — `SEO_ENHANCER` also drives the
+  canonical tags — so the ordering is checked instead, by `tests/check_built_site.py`.
+- **Sitemap `exclude` patterns have no leading slash.** The plugin writes `SITEURL + "/" + pageurl`
+  and matches the patterns against `pageurl`, so `"^/drafts/"` matched nothing for as long as it
+  was there; drafts stayed out only because of the plugin's separate status check. A page that is
+  `published` but `noindex` must be named in `SITEMAP["exclude"]`, or the sitemap asks a crawler
+  to index a URL the page then tells it not to. `tests/check_built_site.py` fails the build on
+  that contradiction rather than trusting the config to be remembered.
+- **`seo_report.html` reads front matter, not the rendered page.** It reports "You need to declare
+  a description" for any post without a `description:` key, even though the theme renders a good
+  one from the post's summary, and it only ever looks at articles and pages — never the home page
+  or the listing templates, which is why it never flagged what Bing did. Its own recommended
+  window is `range(150, 161)`, which is where the numbers in `pelicanconf.py` come from. Generated
+  by `just html` (`SEO_REPORT` is on in `pelicanconf.py`, off in `publishconf.py`) and gitignored.
+
 ## Environment quirks that have bitten before
 
 - **The runner image is Debian bullseye with git 2.30.** pre-commit calls
