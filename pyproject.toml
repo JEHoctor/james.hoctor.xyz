@@ -76,6 +76,10 @@ ignore = [
     "INP001",    # tests/ is not a package.
     "D103",      # Test names are the documentation.
 ]
+"tests/check_built_site.py" = [
+    "T201",      # This is a command-line check run by `just validate`; printing is its interface.
+    "S314",      # The only XML it parses is the sitemap this repository just generated.
+]
 "{pelican,publish}conf.py" = [
     "ERA001",    # These are conf files and sometimes config settings are commented out.
 ]
