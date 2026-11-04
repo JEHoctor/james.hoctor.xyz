@@ -5,7 +5,7 @@ category: "Blog"
 status: "draft"
 ---
 
-If you run Nextcloud behind Caddy, you might have noticed that the hyperlink from Nextloud's admin page to its AIO page is broken.
+If you run Nextcloud behind Caddy, you might have noticed that the hyperlink from Nextcloud's admin page to its AIO page is broken.
 This is because Nextcloud's documentation provides a Caddy configuration snippet for reverse proxying the AIO page that is slightly incorrect.
 When Nextcloud and Caddy are configured correctly, Nextcloud is able to detect the URL used to access its AIO page, and construct the hyperlink from that URL.
 This is more than just a convenience; the AIO page has greater access than the regular admin page and is usually accessible only on a private network or VPN, with a different IP address and hostname.
