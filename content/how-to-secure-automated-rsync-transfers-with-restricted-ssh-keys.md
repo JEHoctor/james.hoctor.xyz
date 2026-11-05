@@ -78,7 +78,7 @@ Note that this is where we restrict rsync access to the `/home/transfer/files` d
 If you want something else, then change it here.
 
 ```bash
-echo 'command="rrsync -wo -munge /home/transfer/files",no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-X11-forwarding '"$(cat ~/transfer/transfer_id_ed25519.pub)" | sudo tee -a /home/transfer/.ssh/authorized_keys > /dev/null
+echo 'command="/usr/bin/rrsync -wo -munge /home/transfer/files",no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-X11-forwarding '"$(cat ~/transfer/transfer_id_ed25519.pub)" | sudo tee -a /home/transfer/.ssh/authorized_keys > /dev/null
 ```
 
 The public key is not needed anymore.
