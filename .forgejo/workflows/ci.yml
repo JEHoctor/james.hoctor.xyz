@@ -73,6 +73,10 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     runs-on: docker
+    # This job installs rsync with apt, which no longer works on the runner's default bullseye
+    # image: the bullseye-security index still lists a package that has gone from Debian's pool.
+    container:
+      image: data.forgejo.org/oci/node:20-bookworm
     steps:
       - name: download-artifacts
         uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e  # v4 = v4.1.4+patch
