@@ -107,11 +107,14 @@ Never point this at the real mirror while experimenting. Use a local bare reposi
 target and a synthetic mailmap, with `--dry-run` so the push is printed instead of run:
 
 ```bash
+REPO=$PWD
 SB=$(mktemp -d)
-git clone -q . "$SB/source"
-git -C "$SB/source" fetch -q . 'refs/remotes/origin/*:refs/remotes/origin/*'
+git clone -q "$REPO" "$SB/source"
+git -C "$SB/source" fetch -q "$REPO" '+refs/remotes/origin/*:refs/remotes/origin/*'
+git -C "$SB/source" checkout -q --detach              # stay on the commit under test
+git -C "$SB/source" branch -f main origin/main        # filter-repo must have a main to rewrite
 git init -q --bare "$SB/mirror.git"
-git -C "$SB/mirror.git" fetch -q . 'refs/remotes/origin/*:refs/heads/*'
+git -C "$SB/mirror.git" fetch -q "$SB/source" 'refs/remotes/origin/*:refs/heads/*'
 git -C "$SB/mirror.git" symbolic-ref HEAD refs/heads/main   # else HEAD is an unborn 'master'
 
 cd "$SB/source"
@@ -120,9 +123,15 @@ export SECRET_MAILMAP="Redacted <redacted@example.invalid> <real@example.com>"
 uv run --group=automation blog mirror --dry-run
 ```
 
-Because git-filter-repo rewrites deterministically, the summary at the end is meaningful: a
-branch whose hash is unchanged genuinely did not change. If a change you believe is cosmetic
-reports every branch as updated, something is wrong.
+The sandbox mirror is seeded with unfiltered history, because the script needs a mirror with a
+`main`, so every branch reports as changed. Git-filter-repo rewrites deterministically, so compare
+the summary at the end between two runs instead: save one from before your change and one from
+after. A branch whose hash differs between them really did change, and if a change you believe is
+cosmetic moves every hash, something is wrong.
+
+Without a local `main` in the source clone, `main` is never rewritten, the seeded history survives
+and the script reports `REFUSING TO PUSH`. In a sandbox like this one, that means the setup is
+wrong, not that the filter is.
 
 ## Environment quirks that have bitten before
 
