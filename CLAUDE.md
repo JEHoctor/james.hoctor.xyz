@@ -101,24 +101,12 @@ job's log (`tea api` recipe in the handbook; the job is named `mirror-preview`) 
 The one fact this job cannot show you is how the *merged* result differs from the branch, so
 merge PRs that touch `content/` or the script one at a time.
 
-### Testing it safely
+### Testing changes to it
 
-Never point this at the real mirror while experimenting. Use a local bare repository as the
-target and a synthetic mailmap, with `--dry-run` so the push is printed instead of run:
-
-```bash
-SB=$(mktemp -d)
-git clone -q . "$SB/source"
-git -C "$SB/source" fetch -q . 'refs/remotes/origin/*:refs/remotes/origin/*'
-git init -q --bare "$SB/mirror.git"
-git -C "$SB/mirror.git" fetch -q . 'refs/remotes/origin/*:refs/heads/*'
-git -C "$SB/mirror.git" symbolic-ref HEAD refs/heads/main   # else HEAD is an unborn 'master'
-
-cd "$SB/source"
-export MIRROR_ACCESS_URL="$SB/mirror.git"
-export SECRET_MAILMAP="Redacted <redacted@example.invalid> <real@example.com>"
-uv run --group=automation blog mirror --dry-run
-```
+Test a change to the script by pushing a branch and reading its `mirror-preview` log. That job runs
+the branch's script against the real public mirror without pushing, and the `mirror` job always
+checks out `main`, so a branch's script cannot publish anything. Locally, only use the dry run
+(`just mirror-preview`). The push itself is first exercised when a change merges.
 
 Because git-filter-repo rewrites deterministically, the summary at the end is meaningful: a
 branch whose hash is unchanged genuinely did not change. If a change you believe is cosmetic
@@ -131,10 +119,8 @@ reports every branch as updated, something is wrong.
   2.30 lacks the `git ls-files --deduplicate` that `pre-commit run --all-files` calls (added in git
   2.31), and `apt-get install rsync` stops on a 404 because the `bullseye-security` index lists a
   package that has gone from Debian's pool.
-- **A change to `runs-on` reaches the real mirror on push.** Forgejo runs the pushed branch's
-  `ci.yml`, so the `mirror` job uses a branch's new image while checking out `main`. Before changing
-  the image, compare a sandboxed `blog mirror --dry-run` on the old and new images: a different git
-  must not change the rewritten hashes.
+- **`ci.yml` comes from the pushed branch.** A change to a job's image or steps takes effect on
+  push, including for the `mirror` job, which then publishes for real from `main`'s code.
 - **ruff is pinned in two places.** The `dev` and `notebook` groups pin `ruff==X.Y.Z` in
   `pyproject.toml` and the pre-commit hook pins `rev: vX.Y.Z`. They must move together, or
   `ruff check .` and `just check-precommit` start disagreeing about which rules exist.
