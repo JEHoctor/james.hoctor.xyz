@@ -1,8 +1,8 @@
 ---
 title: "Corrected Caddy config for accessing the Nextcloud AIO interface"
-date: "2026-11-04 14:00"
+date: "2026-11-04 20:35"
 category: "Blog"
-status: "draft"
+status: "published"
 ---
 
 If you run Nextcloud behind Caddy and run into the issue that the hyperlink from your Nextcloud's admin page to its AIO page is missing the port number, here is the fix.
