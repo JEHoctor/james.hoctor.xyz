@@ -1,6 +1,7 @@
 ---
 title: "Corrected Caddy config for accessing the Nextcloud AIO interface"
 date: "2026-11-04 20:35"
+modified: "2026-11-04 20:38"
 category: "Blog"
 status: "published"
 ---
@@ -76,7 +77,7 @@ The hyperlink on the admin page is constructed from the value of `AIO_URL`.
 When Caddy reverse proxies an upstream HTTPS site (such as the AIO in this case), it sets `Host` to the host and port used to reach that upstream, and copies the `Host` from the original request to `X-Forwarded-Host`.
 The Caddyfile snippet in the documentation does attempt to fix this with the line `header_up Host {host}`, but this drops the downstream port number if one is used.
 
-## How did I find this?
+## How did you find this?
 
 My config was missing the `header_up` line completely, which caused the AIO link to send me to localhost.
 I reverse proxy my AIO page only to a domain on a VPN, with a special port number to accommodate other services that are proxied the same way.
