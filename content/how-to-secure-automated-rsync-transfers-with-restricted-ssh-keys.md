@@ -143,7 +143,7 @@ If you need another user to write files, you will also need set the group write 
 chmod 770 /home/transfer/files
 ```
 
-# References:
+# References
 
 The first reference, *Restrict SSH access to only allow rsync* by Michael Boelen, covers the same topic and was a big inspiration for these instructions.
 However, because I do a few things differently, I wrote my own description of the process.
