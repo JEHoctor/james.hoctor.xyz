@@ -24,17 +24,19 @@
   border-radius: 0.2rem;
 }
 
+/* The button is 1.5rem square with an equal inset on its top and right; in a one-line block
+   (about 2.15rem tall) that leaves it centred. */
 .copy-code {
   position: absolute;
-  top: 0.2rem;
-  right: 0.2rem;
+  top: 0.325rem;
+  right: 0.325rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
   padding: 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
   line-height: 1;
   color: #767676;
   cursor: pointer;
@@ -42,15 +44,23 @@
   background-color: #e3e3e3;
   border: 0;
   border-radius: 0.25rem;
-
-  /* A soft edge in the block's own colour, so a long line scrolling under the button fades
-     out instead of being cut off. The spread is well beyond the gap to the block's edge, so
-     the blur is fully opaque there and no text shows through it; the wrapper clips the
-     excess. */
-  box-shadow: 0 0 0.5rem 0.7rem #ebebeb;
   transition:
     color 150ms cubic-bezier(0.16, 1, 0.3, 1),
     background-color 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Where a long line runs under the button, the code fades out into the block's colour. This
+   is a thin strip at the button's own height, flush with the block's right edge: opaque
+   behind the button and its gap to the edge, ramping up over the last 0.8rem to the left,
+   and covering nothing else (not the scrollbar below it). */
+.copy-code-fade {
+  position: absolute;
+  top: 0.325rem;
+  right: 0;
+  width: 2.65rem;
+  height: 1.5rem;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, #ebebeb 0.8rem);
 }
 
 .copy-code:focus-visible {

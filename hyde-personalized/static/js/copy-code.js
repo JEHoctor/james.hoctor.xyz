@@ -17,7 +17,8 @@
   }
 
   var RESET_MS = 1800;
-  var ICONS = { idle: "fa-clipboard", done: "fa-check", error: "fa-times" };
+  // fa-files-o is the outlined "copy" icon, lighter than the solid fa-clipboard.
+  var ICONS = { idle: "fa-files-o", done: "fa-check", error: "fa-times" };
 
   function containerFor(pre) {
     var parent = pre.parentElement;
@@ -87,6 +88,12 @@
       );
     });
 
+    // A strip behind the button that fades a long line out instead of cutting it off.
+    var fade = document.createElement("span");
+    fade.className = "copy-code-fade";
+    fade.setAttribute("aria-hidden", "true");
+
+    container.appendChild(fade);
     container.appendChild(button);
     container.appendChild(status);
   }
