@@ -25,7 +25,9 @@
 }
 
 /* The button is 1.5rem square with an equal inset on its top and right; in a one-line block
-   (about 2.15rem tall) that leaves it centred. */
+   (about 2.15rem tall) that leaves it centred. The room it needs at the end of each line, so
+   a block can be scrolled until the line's end is clear of it, is in pandoc.css, next to the
+   markup it depends on. */
 .copy-code {
   position: absolute;
   top: 0.325rem;
