@@ -148,6 +148,16 @@ reports every branch as updated, something is wrong.
   build that is fine in a fresh checkout.
 - **Rich markup is disabled** in `mirror.py`. It would otherwise read a bracketed word,
   including the log prefix and any path containing a bracket, as a style tag and silently drop it.
+- **Cloudflare rewrites `user@host` text into a `[email protected]` link.** The site is served through
+  Cloudflare, whose email obfuscation replaces anything that looks like an address, code blocks
+  included, with a link that only decodes once its JavaScript runs. `curl`, reader modes and
+  no-JS clients see the placeholder, so a pasted command breaks. Wrap such a block in
+  `<!--email_off-->` and `<!--/email_off-->` on their own lines, outside the code fence; Cloudflare
+  removes the markers from the served page, so their absence in the live HTML is expected. A
+  local build or `just serve` cannot show whether it worked, since Cloudflare is not in front of
+  them; it only shows the markers survive pandoc. Check after deploying with
+  `curl -s <post url> | grep -c cf_email` (want 0) and read the code block's text in the raw HTML.
+  The client rsync command in the rsync-transfers post is the worked example.
 - **`.claude/worktrees/` holds git worktrees**, not part of the source tree. ruff excludes
   `.claude` via `extend-exclude`; any other linter you add needs the same exclusion.
 
