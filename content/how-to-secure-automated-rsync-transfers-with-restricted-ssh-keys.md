@@ -1,8 +1,8 @@
 ---
 title: "How to secure automated rsync transfers with restricted ssh keys"
-date: "2025-04-28 14:13"
+date: "2026-11-06 15:47"
 category: "Blog"
-status: "draft"
+status: "published"
 ---
 
 If you use rsync to send files between machines in any sort of automated process, then you should check the security of that setup.
