@@ -113,7 +113,7 @@ Then add the drop-in config file.
 
 ```bash
 DROP_IN='/etc/ssh/sshd_config.d/10-limit-transfer.conf'
-if [ -e "$DROP_IN" ]; then
+if sudo test -e "$DROP_IN"; then
     echo "drop-in already exists" >&2
 else
     sudo tee "$DROP_IN" > /dev/null <<'EOF'
