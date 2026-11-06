@@ -205,7 +205,7 @@ chmod 770 /home/transfer/files
 
 # Software versions used
 
-I tested this on Ubuntu 24.04.5 LTS with OpenSSH 9.6p1 and Fedora 44 with OpenSSH 10.2p1.
+I tested this on Ubuntu 24.04.5 LTS with OpenSSH 9.6p1, Ubuntu 26.04.1 LTS with OpenSSH 10.2p1, and Fedora 44 with OpenSSH 10.2p1.
 
 # References
 
