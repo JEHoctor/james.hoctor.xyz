@@ -54,6 +54,30 @@
     padding-right: 2.5rem;
     overflow: visible;
   }
+
+  /*
+   * Classic scrollbars only (copy-code.js adds the class on <html> when the browser draws a
+   * scrollbar that takes space; overlay scrollbars, which take none, are left as they are).
+   * The default is a 15px track with arrow buttons under every block that scrolls, which is
+   * heavy next to the code. So: a thin scrollbar with a faint thumb on a transparent track,
+   * and, on a block that actually scrolls, the <pre> is pulled down by the scrollbar's
+   * thickness (--copy-scrollbar, measured by the script) so that the scrollbar sits in the
+   * block's bottom padding instead of under it, as an overlay scrollbar does. The block is
+   * then exactly as tall as one with no scrollbar. The wrapper takes the grey, so the track
+   * is the block's colour rather than the page's.
+   */
+  .copy-classic-scrollbars .has-copy {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(0 0 0 / 28%) transparent;
+  }
+
+  .copy-classic-scrollbars .has-copy.copy-scrolls {
+    background-color: #ebebeb;
+  }
+
+  .copy-classic-scrollbars .has-copy.copy-scrolls pre {
+    margin-bottom: calc(-1 * var(--copy-scrollbar));
+  }
 }
 
 /*

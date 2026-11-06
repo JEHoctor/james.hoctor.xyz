@@ -105,10 +105,59 @@
     pre.insertBefore(anchor, pre.firstChild);
 
     container.appendChild(status);
+    return container;
+  }
+
+  // Some browsers (Chrome and Edge, Firefox on Windows) draw a classic scrollbar that takes
+  // space: a chunky 15px track under every block that scrolls. Others draw an overlay
+  // scrollbar that floats over the content and takes none, which is what the blocks look
+  // best with. For the classic case, measure how thick a thin scrollbar is; if the browser
+  // honours `scrollbar-width: thin` and it is thin enough, mark the page so that the CSS can
+  // slim and lighten the scrollbar and pull it up into the block's bottom padding, as an
+  // overlay one would be. An overlay scrollbar measures 0 and is left alone.
+  function thinScrollbarThickness() {
+    var probe = document.createElement("div");
+    probe.style.cssText =
+      "position:absolute;left:-9999px;top:0;width:100px;height:50px;" +
+      "overflow-x:scroll;overflow-y:hidden;scrollbar-width:thin";
+    var inner = document.createElement("div");
+    inner.style.cssText = "width:300px;height:10px";
+    probe.appendChild(inner);
+    document.body.appendChild(probe);
+    var thickness = probe.offsetHeight - probe.clientHeight;
+    probe.remove();
+    return thickness;
+  }
+
+  var thickness = thinScrollbarThickness();
+  var classic = thickness > 0 && thickness <= 10;
+  if (classic) {
+    document.documentElement.classList.add("copy-classic-scrollbars");
+    document.documentElement.style.setProperty("--copy-scrollbar", thickness + "px");
   }
 
   var blocks = document.querySelectorAll("pre");
   blocks.forEach(function (pre, index) {
-    addButton(pre, index, blocks.length);
+    var container = addButton(pre, index, blocks.length);
+    if (classic && container) {
+      watchOverflow(container);
+    }
   });
+
+  // The scrollbar only takes space (and so needs pulling up) on a block that actually
+  // overflows, so mark those, and re-check when the block's width changes.
+  function watchOverflow(container) {
+    function check() {
+      container.classList.toggle(
+        "copy-scrolls",
+        container.scrollWidth > container.clientWidth,
+      );
+    }
+    check();
+    if (window.ResizeObserver) {
+      new ResizeObserver(check).observe(container);
+    } else {
+      window.addEventListener("resize", check);
+    }
+  }
 })();
