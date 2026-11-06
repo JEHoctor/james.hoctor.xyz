@@ -102,7 +102,7 @@ First, check what the sshd config currently allows for the transfer user.
 
 ```bash
 sudo sshd -T -C user=transfer | grep -E 'disableforwarding|permittty|authenticationmethods|permituserrc'
-# Expect something like:
+## Expect something like:
 # permittty yes
 # permituserrc yes
 # disableforwarding no
@@ -127,10 +127,12 @@ fi
 ```
 
 Rerun the sshd config check to observe that the drop-in config will have the right effect.
+If the output is the same as above, or it doesn't match the newly configured values, then the drop-in is not going to work.
+On potential problem is that `/etc/ssh/sshd_config` could be missing an `Include` directive for the `/etc/ssh/sshd_config.g/` folder.
 
 ```bash
 sudo sshd -T -C user=transfer | grep -E 'disableforwarding|permittty|authenticationmethods|permituserrc'
-# Expect something like:
+## We need to see these values:
 # permittty no
 # permituserrc no
 # disableforwarding yes
