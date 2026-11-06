@@ -13,13 +13,19 @@
   margin-bottom: 0;
 }
 
+/* The grey surface belongs to the wrapper, not the code element, so the button sits inside
+   it (same colour as the base "code" rule in poole.css). */
 .has-copy {
   position: relative;
+  background-color: #ebebeb;
 }
 
-/* Keep the first line clear of the button. */
+/* The code scrolls sideways, so padding would only clear the button until the first scroll.
+   A margin ends the scrolling area before the button instead, and long lines never run
+   underneath it. */
 .has-copy pre > code {
-  padding-right: 4.5rem;
+  margin-right: 4.6rem;
+  padding-right: 0.6rem;
 }
 
 .copy-code {
