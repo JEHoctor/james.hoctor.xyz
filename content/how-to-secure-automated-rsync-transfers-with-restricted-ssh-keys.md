@@ -23,7 +23,7 @@ sudo dnf install rsync-rrsync
 
 # Step 1: Create an unprivileged user
 
-This recipe uses an unpriviledged user account to limit the access granted if an ssh connection bypasses the other protections and opens a shell.
+This recipe uses an unprivileged user account to limit the access granted if an ssh connection bypasses the other protections and opens a shell.
 I'll use `transfer` as the user name throughout these instructions.
 It's also good to add a descriptive comment for the new user.
 
@@ -96,7 +96,7 @@ rm ~/transfer/transfer_id_ed25519.pub
 
 # Step 6: Optional sshd hardening
 
-You can get the ssh daemon to enforce some of same limits on the transfer user by adding a drop-in sshd config.
+You can get the ssh daemon to enforce some of the same limits on the transfer user by adding a drop-in sshd config.
 This provides overlapping protection that is especially useful if you find yourself adding new keys often.
 
 ```bash
@@ -139,7 +139,7 @@ After completing the above steps, the new ssh key will be in a protected folder 
 You will also need the `known_hosts` file that will be placed in the same folder, and, like any other rsync connection, the username, hostname, and file path for the transfer.
 Move these to the client machine, add them to a secrets manager like vault, or to secrets in your git forge for use in automated deployments.
 Delete the copy on the server after copying to the client.
-If you lose the client copy, rely on deleting old credentials in `/home/transfer/.ssh/authorized_keys` and following the recipe above to generate new ones for the transfer user.
+If you lose the client copy, delete the corresponding entry in `/home/transfer/.ssh/authorized_keys` and follow the recipe above to generate a new key.
 
 ## Automation setup: on the client
 
@@ -167,7 +167,7 @@ This seems to be dependent on the OS defaults for new users.
 chmod 750 /home/transfer
 ```
 
-If you need another user to write files, you will also need set the group write bit on the files directory.
+If you need another user to write files, you will also need to set the group write bit on the files directory.
 
 ```bash
 chmod 770 /home/transfer/files
