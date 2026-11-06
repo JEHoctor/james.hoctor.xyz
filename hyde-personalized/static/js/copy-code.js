@@ -1,12 +1,13 @@
 /*
- * Adds a "Copy" button to every code block. Progressive enhancement: without JavaScript the
+ * Adds a copy button to every code block. Progressive enhancement: without JavaScript the
  * blocks render exactly as before.
  *
  * Pandoc wraps highlighted blocks in div.sourceCode and leaves plain fences as a bare <pre>,
  * so the button is attached to the wrapper when there is one and to a new wrapper otherwise.
- * The button goes above the code, in its own strip, so it never covers a long line. The text
- * is read from the DOM at click time, so anything a script rewrote after page load (for
- * example Cloudflare's email decoding) is copied as the reader sees it.
+ * The button is an icon (Fork Awesome, already loaded for the sidebar) positioned inside the
+ * block's own padding. The text is read from the DOM at click time, so anything a script
+ * rewrote after page load (for example Cloudflare's email decoding) is copied as the reader
+ * sees it.
  */
 (function () {
   "use strict";
@@ -16,6 +17,7 @@
   }
 
   var RESET_MS = 1800;
+  var ICONS = { idle: "fa-clipboard", done: "fa-check", error: "fa-times" };
 
   function containerFor(pre) {
     var parent = pre.parentElement;
@@ -35,54 +37,57 @@
     container.classList.add("has-copy");
 
     // Every button needs a distinct name, or a screen reader says the same thing N times. It
-    // starts with the visible word "Copy", as accessibility guidelines ask.
+    // starts with the word "Copy", as accessibility guidelines ask of an icon's name.
     var position = total > 1 ? " " + (index + 1) + " of " + total : "";
     var idleName = "Copy code block" + position;
     var doneName = "Copied code block" + position;
 
+    var icon = document.createElement("i");
+    icon.className = "fa " + ICONS.idle;
+    icon.setAttribute("aria-hidden", "true");
+
     var button = document.createElement("button");
     button.type = "button";
     button.className = "copy-code";
-    button.textContent = "Copy";
+    button.title = "Copy";
     button.setAttribute("aria-label", idleName);
+    button.appendChild(icon);
 
     var status = document.createElement("span");
     status.className = "copy-code-status";
     status.setAttribute("role", "status");
 
     var timer;
-    function show(label, state, message, name) {
-      button.textContent = label;
-      button.dataset.state = state;
+    function show(state, message, name) {
+      icon.className = "fa " + ICONS[state];
+      if (state === "idle") {
+        delete button.dataset.state;
+      } else {
+        button.dataset.state = state;
+      }
       button.setAttribute("aria-label", name);
       status.textContent = message;
       clearTimeout(timer);
-      timer = setTimeout(function () {
-        button.textContent = "Copy";
-        delete button.dataset.state;
-        button.setAttribute("aria-label", idleName);
-        status.textContent = "";
-      }, RESET_MS);
+      if (state !== "idle") {
+        timer = setTimeout(function () {
+          show("idle", "", idleName);
+        }, RESET_MS);
+      }
     }
 
     button.addEventListener("click", function () {
       var text = code.textContent.replace(/\n$/, "");
       navigator.clipboard.writeText(text).then(
         function () {
-          show("Copied", "done", "Copied to clipboard", doneName);
+          show("done", "Copied to clipboard", doneName);
         },
         function () {
-          show(
-            "Failed",
-            "error",
-            "Copy failed. Select the text and copy it by hand.",
-            idleName,
-          );
+          show("error", "Copy failed. Select the text and copy it by hand.", idleName);
         },
       );
     });
 
-    container.insertBefore(button, container.firstChild);
+    container.appendChild(button);
     container.appendChild(status);
   }
 
