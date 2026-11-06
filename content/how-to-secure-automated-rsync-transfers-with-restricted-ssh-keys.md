@@ -98,18 +98,42 @@ rm ~/transfer/transfer_id_ed25519.pub
 
 You can get the ssh daemon to enforce some of the same limits on the transfer user by adding a drop-in sshd config.
 This provides overlapping protection that is especially useful if you find yourself adding new keys often.
+First, check what the sshd config currently allows for the transfer user.
 
 ```bash
-[ -e /etc/ssh/sshd_config.d ] && echo "drop-in already exists" || cat <<< 'X'
+sudo sshd -T -C user=transfer | grep -E 'disableforwarding|permittty|authenticationmethods|permituserrc'
+# Expect something like:
+# permittty yes
+# permituserrc yes
+# disableforwarding no
+# authenticationmethods any
+```
+
+Then add the drop-in config file.
+
+```bash
+DROP_IN='/etc/ssh/sshd_config.d/10-limit-transfer.conf'
+[ -e "$DROP_IN" ] && echo "drop-in already exists" >&2 && false || sudo tee "$DROP_IN" <<'EOF'
 Match User transfer
     AuthenticationMethods publickey
     DisableForwarding yes
     PermitTTY no
     PermitUserRC no
-X | sudo tee /etc/ssh/sshd_config.d/10_limit_transfer.conf
+EOF
 ```
 
-Then verify the new sshd config and reload to enable it.
+Rerun the sshd config check to observe that the drop-in config will have the right effect.
+
+```bash
+sudo sshd -T -C user=transfer | grep -E 'disableforwarding|permittty|authenticationmethods|permituserrc'
+# Expect something like:
+# permittty no
+# permituserrc no
+# disableforwarding yes
+# authenticationmethods publickey
+```
+
+Then verify the new sshd config is valid and reload the sshd service to enable it.
 
 ```bash
 sudo sshd -t && sudo systemctl reload sshd.service
