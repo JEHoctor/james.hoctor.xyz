@@ -177,9 +177,11 @@ This rsync command will copy files to the directory `/home/transfer/files/destin
 Of course, you'll want to tailor the rsync flags and parameters to your needs.
 For example, you might want to use the `--delete` and/or `--checksum` flags for your use case.
 
+<!--email_off-->
 ```bash
 rsync -rvz -e "ssh -i transfer_id_ed25519 -o UserKnownHostsFile=known_hosts" source/ transfer@example.com:destination/
 ```
+<!--/email_off-->
 
 ## Automation setup: on the server
 
