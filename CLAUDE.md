@@ -157,7 +157,10 @@ reports every branch as updated, something is wrong.
   local build or `just serve` cannot show whether it worked, since Cloudflare is not in front of
   them; it only shows the markers survive pandoc. Check after deploying with
   `curl -s <post url> | grep -c cf_email` (want 0) and read the code block's text in the raw HTML.
-  The client rsync command in the rsync-transfers post is the worked example.
+  The client rsync command in the rsync-transfers post is the worked example. Explain the markers
+  with a markdown comment, `[//]: # (why)`, not an HTML one: Cloudflare strips only the markers,
+  so an ordinary HTML comment would ship to readers. Pandoc drops the unused reference, which
+  `grep -c` on the built HTML confirms.
 - **`.claude/worktrees/` holds git worktrees**, not part of the source tree. ruff excludes
   `.claude` via `extend-exclude`; any other linter you add needs the same exclusion.
 
