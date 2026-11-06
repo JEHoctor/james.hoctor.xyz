@@ -127,7 +127,7 @@ fi
 ```
 
 Rerun the sshd config check to observe that the drop-in config will have the right effect.
-If the output is the same as above, or it doesn't match the newly configured values, then the drop-in is not going to work.
+If the output is unchanged, or it doesn't show the required values shown below, then the drop-in is not working.
 One potential problem is that `/etc/ssh/sshd_config` could be missing an `Include` directive for the `/etc/ssh/sshd_config.d/` folder.
 
 ```bash
