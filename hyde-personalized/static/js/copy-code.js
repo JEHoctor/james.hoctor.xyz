@@ -4,8 +4,9 @@
  *
  * Pandoc wraps highlighted blocks in div.sourceCode and leaves plain fences as a bare <pre>,
  * so the button is attached to the wrapper when there is one and to a new wrapper otherwise.
- * The text is read from the DOM at click time, so anything a script rewrote after page load
- * (for example Cloudflare's email decoding) is copied as the reader sees it.
+ * The button goes above the code, in its own strip, so it never covers a long line. The text
+ * is read from the DOM at click time, so anything a script rewrote after page load (for
+ * example Cloudflare's email decoding) is copied as the reader sees it.
  */
 (function () {
   "use strict";
@@ -28,30 +29,38 @@
     return wrapper;
   }
 
-  function addButton(pre) {
+  function addButton(pre, index, total) {
     var code = pre.querySelector("code") || pre;
     var container = containerFor(pre);
     container.classList.add("has-copy");
+
+    // Every button needs a distinct name, or a screen reader says the same thing N times. It
+    // starts with the visible word "Copy", as accessibility guidelines ask.
+    var position = total > 1 ? " " + (index + 1) + " of " + total : "";
+    var idleName = "Copy code block" + position;
+    var doneName = "Copied code block" + position;
 
     var button = document.createElement("button");
     button.type = "button";
     button.className = "copy-code";
     button.textContent = "Copy";
-    button.setAttribute("aria-label", "Copy code to clipboard");
+    button.setAttribute("aria-label", idleName);
 
     var status = document.createElement("span");
     status.className = "copy-code-status";
     status.setAttribute("role", "status");
 
     var timer;
-    function show(label, state) {
+    function show(label, state, message, name) {
       button.textContent = label;
       button.dataset.state = state;
-      status.textContent = state === "done" ? "Copied to clipboard" : "Copy failed";
+      button.setAttribute("aria-label", name);
+      status.textContent = message;
       clearTimeout(timer);
       timer = setTimeout(function () {
         button.textContent = "Copy";
         delete button.dataset.state;
+        button.setAttribute("aria-label", idleName);
         status.textContent = "";
       }, RESET_MS);
     }
@@ -60,17 +69,25 @@
       var text = code.textContent.replace(/\n$/, "");
       navigator.clipboard.writeText(text).then(
         function () {
-          show("Copied", "done");
+          show("Copied", "done", "Copied to clipboard", doneName);
         },
         function () {
-          show("Copy failed", "error");
+          show(
+            "Failed",
+            "error",
+            "Copy failed. Select the text and copy it by hand.",
+            idleName,
+          );
         },
       );
     });
 
-    container.appendChild(button);
+    container.insertBefore(button, container.firstChild);
     container.appendChild(status);
   }
 
-  document.querySelectorAll("pre").forEach(addButton);
+  var blocks = document.querySelectorAll("pre");
+  blocks.forEach(function (pre, index) {
+    addButton(pre, index, blocks.length);
+  });
 })();

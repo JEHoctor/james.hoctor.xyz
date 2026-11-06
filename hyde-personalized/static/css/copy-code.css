@@ -1,7 +1,8 @@
 /*
- * The "Copy" button that copy-code.js adds to code blocks. Always visible, so it works on touch
- * screens, but quiet until hovered or focused. Colours are on the same grey scale as the code
- * block background in poole.css (#f9f9f9 / #ebebeb).
+ * The "Copy" button that copy-code.js adds to code blocks. It sits in its own strip above the
+ * code, so the code keeps the block's full width and long lines never run under it. Always
+ * visible, so it works on touch screens. Colours are on the same grey scale as the code
+ * block background in poole.css (#ebebeb).
  */
 
 .code-block {
@@ -13,33 +14,33 @@
   margin-bottom: 0;
 }
 
-/* The grey surface belongs to the wrapper, not the code element, so the button sits inside
-   it (same colour as the base "code" rule in poole.css). */
+/* The grey surface belongs to the wrapper, not the code element, so the strip and the code
+   share it (same colour as the base "code" rule in poole.css). */
 .has-copy {
   position: relative;
   background-color: #ebebeb;
 }
 
-/* The code scrolls sideways, so padding would only clear the button until the first scroll.
-   A margin ends the scrolling area before the button instead, and long lines never run
-   underneath it. */
+/* The strip is as short as the button needs; the code's own top padding is trimmed so a
+   one-line block is not much taller than it was. */
 .has-copy pre > code {
-  margin-right: 4.6rem;
-  padding-right: 0.6rem;
+  padding-top: 0.2rem;
 }
 
 .copy-code {
-  position: absolute;
-  top: 0.35rem;
-  right: 0.35rem;
+  display: block;
+  min-width: 4.5rem;
   padding: 0.15rem 0.55rem;
+  margin: 0.35rem 0.35rem 0 auto;
   font-family: inherit;
   font-size: 0.75rem;
   line-height: 1.5;
   color: #595959;
+  text-align: center;
   cursor: pointer;
+  user-select: none;
   background-color: #f9f9f9;
-  border: 1px solid #d4d4d4;
+  border: 1px solid #858585;
   border-radius: 3px;
   transition:
     color 150ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -49,8 +50,8 @@
 
 .copy-code:hover {
   color: #202020;
-  background-color: #ebebeb;
-  border-color: #b8b8b8;
+  background-color: #d6d6d6;
+  border-color: #595959;
 }
 
 .copy-code:focus-visible {
@@ -60,14 +61,17 @@
 
 .copy-code[data-state="done"] {
   color: #2f5d1f;
-  border-color: #90a959;
+  background-color: #e6efd6;
+  border-color: #5f7a3c;
 }
 
 .copy-code[data-state="error"] {
   color: #8a2a2b;
+  background-color: #f5e0e0;
   border-color: #ac4142;
 }
 
+/* Visually hidden, but still announced: the status text for screen readers. */
 .copy-code-status {
   position: absolute;
   width: 1px;
@@ -75,6 +79,17 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+  user-select: none;
+}
+
+/* Fingers need a bigger target than a mouse pointer. */
+@media (pointer: coarse) {
+  .copy-code {
+    min-width: 5rem;
+    min-height: 2.5rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.875rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
