@@ -88,12 +88,6 @@
       );
     });
 
-    // A strip behind the button that fades a long line out instead of cutting it off.
-    var fade = document.createElement("span");
-    fade.className = "copy-code-fade";
-    fade.setAttribute("aria-hidden", "true");
-
-    container.appendChild(fade);
     container.appendChild(button);
     container.appendChild(status);
   }

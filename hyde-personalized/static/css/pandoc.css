@@ -56,22 +56,6 @@ pre > code.sourceCode > span:empty {
   }
 }
 
-/* Room for copy-code.css's button: it sits over the right end of a block, so each line gets
-   extra space there, and scrolling a block all the way right brings the end of its longest
-   line clear of the button. The space is on the line elements, not on the code's own right
-   padding, because browsers differ on whether padding at the end of a scroll container counts
-   as scrollable. Lines are inline-block, so this widens the scrollable area but not the height
-   of a block. Plain fences have no line elements, so they get it on the code itself. */
-@media screen {
-  .has-copy code.sourceCode > span {
-    padding-right: 2.5rem;
-  }
-
-  .has-copy pre > code:not(.sourceCode) {
-    padding-right: 2.5rem;
-  }
-}
-
 /* Token classes, with syntax.css's Pygments colours. */
 code span.al { color: #a00; font-weight: bold; }              /* Alert          <- Error           */
 code span.an { color: #999; font-style: italic; }             /* Annotation     <- Comment         */
