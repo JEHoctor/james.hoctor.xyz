@@ -17,26 +17,60 @@
   margin-bottom: 0;
 }
 
-/* The grey belongs to the wrapper rather than the code element, so it still fills the gutter
-   (below) at the right end of the block. */
+/* overflow is clipped so the block keeps its rounded corners. */
 .has-copy {
   position: relative;
-  background-color: #ebebeb;
+  overflow: hidden;
   border-radius: 0.2rem;
 }
 
-.has-copy pre > code {
-  background-color: transparent;
+/*
+ * Where the scrolling happens. Normally the <code> scrolls and the button would have to sit
+ * beside it, painted over its scrollbar. Here the block's wrapper scrolls instead, the <pre>
+ * inside it is as wide as its longest line (at least as wide as the block), and the button
+ * lives in that <pre>. The scrollbar belongs to the wrapper, so it is painted above
+ * everything in it, button included, and runs the full width of the block.
+ *
+ * The <pre> is the wide element, not the <code>, because the button's anchor (below) can only
+ * travel within its parent's content box, and the <code>'s right padding, which is the room
+ * the button takes at the end of the longest line, is inside the <pre>'s content box but not
+ * its own. With that room, scrolling all the way right brings the end of the line clear of
+ * the button.
+ *
+ * On screen only; a printed block wraps and has no button.
+ */
+@media screen {
+  .has-copy {
+    overflow: auto hidden;
+  }
+
+  .has-copy pre {
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .has-copy pre > code {
+    padding-right: 2.5rem;
+    overflow: visible;
+  }
 }
 
-/* The code stops short of the button, leaving a small clear gutter for it. The code is what
-   scrolls, so its scrollbar and its text both end before the button instead of running
-   underneath it: nothing is ever hidden behind the icon, and the scrollbar is never covered
-   by it. On screen only; a printed block wraps and has no button. */
-@media screen {
-  .has-copy pre > code {
-    margin-right: 2.25rem;
-  }
+/*
+ * Zero-size and in the flow at the very start of the <pre>, so that it is the thing that
+ * sticks: `left` pins it 1.825rem (the button's width plus its inset) in from the right edge
+ * of the visible area, whatever the scroll position. The button and the fade hang off it
+ * absolutely. The z-index keeps it above the code, which pandoc.css makes `position: relative`
+ * and which comes later in the markup.
+ */
+.has-copy pre > .copy-anchor {
+  position: sticky;
+  z-index: 1;
+  left: calc(100% - 1.825rem);
+  display: block;
+  width: 0;
+  height: 0;
+  line-height: 0;
 }
 
 /* The button is 1.5rem square with an equal inset on its top and right; in a one-line block
@@ -44,7 +78,7 @@
 .copy-code {
   position: absolute;
   top: 0.325rem;
-  right: 0.325rem;
+  left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,6 +96,20 @@
   transition:
     color 150ms cubic-bezier(0.16, 1, 0.3, 1),
     background-color 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Where a long line runs under the button, the code fades out into the block's colour. This
+   is a thin strip at the button's own height, reaching the block's right edge: opaque behind
+   the button and its gap to the edge, ramping up over the 0.8rem to its left, and covering
+   nothing else (not the scrollbar below it). It is under the button and over the text. */
+.copy-code-fade {
+  position: absolute;
+  top: 0.325rem;
+  left: -0.8rem;
+  width: 2.65rem;
+  height: 1.5rem;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, #ebebeb 0.8rem);
 }
 
 .copy-code:focus-visible {
@@ -117,7 +165,7 @@
 }
 
 @media print {
-  .copy-code {
+  .has-copy pre > .copy-anchor {
     display: none;
   }
 }

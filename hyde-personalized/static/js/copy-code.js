@@ -88,7 +88,22 @@
       );
     });
 
-    container.appendChild(button);
+    // The button goes inside the <pre>, not beside the block, so that it is part of what the
+    // block's wrapper scrolls. CSS pins it to the right edge of the visible area. That way the
+    // scrollbar, which belongs to the wrapper, is painted above the button instead of being
+    // hidden by it. A strip behind the button fades a long line out instead of cutting it off.
+    // Neither is inside the <code> or adds any text, so code.textContent (what gets copied) is
+    // unchanged.
+    var fade = document.createElement("span");
+    fade.className = "copy-code-fade";
+    fade.setAttribute("aria-hidden", "true");
+
+    var anchor = document.createElement("span");
+    anchor.className = "copy-anchor";
+    anchor.appendChild(fade);
+    anchor.appendChild(button);
+    pre.insertBefore(anchor, pre.firstChild);
+
     container.appendChild(status);
   }
 
