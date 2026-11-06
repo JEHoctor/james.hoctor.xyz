@@ -113,13 +113,17 @@ Then add the drop-in config file.
 
 ```bash
 DROP_IN='/etc/ssh/sshd_config.d/10-limit-transfer.conf'
-[ -e "$DROP_IN" ] && echo "drop-in already exists" >&2 && false || sudo tee "$DROP_IN" <<'EOF'
+if [ -e "$DROP_IN" ]; then
+    echo "drop-in already exists" >&2
+else
+    sudo tee "$DROP_IN" > /dev/null <<'EOF'
 Match User transfer
     AuthenticationMethods publickey
     DisableForwarding yes
     PermitTTY no
     PermitUserRC no
 EOF
+fi
 ```
 
 Rerun the sshd config check to observe that the drop-in config will have the right effect.
