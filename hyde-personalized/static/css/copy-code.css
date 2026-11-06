@@ -1,0 +1,84 @@
+/*
+ * The "Copy" button that copy-code.js adds to code blocks. Always visible, so it works on touch
+ * screens, but quiet until hovered or focused. Colours are on the same grey scale as the code
+ * block background in poole.css (#f9f9f9 / #ebebeb).
+ */
+
+.code-block {
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.code-block > pre {
+  margin-bottom: 0;
+}
+
+.has-copy {
+  position: relative;
+}
+
+/* Keep the first line clear of the button. */
+.has-copy pre > code {
+  padding-right: 4.5rem;
+}
+
+.copy-code {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #595959;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  border: 1px solid #d4d4d4;
+  border-radius: 3px;
+  transition:
+    color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.copy-code:hover {
+  color: #202020;
+  background-color: #ebebeb;
+  border-color: #b8b8b8;
+}
+
+.copy-code:focus-visible {
+  outline: 2px solid #202020;
+  outline-offset: 2px;
+}
+
+.copy-code[data-state="done"] {
+  color: #2f5d1f;
+  border-color: #90a959;
+}
+
+.copy-code[data-state="error"] {
+  color: #8a2a2b;
+  border-color: #ac4142;
+}
+
+.copy-code-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copy-code {
+    transition: none;
+  }
+}
+
+@media print {
+  .copy-code {
+    display: none;
+  }
+}
