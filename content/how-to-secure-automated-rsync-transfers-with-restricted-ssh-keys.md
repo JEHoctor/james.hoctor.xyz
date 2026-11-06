@@ -203,6 +203,10 @@ If you need another user to write files, you will also need to set the group wri
 chmod 770 /home/transfer/files
 ```
 
+# Software versions used
+
+I tested this on Ubuntu 24.04.5 LTS with OpenSSH 9.6p1 and Fedora 44 with OpenSSH 10.2p1.
+
 # References
 
 The first reference, *Restrict SSH access to only allow rsync* by Michael Boelen, covers the same topic and was a big inspiration for these instructions.
