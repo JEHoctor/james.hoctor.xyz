@@ -60,6 +60,11 @@ html {
 body {
   color: #515151;
   background-color: #fff;
+
+  /* iOS Safari reads only the prefixed form, so it must stay despite the lint rule. Without it
+     Safari enlarges the text of any block wider than the screen, such as a long code line. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
