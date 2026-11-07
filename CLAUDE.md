@@ -101,28 +101,42 @@ job's log (`tea api` recipe in the handbook; the job is named `mirror-preview`) 
 The one fact this job cannot show you is how the *merged* result differs from the branch, so
 merge PRs that touch `content/` or the script one at a time.
 
-### Testing it safely
+### Developing the mirror script or its workflow
 
-Never point this at the real mirror while experimenting. Use a local bare repository as the
-target and a synthetic mailmap, with `--dry-run` so the push is printed instead of run:
+**For any other change, do not run this: read the `mirror-preview` log as described above.** That
+is simpler and more reliable, because it uses the real mirror and mailmap. The recipe below is only
+for changing `automation/src/blog_automation/mirror.py` or the workflow that runs it.
+
+It never touches the real mirror: its target is a local bare repository, with a synthetic mailmap.
+The first run really pushes `main`'s filtered result there, as a baseline. The second dry-runs your
+commit against that baseline. Run the whole block from the repository root, with your change
+committed, because the clone does not see uncommitted work:
 
 ```bash
+REPO=$PWD
 SB=$(mktemp -d)
-git clone -q . "$SB/source"
-git -C "$SB/source" fetch -q . 'refs/remotes/origin/*:refs/remotes/origin/*'
-git init -q --bare "$SB/mirror.git"
-git -C "$SB/mirror.git" fetch -q . 'refs/remotes/origin/*:refs/heads/*'
-git -C "$SB/mirror.git" symbolic-ref HEAD refs/heads/main   # else HEAD is an unborn 'master'
-
-cd "$SB/source"
-export MIRROR_ACCESS_URL="$SB/mirror.git"
+git clone -q "$REPO" "$SB/clone"
+cd "$SB/clone"
+git fetch -q "$REPO" '+refs/remotes/origin/*:refs/remotes/origin/*'
+git checkout -q --detach               # the commit under test, which `checkout -` returns to
+git checkout -q -B main origin/main    # filter-repo only rewrites branches that exist locally
+git init -q --bare -b main "$SB/mirror"
+git push -q "$SB/mirror" main      # the script needs the mirror to have a main
+# file:// because after a push, filter-repo rejects a plain path's clone as not fresh
+export MIRROR_ACCESS_URL="file://$SB/mirror"
 export SECRET_MAILMAP="Redacted <redacted@example.invalid> <real@example.com>"
-uv run --group=automation blog mirror --dry-run
+uv run --group=automation blog mirror &&
+  git checkout -q - &&
+  uv run --group=automation blog mirror --dry-run
 ```
 
-Because git-filter-repo rewrites deterministically, the summary at the end is meaningful: a
-branch whose hash is unchanged genuinely did not change. If a change you believe is cosmetic
-reports every branch as updated, something is wrong.
+Only the last run's output means anything: the first compares against an unfiltered seed, so it
+reports every branch as changed and warns about withdrawn posts. Git-filter-repo rewrites
+deterministically, so in the last `SUMMARY`, `0 branch(es) changed` means your commit publishes
+exactly what `main` does and any branch listed really differs. If a change you believe is cosmetic
+moves every hash, something is wrong. To exercise a change to the push itself, replace the final
+dry run with `git checkout -q -B main && uv run --group=automation blog mirror`, since the script
+refuses a real run off `main`, then inspect `$SB/mirror`. Remove `$SB` when done.
 
 ## Environment quirks that have bitten before
 
@@ -131,10 +145,11 @@ reports every branch as updated, something is wrong.
   2.30 lacks the `git ls-files --deduplicate` that `pre-commit run --all-files` calls (added in git
   2.31), and `apt-get install rsync` stops on a 404 because the `bullseye-security` index lists a
   package that has gone from Debian's pool.
-- **A change to `runs-on` reaches the real mirror on push.** Forgejo runs the pushed branch's
-  `ci.yml`, so the `mirror` job uses a branch's new image while checking out `main`. Before changing
-  the image, compare a sandboxed `blog mirror --dry-run` on the old and new images: a different git
-  must not change the rewritten hashes.
+- **A change to `runs-on` reaches the real mirror on push.** `ci.yml` comes from the pushed branch,
+  so the `mirror` job uses a branch's new workflow and image while checking out `main`. Before
+  changing the image, use the recipe under "Developing the mirror script or its workflow" with the
+  baseline on the old image and the dry run on the new: a different git must not change the
+  rewritten hashes, so it must report `0 branch(es) changed`.
 - **ruff is pinned in two places.** The `dev` and `notebook` groups pin `ruff==X.Y.Z` in
   `pyproject.toml` and the pre-commit hook pins `rev: vX.Y.Z`. They must move together, or
   `ruff check .` and `just check-precommit` start disagreeing about which rules exist.
