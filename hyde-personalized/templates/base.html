@@ -24,12 +24,12 @@
 		<link href="//fonts.googleapis.com/" rel="dns-prefetch" />
 		<link href="//fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic|Abril+Fatface|PT+Sans:400,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" />
 
-		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/poole.css" />
-		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/hyde.css" />
-		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/syntax.css" />
-		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/pandoc.css" />
-		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/css/copy-code.css" />
-		<script defer src="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/js/copy-code.js"></script>
+		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/{{ 'css/poole.css'|hashed_theme_asset }}" />
+		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/{{ 'css/hyde.css'|hashed_theme_asset }}" />
+		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/{{ 'css/syntax.css'|hashed_theme_asset }}" />
+		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/{{ 'css/pandoc.css'|hashed_theme_asset }}" />
+		<link rel="stylesheet" href="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/{{ 'css/copy-code.css'|hashed_theme_asset }}" />
+		<script defer src="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/{{ 'js/copy-code.js'|hashed_theme_asset }}"></script>
 		{% if FONT_AWESOME_JS %}
 			<script src="{{ FONT_AWESOME_JS }}" crossorigin="anonymous"></script>
 		{% elif FONT_AWESOME_CSS %}

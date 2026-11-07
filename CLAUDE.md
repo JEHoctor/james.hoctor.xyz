@@ -161,6 +161,15 @@ reports every branch as updated, something is wrong.
   with a markdown comment, `[//]: # (why)`, not an HTML one: Cloudflare strips only the markers,
   so an ordinary HTML comment would ship to readers. Pandoc drops the unused reference, which
   `grep -c` on the built HTML confirms.
+- **Cloudflare and browsers cache static assets for hours under their URL** (`/theme/css/*.css`
+  is `max-age=14400`, `cf-cache-status: HIT`); HTML is `DYNAMIC`, so a new URL in the HTML takes
+  effect at once. The theme's own stylesheets and scripts are therefore linked through the
+  `hashed_theme_asset` filter (`pelicanconf.py`), which appends `?v=<hash of the file>`, so a change
+  to them needs no version bump and no purge. A new stylesheet or script in `base.html` must go
+  through it too. Not versioned, and so possibly stale for hours after a deploy: images, favicons
+  and everything else linked by a plain URL. To check for a stale asset, request the plain URL and
+  the same URL with a cache-busting query (`?nocache=$RANDOM`) and compare the bodies and `cf-cache-status`: an old
+  body on `HIT` beside a new one on `MISS` is the edge cache, not a failed deploy.
 - **`.claude/worktrees/` holds git worktrees**, not part of the source tree. ruff excludes
   `.claude` via `extend-exclude`; any other linter you add needs the same exclusion.
 
