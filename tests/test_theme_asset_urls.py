@@ -1,4 +1,4 @@
-"""Guards on how the theme links its own stylesheets, checked without building the site."""
+"""Guards on how the theme links its own stylesheets and scripts, checked without building the site."""
 
 from __future__ import annotations
 
@@ -27,18 +27,19 @@ def test_hash_is_of_the_file_content() -> None:
     assert pelicanconf.hashed_theme_asset(path) == f"{path}?v={digest[:12]}"
 
 
-def test_a_missing_stylesheet_is_an_error() -> None:
+def test_a_missing_asset_is_an_error() -> None:
     with pytest.raises(FileNotFoundError):
         pelicanconf.hashed_theme_asset("css/no-such-file.css")
 
 
 @pytest.mark.parametrize("template", sorted((THEME_DIR / "templates").rglob("*.html")), ids=lambda p: p.name)
-def test_no_template_links_an_unversioned_theme_stylesheet(template: Path) -> None:
-    """A plain href here would be cached by Cloudflare and browsers under a URL that never changes."""
-    assert not re.findall(r"THEME_STATIC_DIR \}\}/[^\"']*\.css[\"']", template.read_text(encoding="utf-8"))
+def test_no_template_links_an_unversioned_theme_asset(template: Path) -> None:
+    """A plain URL here would be cached by Cloudflare and browsers under a URL that never changes."""
+    assert not re.findall(r"THEME_STATIC_DIR \}\}/[^\"']*\.(?:css|js)[\"']", template.read_text(encoding="utf-8"))
 
 
-def test_every_theme_stylesheet_is_linked_through_the_filter() -> None:
+def test_every_theme_stylesheet_and_script_is_linked_through_the_filter() -> None:
     base = (THEME_DIR / "templates" / "base.html").read_text(encoding="utf-8")
-    linked = set(re.findall(r"\{\{ '(css/[^']+)'\|hashed_theme_asset \}\}", base))
-    assert linked == {f"css/{p.name}" for p in (THEME_DIR / "static" / "css").glob("*.css")}
+    linked = set(re.findall(r"\{\{ '((?:css|js)/[^']+)'\|hashed_theme_asset \}\}", base))
+    static = THEME_DIR / "static"
+    assert linked == {p.relative_to(static).as_posix() for p in [*static.glob("css/*.css"), *static.glob("js/*.js")]}
