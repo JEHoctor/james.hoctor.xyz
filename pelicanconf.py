@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 
 import pypandoc
@@ -42,6 +43,21 @@ COLOR_THEME = "08"
 # Settings specific to my fork of the theme
 FAVICON_DIR = "static"
 APPLE_MOBILE_WEB_APP_TITLE = "James H"
+
+
+def hashed_theme_asset(path: str) -> str:
+    """Return a theme static path with a hash of its content appended as a query string.
+
+    Cloudflare and browsers hold /theme/ files for hours under their URL, while HTML is not cached,
+    so a URL that changes with the file's bytes reaches readers as soon as the page does. The theme's
+    files are copied to the output unchanged, so these bytes are the ones deployed. A missing file
+    raises, and that fails the build.
+    """
+    digest = hashlib.sha256((Path(__file__).resolve().parent / THEME / "static" / path).read_bytes())
+    return f"{path}?v={digest.hexdigest()[:12]}"
+
+
+JINJA_FILTERS = {"hashed_theme_asset": hashed_theme_asset}
 
 # Tell Pelican that content/static/ should be copied to the output. The default is just content/images/.
 # extra/robots.txt is placed at the output root (below) to override the one pelican-seo generates, since
