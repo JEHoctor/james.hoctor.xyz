@@ -121,7 +121,7 @@ git fetch -q "$REPO" '+refs/remotes/origin/*:refs/remotes/origin/*'
 git checkout -q --detach               # the commit under test, which `checkout -` returns to
 git checkout -q -B main origin/main    # filter-repo only rewrites branches that exist locally
 git init -q --bare -b main "$SB/mirror"
-git push -q "$SB/mirror" main      # the script needs the mirror to have a main
+git push -q "$SB/mirror" main          # the script needs the mirror to have a main
 # file:// because after a push, filter-repo rejects a plain path's clone as not fresh
 export MIRROR_ACCESS_URL="file://$SB/mirror"
 export SECRET_MAILMAP="Redacted <redacted@example.invalid> <real@example.com>"
