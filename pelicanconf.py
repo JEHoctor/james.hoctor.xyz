@@ -40,43 +40,52 @@ THEME = "hyde-personalized"
 # on every listing page, which is what Bing Webmaster Tools flagged. Articles build their own
 # description from their summary (see the theme's article.html), and pages may set `description`
 # in their front matter. Everything else is keyed here by the `page_name` Pelican passes to its
-# direct templates. tests/test_descriptions.py checks the rendered lengths.
+# direct templates, and base.html chooses between them. tests/check_built_site.py (run by
+# `just validate`) holds every page in sitemap.xml to the window and to a unique description.
+#
+# These describe what is published, not what the blog may cover one day: no topic belongs here
+# until a published post covers it. `blog post publish` reminds whoever publishes a post to
+# reread them, and private/blog-scope.md says why.
+#
+# The paginated pages (the home page and the per-tag, per-category and per-author pages) get
+# " Page N." appended from page 2 on, so that each page stays distinct from page 1. Their
+# strings, with the current term filled in, are kept to 152 characters so the suffix still fits.
 META_DESCRIPTIONS = {
     "index": (
-        "James Hoctor is a machine learning engineer and data scientist with a BS in "
-        "Mathematics and an MS in Computer Science. Notes on math, Python tooling and Linux."
+        "James Hoctor is a machine learning engineer and data scientist. He writes here about "
+        "self-hosting and Linux, Python tooling, 3D printing and some math."
     ),
     "archives": (
-        "Every post on James Hoctor's blog, newest first: writing on machine learning, "
-        "mathematics, Python tooling such as uv, and running a self-hosted Linux server."
+        "Every post on James Hoctor's blog by date: self-hosting with Caddy, rsync and Certbot, "
+        "Python tooling with uv, a package on PyPI, 3D printing and some math."
     ),
     "tags": (
-        "Browse James Hoctor's blog by tag. Topics span mathematics and probability, machine "
-        "learning, Python packaging and tooling, and self-hosted Linux server notes."
+        "The tags used on James Hoctor's blog, each linking to the posts that carry it. Not every "
+        "post is tagged; the archives page lists everything published so far."
     ),
     "categories": (
-        "Browse James Hoctor's blog by category. Posts on machine learning, mathematics, "
-        "Python tooling and the Linux servers that host this site, grouped by subject."
+        "The categories on James Hoctor's blog, each linking to the posts filed under it, from "
+        "notes on self-hosting and Linux to Python tooling, 3D printing and math."
     ),
     "authors": (
-        "Posts on james.hoctor.xyz listed by author. James Hoctor is a machine learning "
-        "engineer and data scientist writing about math, Python tooling and Linux servers."
+        "The authors of posts on james.hoctor.xyz. James Hoctor, a machine learning engineer and "
+        "data scientist, writes about self-hosting, Python tooling and math."
     ),
 }
 
-# Per-term listing pages interpolate the tag, category or author name. The surrounding text is
-# sized so that a term of a realistic length lands inside the 150-160 character window.
+# Per-term listing pages interpolate the tag, category or author name, so their length depends
+# on the term; a new term that pushes one out of the window fails `just validate`.
 TAG_META_DESCRIPTION = (
-    "Posts on James Hoctor's blog tagged {}: notes on machine learning, mathematics and "
-    "Python tooling from a machine learning engineer and data scientist."
+    "Posts tagged {} on James Hoctor's blog, newest first, each with its date and opening "
+    "paragraph. Every post, tagged or not, is listed in the archives."
 )
 CATEGORY_META_DESCRIPTION = (
-    "Every post in the {} category on James Hoctor's blog covering machine learning, "
-    "mathematics, Python tooling and self-hosted Linux from an ML engineer."
+    "Posts in the {} category on James Hoctor's blog, newest first, each shown with its date "
+    "and opening paragraph and a link through to the full article."
 )
 AUTHOR_META_DESCRIPTION = (
-    "Every post written by {} on james.hoctor.xyz, a blog about machine learning, "
-    "mathematics, Python tooling and running a self-hosted Linux server."
+    "Posts by {}, newest first. He is a machine learning engineer and data scientist writing "
+    "about self-hosting and Linux, Python tooling and math."
 )
 
 # Settings specific to the theme
@@ -146,19 +155,13 @@ SEO_ENHANCER_TWITTER_CARDS = True
 # SEO_ARTICLES_LIMIT = 10
 # SEO_PAGES_LIMIT = 10
 
-# Sitemap plugin configuration. Drafts are excluded automatically (they aren't "published"),
-# but drafts/ is excluded explicitly too, to match the Disallow rule in content/extra/robots.txt.
-#
-# These patterns are matched against the URL *relative to the output root*, with no leading
-# slash: the plugin writes SITEURL + "/" + pageurl and matches pageurl. A pattern written as
-# "^/drafts/" therefore matches nothing at all, which is what this one used to say.
-#
-# A page carrying <meta name="robots" content="noindex"> has no business in the sitemap either:
-# the sitemap asks a crawler to index the URL and the page then asks it not to. The plugin drops
-# anything whose status is not exactly "published" of its own accord, so only a page that stays
-# published while asking to be de-indexed needs naming here. tests/check_built_site.py checks
-# the built output for that contradiction, so a forgotten entry cannot ship.
+# Sitemap plugin configuration. The plugin lists only content whose status is exactly
+# "published", which is what keeps drafts (and hidden pages) out. A published page that sets
+# `noindex` must be named in "exclude" as well, matched against the URL with no leading slash;
+# see "SEO: what the plugins actually do" in CLAUDE.md. A forgotten entry fails
+# tests/check_built_site.py, and so CI, which blocks merging a pull request; it does not stop
+# a direct push to main from deploying, because validate is off the deploy path.
 SITEMAP = {
     "format": "xml",
-    "exclude": [r"^drafts/", r"^test-post\.html$"],
+    "exclude": [r"^test-post\.html$"],
 }

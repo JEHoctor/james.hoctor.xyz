@@ -269,6 +269,10 @@ def publish(path: PathArgument = None) -> None:
     fm.write(path, post)
     log(f"Published {relative(path)} with date {post.metadata['date']}.")
     log("Remember that publishing also lets the mirror publish the post and its .bib, if any.")
+    log(
+        "Check that META_DESCRIPTIONS and the tag, category and author templates in pelicanconf.py "
+        "still describe the blog's published topics; a new topic may need adding to them.",
+    )
 
 
 @app.command()
