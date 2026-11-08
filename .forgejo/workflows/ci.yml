@@ -84,7 +84,7 @@ jobs:
           echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" >> /etc/ssh/ssh_known_hosts
       - name: deploy
         run: |
-          rsync -rvz --delete -e "ssh -i deploy_id" output/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:
+          rsync -rvz --checksum --delete -e "ssh -i deploy_id" output/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:
   mirror:
     name: mirror
     runs-on: node24

@@ -1,0 +1,163 @@
+/*
+ * Adds a copy button to every code block. Progressive enhancement: without JavaScript the
+ * blocks render exactly as before.
+ *
+ * Pandoc wraps highlighted blocks in div.sourceCode and leaves plain fences as a bare <pre>,
+ * so the button is attached to the wrapper when there is one and to a new wrapper otherwise.
+ * The button is an icon (Fork Awesome, already loaded for the sidebar) positioned inside the
+ * block's own padding. The text is read from the DOM at click time, so anything a script
+ * rewrote after page load (for example Cloudflare's email decoding) is copied as the reader
+ * sees it.
+ */
+(function () {
+  "use strict";
+
+  if (!navigator.clipboard || !navigator.clipboard.writeText) {
+    return;
+  }
+
+  var RESET_MS = 1800;
+  // fa-files-o is the outlined "copy" icon, lighter than the solid fa-clipboard.
+  var ICONS = { idle: "fa-files-o", done: "fa-check", error: "fa-times" };
+
+  function containerFor(pre) {
+    var parent = pre.parentElement;
+    if (parent && parent.classList.contains("sourceCode")) {
+      return parent;
+    }
+    var wrapper = document.createElement("div");
+    wrapper.className = "code-block";
+    parent.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+    return wrapper;
+  }
+
+  function addButton(pre, index, total) {
+    var code = pre.querySelector("code") || pre;
+    var container = containerFor(pre);
+    container.classList.add("has-copy");
+
+    // Every button needs a distinct name, or a screen reader says the same thing N times. It
+    // starts with the word "Copy", as accessibility guidelines ask of an icon's name.
+    var position = total > 1 ? " " + (index + 1) + " of " + total : "";
+    var idleName = "Copy code block" + position;
+    var doneName = "Copied code block" + position;
+
+    var icon = document.createElement("i");
+    icon.className = "fa " + ICONS.idle;
+    icon.setAttribute("aria-hidden", "true");
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "copy-code";
+    button.title = "Copy";
+    button.setAttribute("aria-label", idleName);
+    button.appendChild(icon);
+
+    var status = document.createElement("span");
+    status.className = "copy-code-status";
+    status.setAttribute("role", "status");
+
+    var timer;
+    function show(state, message, name) {
+      icon.className = "fa " + ICONS[state];
+      if (state === "idle") {
+        delete button.dataset.state;
+      } else {
+        button.dataset.state = state;
+      }
+      button.setAttribute("aria-label", name);
+      status.textContent = message;
+      clearTimeout(timer);
+      if (state !== "idle") {
+        timer = setTimeout(function () {
+          show("idle", "", idleName);
+        }, RESET_MS);
+      }
+    }
+
+    button.addEventListener("click", function () {
+      var text = code.textContent.replace(/\n$/, "");
+      navigator.clipboard.writeText(text).then(
+        function () {
+          show("done", "Copied to clipboard", doneName);
+        },
+        function () {
+          show("error", "Copy failed. Select the text and copy it by hand.", idleName);
+        },
+      );
+    });
+
+    // The button goes inside the <pre>, not beside the block, so that it is part of what the
+    // block's wrapper scrolls. CSS pins it to the right edge of the visible area. That way the
+    // scrollbar, which belongs to the wrapper, is painted above the button instead of being
+    // hidden by it. A strip behind the button fades a long line out instead of cutting it off.
+    // Neither is inside the <code> or adds any text, so code.textContent (what gets copied) is
+    // unchanged.
+    var fade = document.createElement("span");
+    fade.className = "copy-code-fade";
+    fade.setAttribute("aria-hidden", "true");
+
+    var anchor = document.createElement("span");
+    anchor.className = "copy-anchor";
+    anchor.appendChild(fade);
+    anchor.appendChild(button);
+    pre.insertBefore(anchor, pre.firstChild);
+
+    container.appendChild(status);
+    return container;
+  }
+
+  // Some browsers (Chrome and Edge, Firefox on Windows) draw a classic scrollbar that takes
+  // space: a chunky 15px track under every block that scrolls. Others draw an overlay
+  // scrollbar that floats over the content and takes none, which is what the blocks look
+  // best with. For the classic case, measure how thick a thin scrollbar is; if the browser
+  // honours `scrollbar-width: thin` and it is thin enough, mark the page so that the CSS can
+  // slim and lighten the scrollbar and pull it up into the block's bottom padding, as an
+  // overlay one would be. An overlay scrollbar measures 0 and is left alone.
+  function thinScrollbarThickness() {
+    var probe = document.createElement("div");
+    probe.style.cssText =
+      "position:absolute;left:-9999px;top:0;width:100px;height:50px;" +
+      "overflow-x:scroll;overflow-y:hidden;scrollbar-width:thin";
+    var inner = document.createElement("div");
+    inner.style.cssText = "width:300px;height:10px";
+    probe.appendChild(inner);
+    document.body.appendChild(probe);
+    var thickness = probe.offsetHeight - probe.clientHeight;
+    probe.remove();
+    return thickness;
+  }
+
+  var thickness = thinScrollbarThickness();
+  var classic = thickness > 0 && thickness <= 10;
+  if (classic) {
+    document.documentElement.classList.add("copy-classic-scrollbars");
+    document.documentElement.style.setProperty("--copy-scrollbar", thickness + "px");
+  }
+
+  var blocks = document.querySelectorAll("pre");
+  blocks.forEach(function (pre, index) {
+    var container = addButton(pre, index, blocks.length);
+    if (classic && container) {
+      watchOverflow(container);
+    }
+  });
+
+  // The scrollbar only takes space (and so needs pulling up) on a block that actually
+  // overflows, so mark those, and re-check when the block's width changes.
+  function watchOverflow(container) {
+    function check() {
+      container.classList.toggle(
+        "copy-scrolls",
+        container.scrollWidth > container.clientWidth,
+      );
+    }
+    check();
+    if (window.ResizeObserver) {
+      new ResizeObserver(check).observe(container);
+    } else {
+      window.addEventListener("resize", check);
+    }
+  }
+})();

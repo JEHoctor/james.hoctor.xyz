@@ -101,28 +101,42 @@ job's log (`tea api` recipe in the handbook; the job is named `mirror-preview`) 
 The one fact this job cannot show you is how the *merged* result differs from the branch, so
 merge PRs that touch `content/` or the script one at a time.
 
-### Testing it safely
+### Developing the mirror script or its workflow
 
-Never point this at the real mirror while experimenting. Use a local bare repository as the
-target and a synthetic mailmap, with `--dry-run` so the push is printed instead of run:
+**For any other change, do not run this: read the `mirror-preview` log as described above.** That
+is simpler and more reliable, because it uses the real mirror and mailmap. The recipe below is only
+for changing `automation/src/blog_automation/mirror.py` or the workflow that runs it.
+
+It never touches the real mirror: its target is a local bare repository, with a synthetic mailmap.
+The first run really pushes `main`'s filtered result there, as a baseline. The second dry-runs your
+commit against that baseline. Run the whole block from the repository root, with your change
+committed, because the clone does not see uncommitted work:
 
 ```bash
+REPO=$PWD
 SB=$(mktemp -d)
-git clone -q . "$SB/source"
-git -C "$SB/source" fetch -q . 'refs/remotes/origin/*:refs/remotes/origin/*'
-git init -q --bare "$SB/mirror.git"
-git -C "$SB/mirror.git" fetch -q . 'refs/remotes/origin/*:refs/heads/*'
-git -C "$SB/mirror.git" symbolic-ref HEAD refs/heads/main   # else HEAD is an unborn 'master'
-
-cd "$SB/source"
-export MIRROR_ACCESS_URL="$SB/mirror.git"
+git clone -q "$REPO" "$SB/clone"
+cd "$SB/clone"
+git fetch -q "$REPO" '+refs/remotes/origin/*:refs/remotes/origin/*'
+git checkout -q --detach               # the commit under test, which `checkout -` returns to
+git checkout -q -B main origin/main    # filter-repo only rewrites branches that exist locally
+git init -q --bare -b main "$SB/mirror"
+git push -q "$SB/mirror" main          # the script needs the mirror to have a main
+# file:// because after a push, filter-repo rejects a plain path's clone as not fresh
+export MIRROR_ACCESS_URL="file://$SB/mirror"
 export SECRET_MAILMAP="Redacted <redacted@example.invalid> <real@example.com>"
-uv run --group=automation blog mirror --dry-run
+uv run --group=automation blog mirror &&
+  git checkout -q - &&
+  uv run --group=automation blog mirror --dry-run
 ```
 
-Because git-filter-repo rewrites deterministically, the summary at the end is meaningful: a
-branch whose hash is unchanged genuinely did not change. If a change you believe is cosmetic
-reports every branch as updated, something is wrong.
+Only the last run's output means anything: the first compares against an unfiltered seed, so it
+reports every branch as changed and warns about withdrawn posts. Git-filter-repo rewrites
+deterministically, so in the last `SUMMARY`, `0 branch(es) changed` means your commit publishes
+exactly what `main` does and any branch listed really differs. If a change you believe is cosmetic
+moves every hash, something is wrong. To exercise a change to the push itself, replace the final
+dry run with `git checkout -q -B main && uv run --group=automation blog mirror`, since the script
+refuses a real run off `main`, then inspect `$SB/mirror`. Remove `$SB` when done.
 
 ## SEO: what the plugins actually do
 
@@ -161,10 +175,11 @@ Four things here are not guessable from the code, and each one cost real time.
   2.30 lacks the `git ls-files --deduplicate` that `pre-commit run --all-files` calls (added in git
   2.31), and `apt-get install rsync` stops on a 404 because the `bullseye-security` index lists a
   package that has gone from Debian's pool.
-- **A change to `runs-on` reaches the real mirror on push.** Forgejo runs the pushed branch's
-  `ci.yml`, so the `mirror` job uses a branch's new image while checking out `main`. Before changing
-  the image, compare a sandboxed `blog mirror --dry-run` on the old and new images: a different git
-  must not change the rewritten hashes.
+- **A change to `runs-on` reaches the real mirror on push.** `ci.yml` comes from the pushed branch,
+  so the `mirror` job uses a branch's new workflow and image while checking out `main`. Before
+  changing the image, use the recipe under "Developing the mirror script or its workflow" with the
+  baseline on the old image and the dry run on the new: a different git must not change the
+  rewritten hashes, so it must report `0 branch(es) changed`.
 - **ruff is pinned in two places.** The `dev` and `notebook` groups pin `ruff==X.Y.Z` in
   `pyproject.toml` and the pre-commit hook pins `rev: vX.Y.Z`. They must move together, or
   `ruff check .` and `just check-precommit` start disagreeing about which rules exist.
@@ -178,6 +193,28 @@ Four things here are not guessable from the code, and each one cost real time.
   build that is fine in a fresh checkout.
 - **Rich markup is disabled** in `mirror.py`. It would otherwise read a bracketed word,
   including the log prefix and any path containing a bracket, as a style tag and silently drop it.
+- **Cloudflare rewrites `user@host` text into a `[email protected]` link.** The site is served through
+  Cloudflare, whose email obfuscation replaces anything that looks like an address, code blocks
+  included, with a link that only decodes once its JavaScript runs. `curl`, reader modes and
+  no-JS clients see the placeholder, so a pasted command breaks. Wrap such a block in
+  `<!--email_off-->` and `<!--/email_off-->` on their own lines, outside the code fence; Cloudflare
+  removes the markers from the served page, so their absence in the live HTML is expected. A
+  local build or `just serve` cannot show whether it worked, since Cloudflare is not in front of
+  them; it only shows the markers survive pandoc. Check after deploying with
+  `curl -s <post url> | grep -c cf_email` (want 0) and read the code block's text in the raw HTML.
+  The client rsync command in the rsync-transfers post is the worked example. Explain the markers
+  with a markdown comment, `[//]: # (why)`, not an HTML one: Cloudflare strips only the markers,
+  so an ordinary HTML comment would ship to readers. Pandoc drops the unused reference, which
+  `grep -c` on the built HTML confirms.
+- **Cloudflare and browsers cache static assets for hours under their URL** (`/theme/css/*.css`
+  is `max-age=14400`, `cf-cache-status: HIT`); HTML is `DYNAMIC`, so a new URL in the HTML takes
+  effect at once. The theme's own stylesheets and scripts are therefore linked through the
+  `hashed_theme_asset` filter (`pelicanconf.py`), which appends `?v=<hash of the file>`, so a change
+  to them needs no version bump and no purge. A new stylesheet or script in `base.html` must go
+  through it too. Not versioned, and so possibly stale for hours after a deploy: images, favicons
+  and everything else linked by a plain URL. To check for a stale asset, request the plain URL and
+  the same URL with a cache-busting query (`?nocache=$RANDOM`) and compare the bodies and `cf-cache-status`: an old
+  body on `HIT` beside a new one on `MISS` is the edge cache, not a failed deploy.
 - **`.claude/worktrees/` holds git worktrees**, not part of the source tree. ruff excludes
   `.claude` via `extend-exclude`; any other linter you add needs the same exclusion.
 
