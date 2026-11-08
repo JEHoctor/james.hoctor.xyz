@@ -17,8 +17,8 @@ stale). `just --list` shows all recipes. The common ones:
 just html            # build to output/
 just publish         # build with production settings
 just check-precommit # all pre-commit hooks
-just test            # pytest: front-matter parser and the mirror's publication rule
-just validate        # htmlhint/stylelint over output/ (also runs in CI, off the deploy path)
+just test            # pytest: front-matter parser, post CLI, mirror publication rule, content tree
+just validate        # htmlhint/stylelint and tests/check_built_site.py over output/ (CI, off the deploy path)
 just init            # pre-commit hooks, npm install
 just new-post        # also retitle-post, publish-post, modify-post -> `blog post ...`
 just mirror-preview  # what the mirror would publish if this branch were main (dry run)
@@ -30,7 +30,9 @@ just mirror-preview  # what the mirror would publish if this branch were main (d
 anywhere else, and they act on the checkout you are standing in. Its code is under
 `automation/src/blog_automation/` with its tests in `automation/tests/`; `tests/` at the root holds
 the checks that read the real `content/` tree (every post round-trips through the parser, every
-post has a recognised status). `just test` runs both.
+post has a recognised status, every `noindex` is spelled `"True"`). `just test` runs both.
+`tests/check_built_site.py` is the exception: it reads the build in `output/`, so `just validate`
+runs it rather than pytest (see the SEO section below).
 
 ## Post metadata
 
@@ -140,27 +142,49 @@ refuses a real run off `main`, then inspect `$SB/mirror`. Remove `$SB` when done
 
 ## SEO: what the plugins actually do
 
-Four things here are not guessable from the code, and each one cost real time.
+`tests/check_built_site.py`, run by `just validate`, reads the built pages and checks everything
+below that can be checked. A failure fails CI, which blocks merging a pull request because
+`validate` is a required check; it does not stop a direct push to `main` from deploying, since
+`validate` is off the deploy path.
 
+- **Meta descriptions describe what is published.** Articles derive theirs from their summary
+  (`article.html`) unless they set `description:`; a page sets `description:` in its front matter;
+  the home page and listing pages take theirs from `META_DESCRIPTIONS` and the tag, category and
+  author templates in `pelicanconf.py`, chosen in `base.html`. Every URL in the sitemap must have
+  exactly one, 150–160 characters long, unique across the sitemap, and the built-site check
+  enforces it (a new page without `description:` gets a 96-character fallback and fails). Page 2
+  onward of a paginated listing gets ` Page N.` appended, so keep those strings to 152. Name only
+  topics that published posts cover, never planned ones, and reread these strings whenever a post
+  on a new topic is published (`blog post publish` prints the same reminder).
+  `private/blog-scope.md` records the owner's intentions for the blog's scope; read it before
+  judging what the blog is about from its current posts.
 - **`pelican-seo`'s `noindex:` and `disallow:` front-matter keys never emit a meta tag.** They
-  only add lines to a robots.txt the plugin generates (`seo_enhancer/__init__.py`). Both sat on
-  `content/pages/404.md` for months doing nothing. The real directive is
-  `<meta name="robots" content="noindex, follow">`, which `base.html` now emits from the same
-  `noindex` key. The value is compared as a lowercased string against `"true"`, because these
-  headers are quoted and a bare truthiness test would accept `"False"` as a request to de-index;
-  that makes any other spelling a silent no-op, which `tests/test_meta_descriptions.py` guards.
+  only add lines to a robots.txt the plugin generates (`seo_enhancer/__init__.py`), which our own
+  file then replaces (next point), so both sat on `content/pages/404.md` for months doing nothing.
+  `base.html` emits `<meta name="robots" content="noindex, follow">` from the same `noindex` key.
+  It compares the value as a lowercased string against `"true"`, because these headers are quoted
+  and a bare truthiness test would accept `"False"`; any other spelling is therefore a silent no-op,
+  which `tests/test_content_tree.py` guards. The built-site check confirms every published or
+  hidden page that sets `noindex` really carries the tag. `noindex` and robots.txt `Disallow` are
+  not interchangeable: `Disallow` stops the fetch, so a crawler never sees the page's noindex.
 - **`content/extra/robots.txt` wins over the generated one by signal ordering, not by luck.** The
   plugin writes robots.txt on `all_generators_finalized`, which fires *before* static files are
-  copied, so the static copy lands on top. This is what keeps the plugin's non-standard
-  `Noindex:` lines (Google dropped support in 2019; Bing never had it) out of the deployed file.
-  There is no setting to disable just the robots.txt generation — `SEO_ENHANCER` also drives the
-  canonical tags — so the ordering is checked instead, by `tests/check_built_site.py`.
+  copied, so the static copy lands on top. Without that, the deployed file would lose our
+  `Disallow: /drafts/` and `Sitemap:` lines. There is no setting to disable just the robots.txt
+  generation (`SEO_ENHANCER` also drives the canonical tags), so the built-site check compares the
+  two files instead.
 - **Sitemap `exclude` patterns have no leading slash.** The plugin writes `SITEURL + "/" + pageurl`
   and matches the patterns against `pageurl`, so `"^/drafts/"` matched nothing for as long as it
-  was there; drafts stayed out only because of the plugin's separate status check. A page that is
-  `published` but `noindex` must be named in `SITEMAP["exclude"]`, or the sitemap asks a crawler
-  to index a URL the page then tells it not to. `tests/check_built_site.py` fails the build on
-  that contradiction rather than trusting the config to be remembered.
+  was there. Drafts stay out because the plugin lists only content whose status is exactly
+  `published`. A page that is `published` but `noindex` must be named in `SITEMAP["exclude"]`, or
+  the sitemap asks a crawler to index a URL the page then tells it not to; the built-site check
+  catches that contradiction.
+- **`pelican-seo` duplicates some Open Graph tags.** With `SEO_ENHANCER_OPEN_GRAPH` on, it appends
+  its own `og:title`, `og:type` and `og:url` to every article and page beside the theme's, and an
+  `og:description` too when the front matter sets `description:`. The duplicate `og:description`
+  has the same value as the theme's; the others do not always (a page's theme `og:url` is the
+  site root, for instance). Untangling it means choosing between the theme's and the plugin's
+  tags, which has not been done. The meta description check counts only `name="description"`.
 - **`seo_report.html` reads front matter, not the rendered page.** It reports "You need to declare
   a description" for any post without a `description:` key, even though the theme renders a good
   one from the post's summary, and it only ever looks at articles and pages — never the home page

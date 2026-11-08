@@ -85,17 +85,17 @@ init:
 check-precommit:
     uv run --group=dev pre-commit run --all-files
 
-# run the test suite (front matter parser, mirror publication rule)
+# run the test suite (front matter parser, post CLI, mirror publication rule, content tree)
 test:
     uv run --group=dev --group=automation pytest
 
-# validate generated HTML and CSS, and check robots.txt and sitemap.xml against the built pages
-# (see tests/check_built_site.py for what those last checks are defending)
+# validate generated HTML and CSS, then check the built pages' meta descriptions, noindex tags,
+# robots.txt and sitemap.xml (tests/check_built_site.py)
 validate:
     @if [ ! -d output ]; then echo "No output/ directory - run 'just html' or another similar recipe first" >&2; exit 1; fi
     npx htmlhint output/
     npx stylelint $(find output -name '*.css')
-    uv run --group=dev python tests/check_built_site.py
+    uv run --group=dev --group=automation python tests/check_built_site.py
 
 # mirror repo without drafts
 mirror-redacted:
