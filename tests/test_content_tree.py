@@ -37,3 +37,17 @@ def test_every_current_post_is_classified_and_drafts_outnumber_nothing_silently(
     assert all(isinstance(status, str) for status in statuses.values()), statuses
     assert "draft" in statuses.values()
     assert "published" in statuses.values()
+
+
+NOINDEXED = [p for p in sorted(CONTENT_DIR.rglob("*.md")) if "noindex" in fm.read(p).metadata]
+
+
+@pytest.mark.parametrize("path", NOINDEXED, ids=lambda p: p.name)
+def test_noindex_is_spelled_the_one_way_the_theme_recognises(path: Path) -> None:
+    """A `noindex` key the theme does not recognise is worse than none: it reads as protection.
+
+    base.html honours only "True" (compared as a lowercased string), so any other spelling is a
+    silent no-op, and the built-site check skips it too. This is the one place that catches it.
+    """
+    value = fm.read(path).metadata["noindex"]
+    assert str(value).lower() == "true", f'{path.name}: noindex is {value!r}; the theme only honours "True"'

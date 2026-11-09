@@ -35,6 +35,59 @@ DEFAULT_LANG = "en"
 
 THEME = "hyde-personalized"
 
+# Meta descriptions. Search engines want roughly 150-160 characters, and want them to differ
+# from page to page; the theme's old fallback (SITENAME + BIO) was 96 characters and identical
+# on every listing page, which is what Bing Webmaster Tools flagged. Articles build their own
+# description from their summary (see the theme's article.html), and pages may set `description`
+# in their front matter. Everything else is keyed here by the `page_name` Pelican passes to its
+# direct templates, and base.html chooses between them. tests/check_built_site.py (run by
+# `just validate`) holds every page in sitemap.xml to the window and to a unique description.
+#
+# These describe what is published, not what the blog may cover one day: no topic belongs here
+# until a published post covers it. `blog post publish` reminds whoever publishes a post to
+# reread them, and private/blog-scope.md says why.
+#
+# The paginated pages (the home page and the per-tag, per-category and per-author pages) get
+# " Page N." appended from page 2 on, so that each page stays distinct from page 1. Their
+# strings, with the current term filled in, are kept to 152 characters so the suffix still fits.
+META_DESCRIPTIONS = {
+    "index": (
+        "James Hoctor is a machine learning engineer and data scientist. He writes here about "
+        "self-hosting and Linux, Python tooling, 3D printing and some math."
+    ),
+    "archives": (
+        "Every post on James Hoctor's blog by date: self-hosting with Caddy, rsync and Certbot, "
+        "Python tooling with uv, a package on PyPI, 3D printing and some math."
+    ),
+    "tags": (
+        "The tags used on James Hoctor's blog, each linking to the posts that carry it. Not every "
+        "post is tagged; the archives page lists everything published so far."
+    ),
+    "categories": (
+        "The categories on James Hoctor's blog, each linking to the posts filed under it, from "
+        "notes on self-hosting and Linux to Python tooling, 3D printing and math."
+    ),
+    "authors": (
+        "The authors of posts on james.hoctor.xyz. James Hoctor, a machine learning engineer and "
+        "data scientist, writes about self-hosting, Python tooling and math."
+    ),
+}
+
+# Per-term listing pages interpolate the tag, category or author name, so their length depends
+# on the term; a new term that pushes one out of the window fails `just validate`.
+TAG_META_DESCRIPTION = (
+    "Posts tagged {} on James Hoctor's blog, newest first, each with its date and opening "
+    "paragraph. Every post, tagged or not, is listed in the archives."
+)
+CATEGORY_META_DESCRIPTION = (
+    "Posts in the {} category on James Hoctor's blog, newest first, each shown with its date "
+    "and opening paragraph and a link through to the full article."
+)
+AUTHOR_META_DESCRIPTION = (
+    "Posts by {}, newest first. He is a machine learning engineer and data scientist writing "
+    "about self-hosting and Linux, Python tooling and math."
+)
+
 # Settings specific to the theme
 BIO = "Machine learning engineer and data scientist. <nobr>BS Mathematics</nobr>, <nobr>MS Computer Science.</nobr>"
 PROFILE_IMAGE = "github-profile.jpg"
@@ -102,9 +155,13 @@ SEO_ENHANCER_TWITTER_CARDS = True
 # SEO_ARTICLES_LIMIT = 10
 # SEO_PAGES_LIMIT = 10
 
-# Sitemap plugin configuration. Drafts are excluded automatically (they aren't "published"),
-# but /drafts/ is excluded explicitly too, to match the Disallow rule in content/extra/robots.txt.
+# Sitemap plugin configuration. The plugin lists only content whose status is exactly
+# "published", which is what keeps drafts (and hidden pages) out. A published page that sets
+# `noindex` must be named in "exclude" as well, matched against the URL with no leading slash;
+# see "SEO: what the plugins actually do" in CLAUDE.md. A forgotten entry fails
+# tests/check_built_site.py, and so CI, which blocks merging a pull request; it does not stop
+# a direct push to main from deploying, because validate is off the deploy path.
 SITEMAP = {
     "format": "xml",
-    "exclude": ["^/drafts/"],
+    "exclude": [r"^test-post\.html$"],
 }
